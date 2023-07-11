@@ -2,6 +2,7 @@ package net.blueva.menu.listeners;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.managers.java.ActionManager;
+import net.blueva.menu.managers.java.PlayerManager;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,32 +25,35 @@ public class InventoryClickListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        Player player = (Player) event.getWhoClicked();
-        Inventory inventory = event.getClickedInventory();
-        ItemStack clickedItem = event.getCurrentItem();
+    public void onInventoryClick(InventoryClickEvent e) {
+        Player player = (Player) e.getWhoClicked();
+        Inventory inventory = e.getClickedInventory();
+        ItemStack clickedItem = e.getCurrentItem();
 
-        if (inventory != null && clickedItem != null && main.javaMenuManager.isCustomMenu(inventory, player)) {
-            event.setCancelled(true);
+        // main.javaMenuManager.isCustomMenu(inventory, player)
+        if (PlayerManager.isPlayerInMenu(player)) {
+            e.setCancelled(true);
 
-            ItemMeta itemMeta = clickedItem.getItemMeta();
-            if (itemMeta != null && itemMeta.hasDisplayName()) {
-                String displayName = itemMeta.getDisplayName();
-                FileConfiguration menuConfig = main.javaMenuManager.getMenuConfigByInventory(inventory);
+            if(inventory != null && clickedItem != null) {
+                ItemMeta itemMeta = clickedItem.getItemMeta();
+                if (itemMeta != null && itemMeta.hasDisplayName()) {
+                    String displayName = itemMeta.getDisplayName();
+                    FileConfiguration menuConfig = main.javaMenuManager.getMenuConfigByInventory(inventory);
 
-                if (menuConfig != null && menuConfig.isConfigurationSection("items")) {
-                    ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
+                    if (menuConfig != null && menuConfig.isConfigurationSection("items")) {
+                        ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
 
-                    assert itemsSection != null;
-                    for (String itemName : itemsSection.getKeys(false)) {
-                        ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
-                        if (itemSection != null && itemSection.isString("name")) {
-                            String itemDisplayName = MessagesUtil.format(player, itemSection.getString("name"));
+                        assert itemsSection != null;
+                        for (String itemName : itemsSection.getKeys(false)) {
+                            ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
+                            if (itemSection != null && itemSection.isString("name")) {
+                                String itemDisplayName = MessagesUtil.format(player, itemSection.getString("name"));
 
-                            if (displayName.equals(itemDisplayName)) {
-                                List<String> actions = itemSection.getStringList("actions");
-                                ActionManager.executeActions(player, actions, event.getClick());
-                                break;
+                                if (displayName.equals(itemDisplayName)) {
+                                    List<String> actions = itemSection.getStringList("actions");
+                                    ActionManager.executeActions(player, actions, e.getClick());
+                                    break;
+                                }
                             }
                         }
                     }

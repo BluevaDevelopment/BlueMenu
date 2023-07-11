@@ -76,6 +76,8 @@ public class MenuManager {
 
             player.openInventory(menuInventory);
 
+            PlayerManager.openMenu(player);
+
             if (menuConfig.contains("animations")) {
                 ConfigurationSection animationsConfig = menuConfig.getConfigurationSection("animations");
                 for (String animationName : animationsConfig.getKeys(false)) {
@@ -96,65 +98,6 @@ public class MenuManager {
             }
         }
         return null;
-    }
-
-    public boolean isCustomMenu(Inventory inventory, Player player) {
-        for (FileConfiguration menuConfig : menuConfigs.values()) {
-            int menuSize = menuConfig.getInt("menuSize");
-            if (inventory.getType() == InventoryType.CHEST && inventory.getSize() == menuSize) {
-                ItemStack[] menuItems = inventory.getContents();
-                ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
-                if (itemsSection != null) {
-                    for (String itemName : itemsSection.getKeys(false)) {
-                        ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
-                        if (itemSection != null) {
-                            ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
-                            int slot = itemSection.getInt("slot");
-                            ItemStack inventoryItem = menuItems[slot];
-                            if (!isSimilar(itemStack, inventoryItem)) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isSimilar(ItemStack itemStack1, ItemStack itemStack2) {
-        if (itemStack1 == null || itemStack2 == null) {
-            return itemStack1 == itemStack2;
-        }
-
-        Material material1 = itemStack1.getType();
-        Material material2 = itemStack2.getType();
-
-        if (material1 != material2) {
-            return false;
-        }
-
-        ItemMeta meta1 = itemStack1.getItemMeta();
-        ItemMeta meta2 = itemStack2.getItemMeta();
-
-        if (meta1 == null && meta2 == null) {
-            return true;
-        }
-
-        if (meta1 != null && meta2 != null) {
-            if (!meta1.hasDisplayName() && !meta2.hasDisplayName()) {
-                return true;
-            }
-
-            if (meta1.hasDisplayName() && meta2.hasDisplayName()) {
-                return meta1.getDisplayName().equals(meta2.getDisplayName());
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
     }
 
     static boolean isMenuOpen(Player player) {

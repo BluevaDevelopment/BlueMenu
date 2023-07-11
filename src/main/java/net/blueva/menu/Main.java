@@ -9,7 +9,7 @@ import net.blueva.menu.commands.main.subcommands.ReloadSubCommand;
 import net.blueva.menu.commands.main.tabcomplete.BlueMenuTabComplete;
 import net.blueva.menu.configuration.ConfigManager;
 import net.blueva.menu.libraries.bstats.Metrics;
-import net.blueva.menu.listeners.InventoryClickListener;
+import net.blueva.menu.listeners.*;
 import net.blueva.menu.managers.java.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -43,7 +43,7 @@ public class Main extends JavaPlugin implements Listener {
         javaMenuManager = new MenuManager(this);
         configManager = new ConfigManager(this);
 
-        getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
+        registerEvents();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             placeholderapi = true;
@@ -97,5 +97,13 @@ public class Main extends JavaPlugin implements Listener {
 
         Objects.requireNonNull(getCommand("bluemenu")).setExecutor(handler);
         Objects.requireNonNull(getCommand("bluemenu")).setTabCompleter(new BlueMenuTabComplete());
+    }
+
+    public void registerEvents() {
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryDragListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryInteractListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
     }
 }
