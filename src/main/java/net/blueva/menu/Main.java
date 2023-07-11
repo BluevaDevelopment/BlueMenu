@@ -3,6 +3,7 @@ package net.blueva.menu;
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
 import net.blueva.menu.commands.main.subcommands.OpenSubCommand;
+import net.blueva.menu.commands.main.subcommands.ReloadSubCommand;
 import net.blueva.menu.commands.main.tabcomplete.BlueMenuTabComplete;
 import net.blueva.menu.configuration.ConfigManager;
 import net.blueva.menu.listeners.InventoryClickListener;
@@ -56,7 +57,7 @@ public class Main extends JavaPlugin implements Listener {
         actualLang = getConfig().getString("language");
 
         configManager.registerLang();
-        loadConfig();
+        javaMenuManager.loadJavaMenus();
         registerCommands();
     }
 
@@ -79,28 +80,9 @@ public class Main extends JavaPlugin implements Listener {
 
         // subcommands
         handler.register("open", new OpenSubCommand(this));
+        handler.register("reload", new ReloadSubCommand(this));
 
         Objects.requireNonNull(getCommand("bluemenu")).setExecutor(handler);
         Objects.requireNonNull(getCommand("bluemenu")).setTabCompleter(new BlueMenuTabComplete());
-    }
-
-    private void loadConfig() {
-        List<String> menuList = getConfig().getStringList("java_menus");
-        for (String menuEntry : menuList) {
-            String[] menuData = menuEntry.split(":");
-            if (menuData.length == 2) {
-                String menuName = menuData[0].trim();
-                String menuFileName = menuData[1].trim();
-                File menuConfigFile = new File(getDataFolder()+"/menus/java", menuFileName);
-                if (menuConfigFile.exists()) {
-                    FileConfiguration menuConfig = YamlConfiguration.loadConfiguration(menuConfigFile);
-                    javaMenuManager.menuConfigs.put(menuName, menuConfig);
-                } else {
-                    getLogger().warning("Menu file '" + menuFileName + "' specified in config.yml not found!");
-                }
-            } else {
-                getLogger().warning("Invalid menu configuration entry: " + menuEntry);
-            }
-        }
     }
 }

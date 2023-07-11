@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -12,8 +13,12 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.bukkit.Bukkit.getLogger;
 
 public class MenuManager {
     public final Map<String, FileConfiguration> menuConfigs = new HashMap<>();
@@ -22,6 +27,27 @@ public class MenuManager {
 
     public MenuManager(Main main) {
         this.main = main;
+    }
+
+    public void loadJavaMenus() {
+        main.javaMenuManager.menuConfigs.clear();
+        List<String> menuList = main.getConfig().getStringList("java_menus");
+        for (String menuEntry : menuList) {
+            String[] menuData = menuEntry.split(":");
+            if (menuData.length == 2) {
+                String menuName = menuData[0].trim();
+                String menuFileName = menuData[1].trim();
+                File menuConfigFile = new File(main.getDataFolder()+"/menus/java", menuFileName);
+                if (menuConfigFile.exists()) {
+                    FileConfiguration menuConfig = YamlConfiguration.loadConfiguration(menuConfigFile);
+                    main.javaMenuManager.menuConfigs.put(menuName, menuConfig);
+                } else {
+                    getLogger().warning("Menu file '" + menuFileName + "' specified in config.yml not found!");
+                }
+            } else {
+                getLogger().warning("Invalid menu configuration entry: " + menuEntry);
+            }
+        }
     }
 
     public void openMenu(Player player, String menuName) {
