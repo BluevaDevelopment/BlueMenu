@@ -4,6 +4,31 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
+config_version: 120
+
+# Metrics:
+# This plugin uses the bStats metrics system. If you want your data not to be collected, you can disable this system here.
+# The following information is collected and sent to bstats.org:
+#      Whether the server is in offline or online mode
+#      The plugin version
+#      The server version
+#      The java version
+#      The OS version/name and architecture
+#      The location of your server
+#      The core count for the CPU
+#      The number of players online
+#      The Metrics version
+metrics: true
+
+# Language:
+# Sets the language of all plugin messages
+# It is necessary to restart the server for it to take effect.
+#
+# Available languages:
+# English (UK): en_UK
+# Spanish (ES): es_ES
+language: 'en_UK'
+
 # Menus located in /plugins/BlueMenu/menus/java
 # Directory path where Java menus are located.
 java_menus:

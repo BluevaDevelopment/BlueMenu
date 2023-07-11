@@ -4,16 +4,15 @@ import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
 import net.blueva.menu.commands.main.subcommands.OpenSubCommand;
 import net.blueva.menu.commands.main.tabcomplete.BlueMenuTabComplete;
+import net.blueva.menu.configuration.ConfigManager;
 import net.blueva.menu.listeners.InventoryClickListener;
 import net.blueva.menu.managers.java.MenuManager;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.List;
@@ -21,20 +20,55 @@ import java.util.Objects;
 
 public class Main extends JavaPlugin implements Listener {
 
+    // Managers
     public MenuManager javaMenuManager;
+    public ConfigManager configManager;
+
+
+    // Lang File
+    public FileConfiguration language = null;
+    public File languageFile = null;
+    public String actualLang;
+    public String langPath;
+
+    // Other Things
+    public String pluginversion = getDescription().getVersion();
+
 
     @Override
     public void onEnable() {
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdirs();
-        }
-
         javaMenuManager = new MenuManager(this);
+        configManager = new ConfigManager(this);
 
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
 
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "  ____  _            __  __");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " | __ )| |_   _  ___|  \\/  | ___ _ __  _   _");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " |  _ \\| | | | |/ _ | |\\/| |/ _ | '_ \\| | | |");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " | |_) | | |_| |  __| |  | |  __| | | | |_| |");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " |____/|_|\\__,_|\\___|_|  |_|\\___|_| |_|\\__,_|");
+        Bukkit.getConsoleSender().sendMessage("");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "V. 1.0.0 | Plugin enabled successfully | blueva.net");
+
+        configManager.generateFolders();
+        saveDefaultConfig();
+
+        actualLang = getConfig().getString("language");
+
+        configManager.registerLang();
         loadConfig();
         registerCommands();
+    }
+
+    @Override
+    public void onDisable() {
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "  ____  _            __  __");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " | __ )| |_   _  ___|  \\/  | ___ _ __  _   _");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " |  _ \\| | | | |/ _ | |\\/| |/ _ | '_ \\| | | |");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " | |_) | | |_| |  __| |  | |  __| | | | |_| |");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " |____/|_|\\__,_|\\___|_|  |_|\\___|_| |_|\\__,_|");
+        Bukkit.getConsoleSender().sendMessage("");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "V. 1.0.0 | Plugin disabled successfully | blueva.net");
     }
 
     public void registerCommands() {
@@ -51,15 +85,13 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     private void loadConfig() {
-        saveDefaultConfig();
-
         List<String> menuList = getConfig().getStringList("java_menus");
         for (String menuEntry : menuList) {
             String[] menuData = menuEntry.split(":");
             if (menuData.length == 2) {
                 String menuName = menuData[0].trim();
                 String menuFileName = menuData[1].trim();
-                File menuConfigFile = new File(getDataFolder(), menuFileName);
+                File menuConfigFile = new File(getDataFolder()+"/menus/java", menuFileName);
                 if (menuConfigFile.exists()) {
                     FileConfiguration menuConfig = YamlConfiguration.loadConfiguration(menuConfigFile);
                     javaMenuManager.menuConfigs.put(menuName, menuConfig);
