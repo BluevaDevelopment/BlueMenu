@@ -1,0 +1,35 @@
+#  ____  _            __  __
+# | __ )| |_   _  ___|  \/  | ___ _ __  _   _
+# |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
+# | |_) | | |_| |  __| |  | |  __| | | | |_| |
+# |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+language: "English (UK)"
+global:
+  success: []
+  error: []
+  info: []
+  other: []
+commands:
+  bluemenu:
+    info:
+      - "&8&m--------------------------"
+      - ""
+      - "&b&lBlue&9&lMenu &7- &e{plugin_version}"
+      - "&7Created by Blueva (blueva.net)"
+      - ""
+      - "&7Use &b/bm help &7to get help."
+      - ""
+      - "&8&m--------------------------"
+    list:
+      - "&b&lBlue&9&lMenu &8- &7List of menus &f{type}"
+      - "&7Menus &8(&f{number_menus}&8)&7: &a{list_menus}"
+    help:
+      - "&b&lBlue&9&lMenu &8- &7Help Command"
+      - "&e[] Requiered &7- &a() Optional"
+      - ""
+      - "&b/bm open [java/bedrock] [menu] (player) &8- &7Open a menu"
+      - "&b/bm list [java/bedrock] - List of available menus."
+      - "&b/bm reload &8- &7Reload the configuration"
+      - "&c(SOON) &b/bm create [java/bedrock] [menu_name] &8- &7Create menus inside the game"
+      - "&c(SOON) &b/bm migrate [plugin] [menu/all] &8- &7Migrate menus from another plugin to BlueMenu"

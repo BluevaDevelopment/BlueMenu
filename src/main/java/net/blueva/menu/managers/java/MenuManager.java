@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import static org.bukkit.Bukkit.getLogger;
 
 public class MenuManager {
     public final Map<String, FileConfiguration> menuConfigs = new HashMap<>();
+    public final List<String> menuNames = new ArrayList<>();
 
     private final Main main;
 
@@ -30,7 +32,8 @@ public class MenuManager {
     }
 
     public void loadJavaMenus() {
-        main.javaMenuManager.menuConfigs.clear();
+        menuConfigs.clear();
+        menuNames.clear();
         List<String> menuList = main.getConfig().getStringList("java_menus");
         for (String menuEntry : menuList) {
             String[] menuData = menuEntry.split(":");
@@ -40,7 +43,8 @@ public class MenuManager {
                 File menuConfigFile = new File(main.getDataFolder()+"/menus/java", menuFileName);
                 if (menuConfigFile.exists()) {
                     FileConfiguration menuConfig = YamlConfiguration.loadConfiguration(menuConfigFile);
-                    main.javaMenuManager.menuConfigs.put(menuName, menuConfig);
+                    menuConfigs.put(menuName, menuConfig);
+                    menuNames.add(menuName);
                 } else {
                     getLogger().warning("Menu file '" + menuFileName + "' specified in config.yml not found!");
                 }

@@ -16,6 +16,8 @@ public class BlueMenuTabComplete implements TabCompleter {
 
         if (args.length == 1) {
             if(sender.hasPermission("bluemenu.admin") || sender.isOp()){
+                subCommands.add("help");
+                subCommands.add("list");
                 subCommands.add("open");
                 subCommands.add("reload");
             }

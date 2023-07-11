@@ -2,6 +2,8 @@ package net.blueva.menu;
 
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
+import net.blueva.menu.commands.main.subcommands.HelpSubCommand;
+import net.blueva.menu.commands.main.subcommands.ListSubCommand;
 import net.blueva.menu.commands.main.subcommands.OpenSubCommand;
 import net.blueva.menu.commands.main.subcommands.ReloadSubCommand;
 import net.blueva.menu.commands.main.tabcomplete.BlueMenuTabComplete;
@@ -85,7 +87,9 @@ public class Main extends JavaPlugin implements Listener {
         handler.register("bluemenu", new BlueMenuCommand(this));
 
         // subcommands
+        handler.register("help", new HelpSubCommand(this));
         handler.register("open", new OpenSubCommand(this));
+        handler.register("list", new ListSubCommand(this));
         handler.register("reload", new ReloadSubCommand(this));
 
         Objects.requireNonNull(getCommand("bluemenu")).setExecutor(handler);
