@@ -2,6 +2,7 @@ package net.blueva.menu.listeners;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.managers.java.ActionManager;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -43,7 +44,7 @@ public class InventoryClickListener implements Listener {
                     for (String itemName : itemsSection.getKeys(false)) {
                         ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
                         if (itemSection != null && itemSection.isString("name")) {
-                            String itemDisplayName = itemSection.getString("name");
+                            String itemDisplayName = MessagesUtil.format(player, itemSection.getString("name"));
 
                             if (displayName.equals(itemDisplayName)) {
                                 List<String> actions = itemSection.getStringList("actions");
