@@ -6,6 +6,7 @@ import net.blueva.menu.commands.main.subcommands.OpenSubCommand;
 import net.blueva.menu.commands.main.subcommands.ReloadSubCommand;
 import net.blueva.menu.commands.main.tabcomplete.BlueMenuTabComplete;
 import net.blueva.menu.configuration.ConfigManager;
+import net.blueva.menu.libraries.bstats.Metrics;
 import net.blueva.menu.listeners.InventoryClickListener;
 import net.blueva.menu.managers.java.MenuManager;
 import org.bukkit.Bukkit;
@@ -59,6 +60,11 @@ public class Main extends JavaPlugin implements Listener {
         configManager.registerLang();
         javaMenuManager.loadJavaMenus();
         registerCommands();
+
+        if(getConfig().getBoolean("metrics")) {
+            int pluginId = 19060;
+            Metrics metrics = new Metrics(this, pluginId);
+        }
     }
 
     @Override

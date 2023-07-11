@@ -4,7 +4,7 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
-config_version: 120
+config_version: 100
 
 # Metrics:
 # This plugin uses the bStats metrics system. If you want your data not to be collected, you can disable this system here.
