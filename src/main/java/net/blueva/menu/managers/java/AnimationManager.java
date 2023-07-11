@@ -26,7 +26,7 @@ public class AnimationManager {
             for (String frame : framesSection.getKeys(false)) {
                 ConfigurationSection frameSection = framesSection.getConfigurationSection(frame);
                 if (frameSection != null) {
-                    ItemStack frameItem = ItemManager.createItemStackFromConfig(frameSection);
+                    ItemStack frameItem = ItemManager.createItemStackFromConfig(frameSection, player);
                     frames.add(frameItem);
                 }
             }

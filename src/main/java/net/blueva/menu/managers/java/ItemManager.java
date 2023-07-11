@@ -2,10 +2,12 @@ package net.blueva.menu.managers.java;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,8 +20,8 @@ import java.util.UUID;
 import static org.bukkit.Bukkit.getLogger;
 
 public class ItemManager {
-    public static ItemStack createItemStackFromConfig(ConfigurationSection itemSection) {
-        String itemName = itemSection.getString("name");
+    public static ItemStack createItemStackFromConfig(ConfigurationSection itemSection, Player player) {
+        String itemName = MessagesUtil.format(player, itemSection.getString("name"));
         Material material = Material.valueOf(itemSection.getString("itemStack.material"));
         int amount = itemSection.getInt("itemStack.amount");
 
@@ -28,7 +30,7 @@ public class ItemManager {
         assert itemMeta != null;
         itemMeta.setDisplayName(itemName);
 
-        List<String> lore = itemSection.getStringList("lore");
+        List<String> lore = MessagesUtil.format(player, itemSection.getStringList("lore"));
         itemMeta.setLore(lore);
 
         itemStack.setItemMeta(itemMeta);

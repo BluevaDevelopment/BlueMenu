@@ -14,12 +14,10 @@ import net.blueva.menu.managers.java.MenuManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
 public class Main extends JavaPlugin implements Listener {
@@ -37,6 +35,7 @@ public class Main extends JavaPlugin implements Listener {
 
     // Other Things
     public String pluginversion = getDescription().getVersion();
+    public static boolean placeholderapi = false;
 
 
     @Override
@@ -45,6 +44,15 @@ public class Main extends JavaPlugin implements Listener {
         configManager = new ConfigManager(this);
 
         getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            placeholderapi = true;
+        }
+
+        if(getConfig().getBoolean("metrics")) {
+            int pluginId = 19060;
+            Metrics metrics = new Metrics(this, pluginId);
+        }
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "  ____  _            __  __");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " | __ )| |_   _  ___|  \\/  | ___ _ __  _   _");
@@ -62,11 +70,6 @@ public class Main extends JavaPlugin implements Listener {
         configManager.registerLang();
         javaMenuManager.loadJavaMenus();
         registerCommands();
-
-        if(getConfig().getBoolean("metrics")) {
-            int pluginId = 19060;
-            Metrics metrics = new Metrics(this, pluginId);
-        }
     }
 
     @Override

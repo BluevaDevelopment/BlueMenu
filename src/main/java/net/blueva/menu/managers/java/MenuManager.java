@@ -1,6 +1,7 @@
 package net.blueva.menu.managers.java;
 
 import net.blueva.menu.Main;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -58,7 +59,7 @@ public class MenuManager {
         FileConfiguration menuConfig = menuConfigs.get(menuName);
         if (menuConfig != null) {
             int menuSize = menuConfig.getInt("menuSize");
-            String menuTitle = menuConfig.getString("menuName");
+            String menuTitle = MessagesUtil.format(player, menuConfig.getString("menuName"));
             Inventory menuInventory = Bukkit.createInventory(null, menuSize, menuTitle);
 
             ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
@@ -66,7 +67,7 @@ public class MenuManager {
                 for (String itemName : itemsSection.getKeys(false)) {
                     ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
                     if (itemSection != null) {
-                        ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection);
+                        ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
                         int slot = itemSection.getInt("slot");
                         menuInventory.setItem(slot, itemStack);
                     }
@@ -97,7 +98,7 @@ public class MenuManager {
         return null;
     }
 
-    public boolean isCustomMenu(Inventory inventory) {
+    public boolean isCustomMenu(Inventory inventory, Player player) {
         for (FileConfiguration menuConfig : menuConfigs.values()) {
             int menuSize = menuConfig.getInt("menuSize");
             if (inventory.getType() == InventoryType.CHEST && inventory.getSize() == menuSize) {
@@ -107,7 +108,7 @@ public class MenuManager {
                     for (String itemName : itemsSection.getKeys(false)) {
                         ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
                         if (itemSection != null) {
-                            ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection);
+                            ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
                             int slot = itemSection.getInt("slot");
                             ItemStack inventoryItem = menuItems[slot];
                             if (!isSimilar(itemStack, inventoryItem)) {

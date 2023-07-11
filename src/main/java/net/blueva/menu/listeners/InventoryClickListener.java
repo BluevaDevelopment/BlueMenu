@@ -28,7 +28,7 @@ public class InventoryClickListener implements Listener {
         Inventory inventory = event.getClickedInventory();
         ItemStack clickedItem = event.getCurrentItem();
 
-        if (inventory != null && clickedItem != null && main.javaMenuManager.isCustomMenu(inventory)) {
+        if (inventory != null && clickedItem != null && main.javaMenuManager.isCustomMenu(inventory, player)) {
             event.setCancelled(true);
 
             ItemMeta itemMeta = clickedItem.getItemMeta();
