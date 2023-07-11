@@ -1,0 +1,23 @@
+#  ____  _            __  __
+# | __ )| |_   _  ___|  \/  | ___ _ __  _   _
+# |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
+# | |_) | | |_| |  __| |  | |  __| | | | |_| |
+# |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+# Menus located in /plugins/BlueMenu/menus/java
+# Directory path where Java menus are located.
+java_menus:
+  - 'menu:default_menu.yml'  # Path to the default Java menu file.
+  # Note: Customize this file to define the structure and content of the Java menus.
+
+  - 'java_menu:java_menu.yml'  # Path to an additional Java menu file.
+  # Note: You can create and add more Java menu files to this list.
+
+# Menus located in /plugins/BlueMenu/menus/bedrock
+# Directory path where Bedrock menus are located.
+bedrock_menus:
+  - 'menu:default_menu.yml'  # Path to the default Bedrock menu file.
+  # Note: Customize this file to define the structure and content of the Bedrock menus.
+
+  - 'bedrock_menu:bedrock_menu.yml'  # Path to an additional Bedrock menu file.
+  # Note: You can create and add more Bedrock menu files to this list.
