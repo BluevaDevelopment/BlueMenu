@@ -6,6 +6,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 public class OpenSubCommand implements CommandInterface
 {
@@ -17,7 +20,8 @@ public class OpenSubCommand implements CommandInterface
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd,
+                             String commandLabel, String @NotNull [] args) throws IOException {
         if (args.length >= 2) {
             String menuName = args[1];
             Player targetPlayer = null;

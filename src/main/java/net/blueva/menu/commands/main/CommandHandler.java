@@ -19,7 +19,7 @@ public class CommandHandler implements CommandExecutor
         this.main = main;
     }
 
-    private static HashMap<String, CommandInterface> commands = new HashMap<String, CommandInterface>();
+    private static final HashMap<String, CommandInterface> commands = new HashMap<String, CommandInterface>();
 
 
     public void register(String name, CommandInterface cmd) {

@@ -15,16 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 public class AnimationManager {
-    private static Main main;
-
-    public AnimationManager(Main main) {
-        AnimationManager.main = main;
-    }
-
     public static Map<Player, Integer> animationTasks = new HashMap<>();
 
-
-    static void startAnimation(Player player, ConfigurationSection animationConfig, int menuSize) {
+    static void startAnimation(Main main, Player player, ConfigurationSection animationConfig, int menuSize) {
         int interval = animationConfig.getInt("interval");
         List<ItemStack> frames = new ArrayList<>();
 

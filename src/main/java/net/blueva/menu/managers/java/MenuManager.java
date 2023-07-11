@@ -16,10 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MenuManager {
-    public final Map<String, FileConfiguration> menuConfigs;
+    public final Map<String, FileConfiguration> menuConfigs = new HashMap<>();
+
+    private final Main main;
 
     public MenuManager(Main main) {
-        this.menuConfigs = new HashMap<>();
+        this.main = main;
     }
 
     public void openMenu(Player player, String menuName) {
@@ -47,7 +49,7 @@ public class MenuManager {
                 ConfigurationSection animationsConfig = menuConfig.getConfigurationSection("animations");
                 for (String animationName : animationsConfig.getKeys(false)) {
                     ConfigurationSection animationConfig = animationsConfig.getConfigurationSection(animationName);
-                    AnimationManager.startAnimation(player, animationConfig, menuInventory.getSize()); // Pass the menu size
+                    AnimationManager.startAnimation(main, player, animationConfig, menuInventory.getSize()); // Pass the menu size
                 }
             }
         } else {

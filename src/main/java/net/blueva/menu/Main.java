@@ -35,8 +35,6 @@ public class Main extends JavaPlugin implements Listener {
 
         loadConfig();
         registerCommands();
-
-        Objects.requireNonNull(getCommand("bluemenu")).setExecutor(this);
     }
 
     public void registerCommands() {

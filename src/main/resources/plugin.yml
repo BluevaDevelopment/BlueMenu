@@ -5,7 +5,7 @@ api-version: 1.13
 
 commands:
   bluemenu:
-    description: Menu principal
+    description: Main command
     aliases:
       - bm
       - pluginmenu

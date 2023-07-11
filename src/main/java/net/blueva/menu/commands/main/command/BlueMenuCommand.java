@@ -14,18 +14,12 @@ public class BlueMenuCommand implements CommandInterface
         this.main = main;
     }
 
-    //The command should be automatically created.
     @Override
     public boolean onCommand(CommandSender sender, Command cmd,
                              String commandLabel, String[] args) {
 
         if(sender.hasPermission("bluemenu.info") || sender.hasPermission("bluemenu.*")) {
-            /*List<String> bminfo = "";
-            for (String message : bminfo) {
-                String player = sender.getName();
-                sender.sendMessage();
-            }*/
-            sender.sendMessage("Working!");
+            sender.sendMessage("test");
         }
         return false;
     }
