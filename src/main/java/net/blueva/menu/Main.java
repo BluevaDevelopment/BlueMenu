@@ -104,6 +104,7 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryDragListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryInteractListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerCommandPreprocessListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
     }
 }

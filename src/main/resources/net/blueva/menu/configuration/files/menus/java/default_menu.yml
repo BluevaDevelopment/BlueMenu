@@ -7,7 +7,7 @@
 menuName: "&6Menu de Ejemplo"
 menuSize: 54
 type: CHEST
-openCommand: menu
+openCommand: /menu
 items:
   item1:
     name: "&aItem 1"

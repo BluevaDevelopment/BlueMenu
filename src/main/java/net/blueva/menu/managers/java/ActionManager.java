@@ -11,13 +11,11 @@ import static org.bukkit.Bukkit.getLogger;
 
 public class ActionManager {
     public static void executeActions(Player player, List<String> actions, ClickType clickType) {
-        String clickTypeString;
+        String clickTypeString = "";
         if (clickType == ClickType.LEFT) {
             clickTypeString = "LEFT_CLICK";
         } else if (clickType == ClickType.RIGHT) {
             clickTypeString = "RIGHT_CLICK";
-        } else {
-            clickTypeString = "CLICK";
         }
 
         for (String action : actions) {
