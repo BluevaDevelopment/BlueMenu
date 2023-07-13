@@ -19,11 +19,11 @@ items:
       - "&7Este es el Item 1"
       - "&7en el Menú de Ejemplo"
     actions:
-      - "[LEFT_CLICK] CONSOLE:say ¡Has seleccionado el Item 1 con el click izquierdo!"
-      - "[RIGHT_CLICK] CONSOLE:say ¡Has seleccionado el Item 1 con el click derecho!"
+      - "[LEFT_CLICK] CONSOLE;say ¡Has seleccionado el Item 1 con el click izquierdo!"
+      - "[RIGHT_CLICK] CONSOLE;say ¡Has seleccionado el Item 1 con el click derecho!"
     attributes:
-      - "[ENCHANTMENT] FIRE_ASPECT:1"
-      - "[BOOLEAN] HIDE_ENCHANTS:false"
+      - "[ENCHANTMENT] FIRE_ASPECT;1"
+      - "[BOOLEAN] HIDE_ENCHANTS;false"
   item2:
     name: "&bItem 2"
     slot: 15
@@ -35,8 +35,8 @@ items:
       - "&7Este es el Item 2"
       - "&7en el Menú de Ejemplo"
     actions:
-      - "[CLICK] MESSAGE:&a¡Has seleccionado el Item 2!"
-      - "[CLICK] CONSOLE:give %player% diamond 1"
+      - "[CLICK] MESSAGE;&a¡Has seleccionado el Item 2!"
+      - "[CLICK] CONSOLE;give %player% diamond 1"
 animations:
   animation1:
     interval: 30
@@ -62,9 +62,9 @@ animations:
           - "&7Este es el Frame 2"
           - "&7en la Animación 1"
         actions:
-          - "[CLICK] MESSAGE:&a¡Has seleccionado el Frame 2!"
-          - "[CLICK] PLAYER:me ¡He seleccionado el Frame 2!"
+          - "[CLICK] MESSAGE;&a¡Has seleccionado el Frame 2!"
+          - "[CLICK] PLAYER;me ¡He seleccionado el Frame 2!"
         attributes:
-          - "[ENCHANTMENT] FIRE_ASPECT:1"
-          - "[BOOLEAN] HIDE_ENCHANTS:true"
-          - "[BOOLEAN] HIDE_ATTRIBUTES:true"
+          - "[ENCHANTMENT] FIRE_ASPECT;1"
+          - "[BOOLEAN] HIDE_ENCHANTS;true"
+          - "[BOOLEAN] HIDE_ATTRIBUTES;true"

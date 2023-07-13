@@ -70,7 +70,7 @@ public class ItemManager {
     }
 
     private static void applyEnchantmentAttribute(ItemMeta itemMeta, String attributeValue) {
-        String[] enchantmentData = attributeValue.split(":");
+        String[] enchantmentData = attributeValue.split(";");
         if (enchantmentData.length == 2) {
             Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantmentData[0].trim().toLowerCase()));
             if (enchantment != null) {
@@ -81,7 +81,7 @@ public class ItemManager {
     }
 
     private static void applyBooleanAttribute(ItemMeta itemMeta, String attributeValue) {
-        String[] booleanData = attributeValue.split(":");
+        String[] booleanData = attributeValue.split(";");
         if (booleanData.length == 2) {
             String flagName = booleanData[0].trim().toUpperCase();
             boolean flagValue = Boolean.parseBoolean(booleanData[1].trim());

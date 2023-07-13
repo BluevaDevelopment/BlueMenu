@@ -37,7 +37,7 @@ public class MenuManager {
         menuNames.clear();
         List<String> menuList = main.getConfig().getStringList("java_menus");
         for (String menuEntry : menuList) {
-            String[] menuData = menuEntry.split(":");
+            String[] menuData = menuEntry.split(";");
             if (menuData.length == 2) {
                 String menuName = menuData[0].trim();
                 String menuFileName = menuData[1].trim();

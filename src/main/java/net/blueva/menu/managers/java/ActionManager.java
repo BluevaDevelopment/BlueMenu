@@ -1,7 +1,7 @@
 package net.blueva.menu.managers.java;
 
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
@@ -33,28 +33,25 @@ public class ActionManager {
     }
 
     private static void executeClickAction(Player player, String action) {
-        String[] actionParts = action.split(":");
-        if (actionParts.length == 2) {
+        String[] actionParts = action.split(";");
+        if (actionParts.length >= 2) {
             String actionTarget = actionParts[0].toUpperCase();
             String actionCommand = actionParts[1];
 
             switch (actionTarget) {
-                case "CONSOLE":
-                    String consoleCommand = actionCommand.replace("%player%", player.getName());
+                case "CONSOLE" -> {
+                    String consoleCommand = MessagesUtil.format(player, actionCommand);
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), consoleCommand);
-                    break;
-                case "PLAYER":
-                    String playerCommand = actionCommand.replace("%player%", player.getName());
+                }
+                case "PLAYER" -> {
+                    String playerCommand = MessagesUtil.format(player, actionCommand);
                     player.performCommand(playerCommand);
-                    break;
-                case "MESSAGE":
-                    String message = ChatColor.translateAlternateColorCodes('&', actionCommand);
+                }
+                case "MESSAGE" -> {
+                    String message = MessagesUtil.format(player, actionCommand);
                     player.sendMessage(message);
-                    break;
-                // Agrega más objetivos de acción según tus necesidades
-                default:
-                    getLogger().warning("Invalid action target: " + actionTarget);
-                    break;
+                }
+                default -> getLogger().warning("Invalid action target: " + actionTarget);
             }
         }
     }
