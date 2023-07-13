@@ -53,6 +53,12 @@ public class ActionManager {
                 }
                 default -> getLogger().warning("Invalid action target: " + actionTarget);
             }
+        } else if (actionParts.length == 1) {
+            String actionTarget = actionParts[0].toUpperCase();
+            switch (actionTarget) {
+                case "CLOSE" -> player.closeInventory();
+                default -> getLogger().warning("Invalid action target: " + actionTarget);
+            }
         }
     }
 }
