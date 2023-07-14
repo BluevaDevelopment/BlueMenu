@@ -10,8 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-public class OpenSubCommand implements CommandInterface
-{
+public class OpenSubCommand implements CommandInterface {
 
     private final Main main;
 
@@ -21,20 +20,31 @@ public class OpenSubCommand implements CommandInterface
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command cmd,
-                             String commandLabel, String @NotNull [] args) throws IOException {
-        if (args.length >= 2) {
-            String menuName = args[1];
+                             String commandLabel, String @NotNull [] args) {
+        if (args.length >= 3) {
+            String platform = args[1];
+            String menuName = args[2];
             Player targetPlayer = null;
 
-            if (sender instanceof Player player) {
-                if (player.hasPermission("bluemenu.open")) {
-                    targetPlayer = player;
-                } else {
-                    sender.sendMessage("You do not have permission to execute this command.");
-                    return true;
+            if (platform.equalsIgnoreCase("java")) {
+                if (sender instanceof Player player) {
+                    if (player.hasPermission("bluemenu.open")) {
+                        targetPlayer = player;
+                    } else {
+                        sender.sendMessage("You do not have permission to execute this command.");
+                        return true;
+                    }
                 }
-            } else if (args.length >= 3 && sender.hasPermission("bluemenu.open.others")) {
-                String targetPlayerName = args[2];
+            } else if (platform.equalsIgnoreCase("bedrock")) {
+                sender.sendMessage("The Bedrock platform support is coming soon.");
+                return true;
+            } else {
+                sender.sendMessage("Invalid platform. Use either 'java' or 'bedrock'.");
+                return true;
+            }
+
+            if (args.length >= 4 && sender.hasPermission("bluemenu.open.others")) {
+                String targetPlayerName = args[3];
                 targetPlayer = Bukkit.getPlayer(targetPlayerName);
                 if (targetPlayer == null) {
                     sender.sendMessage("The specified player is not online.");
@@ -47,12 +57,10 @@ public class OpenSubCommand implements CommandInterface
 
             main.javaMenuManager.openMenu(targetPlayer, menuName);
         } else {
-            sender.sendMessage("Incorrect use of the command. Use: /bluemenu open <menu> [player]");
+            sender.sendMessage("Incorrect use of the command. Use: /bluemenu open <java/bedrock> <menu> [player]");
         }
 
         return true;
     }
-
-
 
 }
