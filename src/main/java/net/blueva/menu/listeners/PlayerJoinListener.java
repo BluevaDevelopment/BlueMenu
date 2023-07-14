@@ -11,8 +11,7 @@ public class PlayerJoinListener implements Listener {
     public void PJL(PlayerJoinEvent e) {
         if(!PlayerManager.playerInMenu.containsKey(e.getPlayer())) {
             PlayerManager.playerInMenu.put(e.getPlayer(), false);
-            Bukkit.getConsoleSender().sendMessage("Working!");
+            PlayerManager.playerMenuTitle.put(e.getPlayer(), "None");
         }
-        Bukkit.getConsoleSender().sendMessage("Working! 2");
     }
 }

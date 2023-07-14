@@ -76,7 +76,7 @@ public class MenuManager {
 
             player.openInventory(menuInventory);
 
-            PlayerManager.openMenu(player);
+            PlayerManager.openMenu(player, menuConfig.getString("menuName"));
 
             if (menuConfig.contains("animations")) {
                 ConfigurationSection animationsConfig = menuConfig.getConfigurationSection("animations");
@@ -90,10 +90,11 @@ public class MenuManager {
         }
     }
 
-    public FileConfiguration getMenuConfigByInventory(Inventory inventory) {
+    public FileConfiguration getMenuConfig(Inventory inventory, Player player) {
         for (FileConfiguration menuConfig : menuConfigs.values()) {
+            String menuName = MessagesUtil.format(player, menuConfig.getString("menuName"));
             int menuSize = menuConfig.getInt("menuSize");
-            if (inventory.getType() == InventoryType.CHEST && inventory.getSize() == menuSize) {
+            if (inventory.getType() == InventoryType.CHEST && inventory.getSize() == menuSize && PlayerManager.playerMenuTitle.get(player).equals(menuName)) {
                 return menuConfig;
             }
         }

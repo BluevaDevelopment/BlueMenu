@@ -38,7 +38,7 @@ public class InventoryClickListener implements Listener {
                 ItemMeta itemMeta = clickedItem.getItemMeta();
                 if (itemMeta != null && itemMeta.hasDisplayName()) {
                     String displayName = itemMeta.getDisplayName();
-                    FileConfiguration menuConfig = main.javaMenuManager.getMenuConfigByInventory(inventory);
+                    FileConfiguration menuConfig = main.javaMenuManager.getMenuConfig(inventory, player);
 
                     if (menuConfig != null && menuConfig.isConfigurationSection("items")) {
                         ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
