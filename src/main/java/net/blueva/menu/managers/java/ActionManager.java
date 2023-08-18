@@ -40,12 +40,12 @@ public class ActionManager {
 
             switch (actionTarget) {
                 case "CONSOLE" -> {
-                    String consoleCommand = MessagesUtil.format(player, actionCommand);
+                    String consoleCommand = MessagesUtil.formatPlaceholders(player, actionCommand);
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), consoleCommand);
                 }
                 case "PLAYER" -> {
-                    String playerCommand = MessagesUtil.format(player, actionCommand);
-                    Bukkit.dispatchCommand(player, playerCommand);
+                    String playerCommand = MessagesUtil.formatPlaceholders(player, actionCommand);
+                    player.chat("/"+playerCommand);
                 }
                 case "MESSAGE" -> {
                     String message = MessagesUtil.format(player, actionCommand);
