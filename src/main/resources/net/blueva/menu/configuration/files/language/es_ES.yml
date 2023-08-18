@@ -1,0 +1,44 @@
+#  ____  _            __  __
+# | __ )| |_   _  ___|  \/  | ___ _ __  _   _
+# |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
+# | |_) | | |_| |  __| |  | |  __| | | | |_| |
+# |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+language: "Spanish (ES)"
+global:
+  success:
+    configuration_reloaded: "&aConfiguración recargada correctamente."
+  error:
+    player_offline: "&cEl jugador especificado no está en linea."
+    insufficient_permissions: "&cNo tienes permisos para ejecutar ese comando."
+    invalid_menu: "&cEl menu especificado no ha sido encontrado. ¿Has escrito el nombre correctamente?"
+    invalid_platform: "&cPlataforma invalida. Usa 'java', 'bedrock' o 'auto'."
+    invalid_attribute: "&cTipo de atributo invalido: &e{type}"
+    invalid_menu_file: "&cNo se encontró el archivo de menú {name} especificado en config.yml"
+    invalid_menu_entry: "&cEntrada de configuración de menú no válida: {entry}"
+  other:
+    use_open_subcommand: "&cUsa: /bluemenu open <java/bedrock/auto> <menu> [jugador]"
+    use_list_subcommand: "&cUsa: /bluemenu list <java/bedrock>"
+commands:
+  bluemenu:
+    info:
+      - "&8&m--------------------------"
+      - ""
+      - "&b&lBlue&9&lMenu &7- &e{plugin_version}"
+      - "&7Creado por Blueva (blueva.net)"
+      - ""
+      - "&7Usa &b/bm help &7para obtener ayuda."
+      - ""
+      - "&8&m--------------------------"
+    list:
+      - "&b&lBlue&9&lMenu &8- &7Lista de menus &f{type}"
+      - "&7Menus &8(&f{number_menus}&8)&7: &a{list_menus}"
+    help:
+      - "&b&lBlue&9&lMenu &8- &7Comando de ayuda"
+      - "&e[] Requerido &7- &a() Opcional"
+      - ""
+      - "&b/bm open [java/bedrock/auto] [menu] (jugador) &8- &7Abre un menu."
+      - "&b/bm list [java/bedrock] - Lista de menus disponibles."
+      - "&b/bm reload &8- &7Recarga la configuración."
+      - "&c(PRONTO) &b/bm create [java/bedrock] [menu_name] &8- &7Crea menus dentro del juego."
+      - "&c(PRONTO) &b/bm migrate [plugin] [menu/all] &8- &7Migra menus desde otros plugins a BlueMenu."

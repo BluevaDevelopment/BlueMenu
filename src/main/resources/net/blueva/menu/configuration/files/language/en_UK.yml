@@ -13,9 +13,9 @@ global:
     insufficient_permissions: "&cYou do not have permission to execute this command."
     invalid_menu: "&cThe specified menu was not found. Did you spell the name correctly?"
     invalid_platform: "&cInvalid platform. Use 'java', 'bedrock' or 'auto'."
-    invalid_attribute: "Invalid attribute type: {type}"
-    invalid_menu_file: "Menu file {name} specified in config.yml not found!"
-    invalid_menu_entry: "Invalid menu configuration entry: {entry}"
+    invalid_attribute: "&cInvalid attribute type: &e{type}"
+    invalid_menu_file: "&cMenu file {name} specified in config.yml not found!"
+    invalid_menu_entry: "&cInvalid menu configuration entry: {entry}"
   other:
     use_open_subcommand: "&cUse: /bluemenu open <java/bedrock/auto> <menu> [player]"
     use_list_subcommand: "&cUse: /bluemenu list <java/bedrock>"
