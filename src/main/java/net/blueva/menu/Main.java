@@ -36,10 +36,18 @@ public class Main extends JavaPlugin implements Listener {
     // Other Things
     public String pluginversion = getDescription().getVersion();
     public static boolean placeholderapi = false;
+    private static Main plugin;
+
+    public static Main getPlugin() {
+        return plugin;
+    }
+
 
 
     @Override
     public void onEnable() {
+        plugin = this;
+
         javaMenuManager = new MenuManager(this);
         configManager = new ConfigManager(this);
 

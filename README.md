@@ -39,7 +39,7 @@ With an IDE like IntelliJ IDEA or Eclipse, you can easily import the source code
 Important: Menus in Bedrock (GeyserMC - Floodgate) are not working yet.
 1. Edit the plugin's configuration file to define the menus and items.
 2. Restart the server or use the `/bluemenu reload` command to load the changes.
-3. Use the `/bluemenu open <menu name>` command to open a menu.
+3. Use the `/bluemenu open [java/bedrock/auto] [menu] (player)` command to open a menu.
 4. Interact with the menu items to perform the associated actions.
 
 ## Support Blue Menu

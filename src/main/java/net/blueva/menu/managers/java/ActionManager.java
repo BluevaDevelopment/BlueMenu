@@ -45,7 +45,7 @@ public class ActionManager {
                 }
                 case "PLAYER" -> {
                     String playerCommand = MessagesUtil.format(player, actionCommand);
-                    player.performCommand(playerCommand);
+                    Bukkit.dispatchCommand(player, playerCommand);
                 }
                 case "MESSAGE" -> {
                     String message = MessagesUtil.format(player, actionCommand);

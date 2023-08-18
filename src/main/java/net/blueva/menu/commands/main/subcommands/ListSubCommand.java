@@ -2,9 +2,11 @@ package net.blueva.menu.commands.main.subcommands;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.commands.CommandInterface;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -38,18 +40,14 @@ public class ListSubCommand implements CommandInterface
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
                     }
                 } else {
-                    sender.sendMessage("Invalid argument. Usage: /bm list (java/bedrock)");
+                    sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.other.use_list_subcommand")));
                 }
             } else {
-                sender.sendMessage("Invalid usage. Usage: /bm list (java/bedrock)");
+                sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.other.use_list_subcommand")));
             }
         } else {
-            sender.sendMessage("You do not have permission to execute this command.");
+            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
         }
         return true;
     }
-
-
-
-
 }

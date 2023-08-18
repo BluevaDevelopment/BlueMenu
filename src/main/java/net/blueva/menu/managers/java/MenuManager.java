@@ -15,10 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.bukkit.Bukkit.getLogger;
 
@@ -47,10 +44,10 @@ public class MenuManager {
                     menuConfigs.put(menuName, menuConfig);
                     menuNames.add(menuName);
                 } else {
-                    getLogger().warning("Menu file '" + menuFileName + "' specified in config.yml not found!");
+                    getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu_file")).replace("{name}", menuFileName));
                 }
             } else {
-                getLogger().warning("Invalid menu configuration entry: " + menuEntry);
+                getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu_entry")).replace("{entry}", menuEntry));
             }
         }
     }
@@ -80,13 +77,17 @@ public class MenuManager {
 
             if (menuConfig.contains("animations")) {
                 ConfigurationSection animationsConfig = menuConfig.getConfigurationSection("animations");
-                for (String animationName : animationsConfig.getKeys(false)) {
-                    ConfigurationSection animationConfig = animationsConfig.getConfigurationSection(animationName);
-                    AnimationManager.startAnimation(main, player, animationConfig, menuInventory.getSize()); // Pass the menu size
+                if(animationsConfig != null) {
+                    for (String animationName : animationsConfig.getKeys(false)) {
+                        ConfigurationSection animationConfig = animationsConfig.getConfigurationSection(animationName);
+                        if(animationConfig != null) {
+                            AnimationManager.startAnimation(main, player, animationConfig, menuInventory.getSize()); // Pass the menu size
+                        }
+                    }
                 }
             }
         } else {
-            player.sendMessage("Menu not found.");
+            player.sendMessage(MessagesUtil.format(player, Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu")));
         }
     }
 

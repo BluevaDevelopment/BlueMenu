@@ -6,10 +6,19 @@
 
 language: "English (UK)"
 global:
-  success: []
-  error: []
-  info: []
-  other: []
+  success:
+    configuration_reloaded: "&aConfiguration successfully reloaded."
+  error:
+    player_offline: "&cThe specified player is not online."
+    insufficient_permissions: "&cYou do not have permission to execute this command."
+    invalid_menu: "&cThe specified menu was not found. Did you spell the name correctly?"
+    invalid_platform: "&cInvalid platform. Use 'java', 'bedrock' or 'auto'."
+    invalid_attribute: "Invalid attribute type: {type}"
+    invalid_menu_file: "Menu file {name} specified in config.yml not found!"
+    invalid_menu_entry: "Invalid menu configuration entry: {entry}"
+  other:
+    use_open_subcommand: "&cUse: /bluemenu open <java/bedrock/auto> <menu> [player]"
+    use_list_subcommand: "&cUse: /bluemenu list <java/bedrock>"
 commands:
   bluemenu:
     info:
@@ -28,7 +37,7 @@ commands:
       - "&b&lBlue&9&lMenu &8- &7Help Command"
       - "&e[] Requiered &7- &a() Optional"
       - ""
-      - "&b/bm open [java/bedrock] [menu] (player) &8- &7Open a menu"
+      - "&b/bm open [java/bedrock/auto] [menu] (player) &8- &7Open a menu"
       - "&b/bm list [java/bedrock] - List of available menus."
       - "&b/bm reload &8- &7Reload the configuration"
       - "&c(SOON) &b/bm create [java/bedrock] [menu_name] &8- &7Create menus inside the game"

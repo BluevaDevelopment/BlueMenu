@@ -2,9 +2,11 @@ package net.blueva.menu.commands.main.subcommands;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.commands.CommandInterface;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class ReloadSubCommand implements CommandInterface
@@ -23,9 +25,9 @@ public class ReloadSubCommand implements CommandInterface
             main.reloadConfig();
             main.configManager.reloadLang();
             main.javaMenuManager.loadJavaMenus();
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aConfiguration successfully reloaded."));
+            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.configuration_reloaded")));
         } else {
-            sender.sendMessage("You do not have permission to execute this command.");
+            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
         }
 
         return true;

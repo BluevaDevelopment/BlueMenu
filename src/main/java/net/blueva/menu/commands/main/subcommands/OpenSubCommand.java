@@ -2,6 +2,7 @@ package net.blueva.menu.commands.main.subcommands;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.commands.CommandInterface;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,7 +32,7 @@ public class OpenSubCommand implements CommandInterface {
                     if (player.hasPermission("bluemenu.open")) {
                         targetPlayer = player;
                     } else {
-                        sender.sendMessage("You do not have permission to execute this command.");
+                        sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
                         return true;
                     }
                 }
@@ -39,7 +40,7 @@ public class OpenSubCommand implements CommandInterface {
                 sender.sendMessage("The Bedrock platform support is coming soon.");
                 return true;
             } else {
-                sender.sendMessage("Invalid platform. Use either 'java' or 'bedrock'.");
+                sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.invalid_platform")));
                 return true;
             }
 
@@ -47,17 +48,17 @@ public class OpenSubCommand implements CommandInterface {
                 String targetPlayerName = args[3];
                 targetPlayer = Bukkit.getPlayer(targetPlayerName);
                 if (targetPlayer == null) {
-                    sender.sendMessage("The specified player is not online.");
+                    sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.player_offline")));
                     return true;
                 }
             } else {
-                sender.sendMessage("You do not have permission to execute this command.");
+                sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
                 return true;
             }
 
             main.javaMenuManager.openMenu(targetPlayer, menuName);
         } else {
-            sender.sendMessage("Incorrect use of the command. Use: /bluemenu open <java/bedrock> <menu> [player]");
+            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.info.use_open_subcommand")));
         }
 
         return true;

@@ -2,6 +2,7 @@ package net.blueva.menu.managers.java;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.bukkit.Bukkit.getLogger;
@@ -61,7 +63,7 @@ public class ItemManager {
                 case "BOOLEAN" -> applyBooleanAttribute(itemMeta, attributeValue);
 
                 // Add more attribute types here as needed
-                default -> getLogger().warning("Invalid attribute type: " + attributeType);
+                default -> getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_attribute")).replace("{type}", attributeType));
             }
         }
 
