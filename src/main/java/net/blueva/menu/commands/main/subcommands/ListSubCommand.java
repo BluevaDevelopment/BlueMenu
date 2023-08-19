@@ -27,7 +27,16 @@ public class ListSubCommand implements CommandInterface
                 String arg = args[1].toLowerCase();
 
                 if (arg.equalsIgnoreCase("bedrock")) {
-                    sender.sendMessage(ChatColor.RED + "Bedrock menus are not yet available.");
+                    String menuList = String.join(", ", main.bedrockMenuManager.menuNames);
+
+                    List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.list");
+                    for (String message : list) {
+                        message = message.replace("{type}", "BEDROCK");
+                        message = message.replace("{number_menus}", String.valueOf(main.javaMenuManager.menuNames.size()));
+                        message = message.replace("{list_menus}", menuList);
+
+                        sender.sendMessage(MessagesUtil.format((Player) sender, message));
+                    }
                 } else if (arg.equalsIgnoreCase("java")) {
                     String menuList = String.join(", ", main.javaMenuManager.menuNames);
 
@@ -37,7 +46,7 @@ public class ListSubCommand implements CommandInterface
                         message = message.replace("{number_menus}", String.valueOf(main.javaMenuManager.menuNames.size()));
                         message = message.replace("{list_menus}", menuList);
 
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                        sender.sendMessage(MessagesUtil.format((Player) sender, message));
                     }
                 } else {
                     sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.other.use_list_subcommand")));

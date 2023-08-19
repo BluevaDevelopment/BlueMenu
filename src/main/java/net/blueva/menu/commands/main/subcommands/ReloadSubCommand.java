@@ -25,8 +25,10 @@ public class ReloadSubCommand implements CommandInterface
             main.reloadConfig();
             main.configManager.reloadLang();
             main.javaMenuManager.loadJavaMenus();
-            main.bedrockMenuManager.loadBedrockMenus();
-            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.configuration_reloaded")));
+            if(Main.isUsingFloodgate) {
+                main.bedrockMenuManager.loadBedrockMenus();
+            }
+            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.success.configuration_reloaded")));
         } else {
             sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
         }

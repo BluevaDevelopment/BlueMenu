@@ -21,7 +21,7 @@ public class OpenSubCommand implements CommandInterface {
                              String commandLabel, String @NotNull [] args) {
 
         if (args.length < 3) {
-            sender.sendMessage(MessagesUtil.format(null, main.configManager.getLang().getString("global.info.use_open_subcommand")));
+            sender.sendMessage(MessagesUtil.format(null, main.configManager.getLang().getString("global.other.use_open_subcommand")));
             return true;
         }
 
