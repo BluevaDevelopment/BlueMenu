@@ -44,7 +44,7 @@ public class MessagesUtil {
                     .replace("{server_max_players}", String.valueOf(Bukkit.getServer().getMaxPlayers()))
                     .replace("{server_version}", Bukkit.getServer().getVersion());
 
-            if(Main.placeholderapi) {
+            if(Main.isUsingPAPI) {
                 return PlaceholderAPI.setPlaceholders(player, text);
             }
         }

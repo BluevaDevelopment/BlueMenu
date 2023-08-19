@@ -35,7 +35,9 @@ public class Main extends JavaPlugin implements Listener {
 
     // Other Things
     public String pluginversion = getDescription().getVersion();
-    public static boolean placeholderapi = false;
+    public static boolean isUsingPAPI = false;
+    public static boolean isUsingGeyser = false;
+    public static boolean isUsingFloodgate = false;
     private static Main plugin;
 
     public static Main getPlugin() {
@@ -54,7 +56,17 @@ public class Main extends JavaPlugin implements Listener {
         registerEvents();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            placeholderapi = true;
+            isUsingPAPI = true;
+        }
+        if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
+            isUsingFloodgate = true;
+        }
+        if (Bukkit.getPluginManager().getPlugin("Geyser-Spigot") != null) {
+            isUsingGeyser = true;
+        }
+
+        if(!isUsingFloodgate && !isUsingGeyser) {
+            Bukkit.getConsoleSender().sendMessage("[BlueMenu] No Geyser or Floodgate detected. Bedrock menus have been disabled.");
         }
 
         if(getConfig().getBoolean("metrics")) {
