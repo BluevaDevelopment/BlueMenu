@@ -4,3 +4,22 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
+menuName: "&6Example"
+type: MODAL
+openCommand: /menu
+content:
+  - "&bSample text"
+  - "Line 2"
+buttons:
+  button1:
+    text: "&aTest 1"
+    actions:
+      - "CONSOLE;say ¡Has seleccionado el Boton 1!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
+  button2:
+    text: "&aTest 2"
+    actions:
+      - "CONSOLE;say ¡Has seleccionado el Boton 2!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"

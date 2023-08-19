@@ -24,6 +24,7 @@ public class Main extends JavaPlugin implements Listener {
 
     // Managers
     public MenuManager javaMenuManager;
+    public net.blueva.menu.managers.bedrock.MenuManager bedrockMenuManager;
     public ConfigManager configManager;
 
 
@@ -36,7 +37,6 @@ public class Main extends JavaPlugin implements Listener {
     // Other Things
     public String pluginversion = getDescription().getVersion();
     public static boolean isUsingPAPI = false;
-    public static boolean isUsingGeyser = false;
     public static boolean isUsingFloodgate = false;
     private static Main plugin;
 
@@ -51,6 +51,7 @@ public class Main extends JavaPlugin implements Listener {
         plugin = this;
 
         javaMenuManager = new MenuManager(this);
+        bedrockMenuManager = new net.blueva.menu.managers.bedrock.MenuManager(this);
         configManager = new ConfigManager(this);
 
         registerEvents();
@@ -60,13 +61,6 @@ public class Main extends JavaPlugin implements Listener {
         }
         if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
             isUsingFloodgate = true;
-        }
-        if (Bukkit.getPluginManager().getPlugin("Geyser-Spigot") != null) {
-            isUsingGeyser = true;
-        }
-
-        if(!isUsingFloodgate && !isUsingGeyser) {
-            Bukkit.getConsoleSender().sendMessage("[BlueMenu] No Geyser or Floodgate detected. Bedrock menus have been disabled.");
         }
 
         if(getConfig().getBoolean("metrics")) {
@@ -82,6 +76,10 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage("");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "V. 1.0.0 | Plugin enabled successfully | blueva.net");
 
+        if(!isUsingFloodgate) {
+            Bukkit.getConsoleSender().sendMessage("[BlueMenu] No Floodgate detected. Bedrock menus have been disabled.");
+        }
+
         configManager.generateFolders();
         saveDefaultConfig();
 
@@ -89,6 +87,7 @@ public class Main extends JavaPlugin implements Listener {
 
         configManager.registerLang();
         javaMenuManager.loadJavaMenus();
+        bedrockMenuManager.loadBedrockMenus();
         registerCommands();
     }
 

@@ -16,6 +16,7 @@ global:
     invalid_attribute: "&cTipo de atributo invalido: &e{type}"
     invalid_menu_file: "&cNo se encontró el archivo de menú {name} especificado en config.yml"
     invalid_menu_entry: "&cEntrada de configuración de menú no válida: {entry}"
+    bedrock_disabled: "&cLos menus de bedrock estan desactivados en este servidor."
   other:
     use_open_subcommand: "&cUsa: /bluemenu open <java/bedrock/auto> <menu> [jugador]"
     use_list_subcommand: "&cUsa: /bluemenu list <java/bedrock>"

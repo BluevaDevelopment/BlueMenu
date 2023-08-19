@@ -12,6 +12,9 @@ import java.util.List;
 
 public class MessagesUtil {
     public static @NotNull String format (Player player, String text) {
+        if(player == null) {
+            return formatColors(text);
+        }
         String textfinal = formatPlaceholders(player, text);
         return formatColors(textfinal);
     }
