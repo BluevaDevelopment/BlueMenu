@@ -48,7 +48,7 @@ public class MenuManager {
             String menuType = menuConfig.getString("type");
             if(menuType != null) {
                 if(menuType.equalsIgnoreCase("SIMPLE")) {
-                    //SimpleManager.openMenu(Player player, FileConfiguration menuConfig);
+                    SimpleManager.openMenu(player, menuConfig);
                 }
                 if(menuType.equalsIgnoreCase("MODAL")) {
                     ModalManager.openMenu(player, menuConfig);

@@ -22,6 +22,7 @@ public class ModalManager {
         }
 
         ModalForm form = ModalForm.builder()
+                .title(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("menuName"))))
                 .content(keyResult.toString())
                 .button1(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("buttons.button1.text"))))
                 .button2(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("buttons.button2.text"))))

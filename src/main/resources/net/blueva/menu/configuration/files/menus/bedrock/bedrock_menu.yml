@@ -3,3 +3,36 @@
 # |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+menuName: "&6Example"
+type: SIMPLE
+openCommand: /bedrock
+content:
+  - "&bSample text"
+  - "Line 2"
+buttons:
+  button1:
+    text: "&aTest 1"
+    image: "https://avatars.githubusercontent.com/u/52673035?s=200&v=4"
+    actions:
+      - "CONSOLE;say ¡Has seleccionado el Boton 1!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
+  button2:
+    text: "&aTest 2"
+    actions:
+      - "CONSOLE;say ¡Has seleccionado el Boton 2!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
+  button3:
+    text: "&aTest 3"
+    actions:
+      - "CONSOLE;say ¡Has seleccionado el Boton 3!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
+  button4:
+    text: "&aTest 4"
+    actions:
+      - "CONSOLE;say ¡Has seleccionado el Boton 4!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
