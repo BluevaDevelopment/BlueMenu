@@ -6,6 +6,7 @@ import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.jetbrains.annotations.NotNull;
 
 public class OpenSubCommand implements CommandInterface {
@@ -50,7 +51,17 @@ public class OpenSubCommand implements CommandInterface {
             return true;
         }
 
-        if (platform.equalsIgnoreCase("java")) {
+        if (platform.equalsIgnoreCase("auto")) {
+            if(Main.isUsingFloodgate) {
+                if(FloodgateApi.getInstance().isFloodgatePlayer(targetPlayer.getUniqueId())) {
+                    main.bedrockMenuManager.openMenu(targetPlayer, menuName);
+                } else {
+                    main.javaMenuManager.openMenu(targetPlayer, menuName);
+                }
+            } else {
+                main.javaMenuManager.openMenu(targetPlayer, menuName);
+            }
+        } else if (platform.equalsIgnoreCase("java")) {
             main.javaMenuManager.openMenu(targetPlayer, menuName);
         } else if (platform.equalsIgnoreCase("bedrock")) {
             if(Main.isUsingFloodgate) {
