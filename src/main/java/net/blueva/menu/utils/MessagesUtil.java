@@ -15,6 +15,9 @@ public class MessagesUtil {
         if(player == null) {
             return formatColors(text);
         }
+        if(text == null) {
+            text = "";
+        }
         String textfinal = formatPlaceholders(player, text);
         return formatColors(textfinal);
     }

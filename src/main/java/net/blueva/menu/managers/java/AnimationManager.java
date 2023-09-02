@@ -81,7 +81,7 @@ public class AnimationManager {
         }
     }
 
-    private static void cancelAnimation(Player player) {
+    public static void cancelAnimation(Player player) {
         if (animationTasks.containsKey(player)) {
             int taskId = animationTasks.get(player);
             Bukkit.getScheduler().cancelTask(taskId);

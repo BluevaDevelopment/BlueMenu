@@ -2,7 +2,9 @@ package net.blueva.menu.commands.main.subcommands;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.commands.CommandInterface;
+import net.blueva.menu.managers.java.AnimationManager;
 import net.blueva.menu.utils.MessagesUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -28,6 +30,7 @@ public class ReloadSubCommand implements CommandInterface
             if(Main.isUsingFloodgate) {
                 main.bedrockMenuManager.loadBedrockMenus();
             }
+            AnimationManager.animationTasks.clear();
             sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.success.configuration_reloaded")));
         } else {
             sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
@@ -35,7 +38,4 @@ public class ReloadSubCommand implements CommandInterface
 
         return true;
     }
-
-
-
 }
