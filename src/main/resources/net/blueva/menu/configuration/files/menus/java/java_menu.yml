@@ -3,3 +3,387 @@
 # |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+menuName: '     &b&lBlue&9&lMenu &7- &rJava Slots'
+menuSize: 54
+type: CHEST
+openCommand: /slots
+items:
+  item0:
+    name: "Slot: &c0"
+    slot: 0
+    itemStack:
+      material: RED_STAINED_GLASS_PANE
+      amount: 1
+    lore: []
+  item1:
+    name: "Slot: &b1"
+    slot: 1
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 1
+    lore: []
+  item2:
+    name: "Slot: &b2"
+    slot: 2
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 2
+    lore: []
+  item3:
+    name: "Slot: &b3"
+    slot: 3
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 3
+    lore: []
+  item4:
+    name: "Slot: &b4"
+    slot: 4
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 4
+    lore: []
+  item5:
+    name: "Slot: &b5"
+    slot: 5
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 5
+    lore: []
+  item6:
+    name: "Slot: &b6"
+    slot: 6
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 6
+    lore: []
+  item7:
+    name: "Slot: &b7"
+    slot: 7
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 7
+    lore: []
+  item8:
+    name: "Slot: &b8"
+    slot: 8
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 8
+    lore: []
+  item9:
+    name: "Slot: &b9"
+    slot: 9
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 9
+    lore: []
+  item10:
+    name: "Slot: &b10"
+    slot: 10
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 10
+    lore: []
+  item11:
+    name: "Slot: &b11"
+    slot: 11
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 11
+    lore: []
+  item12:
+    name: "Slot: &b12"
+    slot: 12
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 12
+    lore: []
+  item13:
+    name: "Slot: &b13"
+    slot: 13
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 13
+    lore: []
+  item14:
+    name: "Slot: &b14"
+    slot: 14
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 14
+    lore: []
+  item15:
+    name: "Slot: &b15"
+    slot: 15
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 15
+    lore: []
+  item16:
+    name: "Slot: &b16"
+    slot: 16
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 16
+    lore: []
+  item17:
+    name: "Slot: &b17"
+    slot: 17
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 17
+    lore: []
+  item18:
+    name: "Slot: &b18"
+    slot: 18
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 18
+    lore: []
+  item19:
+    name: "Slot: &b19"
+    slot: 19
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 19
+    lore: []
+  item20:
+    name: "Slot: &b20"
+    slot: 20
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 20
+    lore: []
+  item21:
+    name: "Slot: &b21"
+    slot: 21
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 21
+    lore: []
+  item22:
+    name: "Slot: &b22"
+    slot: 22
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 22
+    lore: []
+  item23:
+    name: "Slot: &b23"
+    slot: 23
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 23
+    lore: []
+  item24:
+    name: "Slot: &b24"
+    slot: 24
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 24
+    lore: []
+  item25:
+    name: "Slot: &b25"
+    slot: 25
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 25
+    lore: []
+  item26:
+    name: "Slot: &b26"
+    slot: 26
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 26
+    lore: []
+  item27:
+    name: "Slot: &b27"
+    slot: 27
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 27
+    lore: []
+  item28:
+    name: "Slot: &b28"
+    slot: 28
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 28
+    lore: []
+  item29:
+    name: "Slot: &b29"
+    slot: 29
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 29
+    lore: []
+  item30:
+    name: "Slot: &b30"
+    slot: 30
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 30
+    lore: []
+  item31:
+    name: "Slot: &b31"
+    slot: 31
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 31
+    lore: []
+  item32:
+    name: "Slot: &b32"
+    slot: 32
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 32
+    lore: []
+  item33:
+    name: "Slot: &b33"
+    slot: 33
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 33
+    lore: []
+  item34:
+    name: "Slot: &b34"
+    slot: 34
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 34
+    lore: []
+  item35:
+    name: "Slot: &b35"
+    slot: 35
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 35
+    lore: []
+  item36:
+    name: "Slot: &b36"
+    slot: 36
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 36
+    lore: []
+  item37:
+    name: "Slot: &b37"
+    slot: 37
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 37
+    lore: []
+  item38:
+    name: "Slot: &b38"
+    slot: 38
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 38
+    lore: []
+  item39:
+    name: "Slot: &b39"
+    slot: 39
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 39
+    lore: []
+  item40:
+    name: "Slot: &b40"
+    slot: 40
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 40
+    lore: []
+  item41:
+    name: "Slot: &b41"
+    slot: 41
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 41
+    lore: []
+  item42:
+    name: "Slot: &b42"
+    slot: 42
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 42
+    lore: []
+  item43:
+    name: "Slot: &b43"
+    slot: 43
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 43
+    lore: []
+  item44:
+    name: "Slot: &b44"
+    slot: 44
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 44
+    lore: []
+  item45:
+    name: "Slot: &b45"
+    slot: 45
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 45
+    lore: []
+  item46:
+    name: "Slot: &b46"
+    slot: 46
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 46
+    lore: []
+  item47:
+    name: "Slot: &b47"
+    slot: 47
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 47
+    lore: []
+  item48:
+    name: "Slot: &b48"
+    slot: 48
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 48
+    lore: []
+  item49:
+    name: "Slot: &b49"
+    slot: 49
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 49
+    lore: []
+  item50:
+    name: "Slot: &b50"
+    slot: 50
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 50
+    lore: []
+  item51:
+    name: "Slot: &b51"
+    slot: 51
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 51
+    lore: []
+  item52:
+    name: "Slot: &b52"
+    slot: 52
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 52
+    lore: []
+  item53:
+    name: "Slot: &b53"
+    slot: 53
+    itemStack:
+      material: BLACK_STAINED_GLASS_PANE
+      amount: 53
+    lore: []
