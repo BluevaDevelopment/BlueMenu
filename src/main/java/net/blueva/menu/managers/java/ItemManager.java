@@ -110,7 +110,7 @@ public class ItemManager {
             itemMeta.setCustomModelData(customModelData);
         } catch (NumberFormatException e) {
             SkullMeta skullMeta = (SkullMeta) itemMeta;
-            GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+            GameProfile profile = new GameProfile(UUID.randomUUID(), "");
             profile.getProperties().put("textures", new Property("textures", value));
             Field profileField;
 
