@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 public class AnimationManager {
-    public static Map<Player, Integer> animationTasks = new HashMap<>();
-
     static void startAnimation(Main main, Player player, ConfigurationSection animationConfig, int menuSize) {
         int interval = animationConfig.getInt("interval");
         List<ItemStack> frames = new ArrayList<>();
@@ -33,14 +31,14 @@ public class AnimationManager {
         }
 
         if (!frames.isEmpty()) {
-            int taskId = new BukkitRunnable() {
+            new BukkitRunnable() {
                 int currentFrame = 0;
 
                 @Override
                 public void run() {
                     if (!player.isOnline() || !MenuManager.isMenuOpen(player)) {
                         // Player logged out, cancel the task
-                        cancelAnimation(player);
+                        cancel();
                         return;
                     }
 
@@ -76,16 +74,6 @@ public class AnimationManager {
                     currentFrame++;
                 }
             }.runTaskTimer(main, 0, interval).getTaskId();
-
-            animationTasks.put(player, taskId);
-        }
-    }
-
-    public static void cancelAnimation(Player player) {
-        if (animationTasks.containsKey(player)) {
-            int taskId = animationTasks.get(player);
-            Bukkit.getScheduler().cancelTask(taskId);
-            animationTasks.remove(player);
         }
     }
 }
