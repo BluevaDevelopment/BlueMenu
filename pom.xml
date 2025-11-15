@@ -113,7 +113,6 @@
                                 <includes>
                                     <include>net.wesjd:anvilgui</include>
                                     <include>fr.mrmicky:fastinv</include>
-                                    <include>dev.dejvokep:boosted-yaml</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -124,10 +123,6 @@
                                 <relocation>
                                     <pattern>fr.mrmicky.fastinv</pattern>
                                     <shadedPattern>net.blueva.menu.libraries.fastinv</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>dev.dejvokep.boostedyaml</pattern>
-                                    <shadedPattern>net.blueva.menu.libraries.boostedyaml</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
