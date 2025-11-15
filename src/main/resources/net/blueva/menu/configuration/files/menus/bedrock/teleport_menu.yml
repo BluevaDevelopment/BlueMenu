@@ -4,7 +4,7 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
-menuName: "<gradient:#5555ff:#00aaff>Teleport</gradient>"
+menuName: "<gradient:#5555ff:#00aaff>Teleport System</gradient>"
 type: CUSTOM
 openCommand: /tpform
 
@@ -16,18 +16,7 @@ components:
 
   description:
     type: LABEL
-    text: "<gray>Select your destination and configure options"
-
-  # World selector
-  world_selector:
-    type: DROPDOWN
-    text: "<aqua>Destination world:"
-    options:
-      - "world"
-      - "world_nether"
-      - "world_the_end"
-    default: 0
-    actions: []  # No action needed here, we'll use it in final actions
+    text: "<gray>Enter coordinates to teleport"
 
   # X coordinate
   coord_x:
@@ -55,38 +44,24 @@ components:
     default: "0"
     actions: []
 
-  # Save location toggle
-  save_location:
+  # Confirm toggle - This component executes the final action
+  confirm_tp:
     type: TOGGLE
-    text: "<green>Save this location as favorite?"
+    text: "<green>Confirm teleport?"
     default: false
-    actions: []
-
-  # Teleport mode - This component executes the final action
-  tp_mode:
-    type: STEPSLIDER
-    text: "<red>Teleport mode:"
-    steps:
-      - "Instant"
-      - "With effects"
-      - "With countdown"
-    default: 0
     actions:
-      - "MESSAGE;<aqua>Teleporting to world: {world_selector_text}"
-      - "MESSAGE;<aqua>Coordinates: {coord_x}, {coord_y}, {coord_z}"
-      - "MESSAGE;<aqua>Mode: {tp_mode_text}"
-      - "MESSAGE;<aqua>Save location: {save_location}"
-      - "CONSOLE;execute in {world_selector_text} run tp {player_name} {coord_x} {coord_y} {coord_z}"
+      - "MESSAGE;<aqua>Coordinates: X={coord_x} Y={coord_y} Z={coord_z}"
+      - "MESSAGE;<aqua>Confirm: {confirm_tp}"
+      - "CONSOLE;tp {player_name} {coord_x} {coord_y} {coord_z}"
       - "MESSAGE;<green>Teleport successful!"
 
 # ====================================
 # NOTES:
 # ====================================
 # This form demonstrates cross-component placeholders:
-# - {world_selector_text} - Selected world name
 # - {coord_x}, {coord_y}, {coord_z} - Coordinates from different inputs
-# - {save_location} - Toggle value
-# - {tp_mode_text} - Selected teleport mode
+# - {confirm_tp} - Toggle value
+# - {player_name} - Standard placeholder
 #
 # All actions are executed when the form is submitted, and all component
 # values are available to all actions via placeholders.
