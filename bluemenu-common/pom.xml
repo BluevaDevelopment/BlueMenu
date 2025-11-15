@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.blueva.menu</groupId>
+        <artifactId>BlueMenu-Parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>bluemenu-common</artifactId>
+    <packaging>jar</packaging>
+
+    <name>BlueMenu Common</name>
+    <description>Common module with shared DTOs, models and utilities</description>
+
+    <dependencies>
+        <!-- Gson for JSON serialization -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

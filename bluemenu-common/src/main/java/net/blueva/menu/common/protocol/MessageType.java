@@ -1,0 +1,28 @@
+package net.blueva.menu.common.protocol;
+
+/**
+ * Types of messages exchanged via WebSocket
+ */
+public enum MessageType {
+    // Plugin -> WebServer
+    SESSION_CREATE,
+    MENU_UPDATE,
+    MENU_LIST,
+
+    // WebServer -> Plugin
+    SESSION_VALIDATE,
+    MENU_GET,
+    MENU_SAVE,
+    MENU_CREATE,
+    MENU_DELETE,
+
+    // WebServer -> Web Panel
+    SESSION_VALID,
+    SESSION_INVALID,
+    MENU_DATA,
+
+    // Generic
+    PING,
+    PONG,
+    ERROR
+}
