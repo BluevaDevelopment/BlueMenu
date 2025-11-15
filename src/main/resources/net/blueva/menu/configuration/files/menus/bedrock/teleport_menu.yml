@@ -23,13 +23,11 @@ components:
     type: DROPDOWN
     text: "<aqua>Destination world:"
     options:
-      - "Overworld"
-      - "Nether"
-      - "End"
-      - "Lobby"
+      - "world"
+      - "world_nether"
+      - "world_the_end"
     default: 0
-    actions:
-      - "CONSOLE;say World selected: {value}"
+    actions: []  # No action needed here, we'll use it in final actions
 
   # X coordinate
   coord_x:
@@ -57,15 +55,14 @@ components:
     default: "0"
     actions: []
 
-  # Save location
+  # Save location toggle
   save_location:
     type: TOGGLE
     text: "<green>Save this location as favorite?"
     default: false
-    actions:
-      - "MESSAGE;<aqua>Save location: {value}"
+    actions: []
 
-  # Teleport mode
+  # Teleport mode - This component executes the final action
   tp_mode:
     type: STEPSLIDER
     text: "<red>Teleport mode:"
@@ -75,5 +72,21 @@ components:
       - "With countdown"
     default: 0
     actions:
-      - "CONSOLE;tp {player_name} {coord_x} {coord_y} {coord_z}"
-      - "MESSAGE;<green>Teleport successful! Mode: {value}"
+      - "MESSAGE;<aqua>Teleporting to world: {world_selector_text}"
+      - "MESSAGE;<aqua>Coordinates: {coord_x}, {coord_y}, {coord_z}"
+      - "MESSAGE;<aqua>Mode: {tp_mode_text}"
+      - "MESSAGE;<aqua>Save location: {save_location}"
+      - "CONSOLE;execute in {world_selector_text} run tp {player_name} {coord_x} {coord_y} {coord_z}"
+      - "MESSAGE;<green>Teleport successful!"
+
+# ====================================
+# NOTES:
+# ====================================
+# This form demonstrates cross-component placeholders:
+# - {world_selector_text} - Selected world name
+# - {coord_x}, {coord_y}, {coord_z} - Coordinates from different inputs
+# - {save_location} - Toggle value
+# - {tp_mode_text} - Selected teleport mode
+#
+# All actions are executed when the form is submitted, and all component
+# values are available to all actions via placeholders.
