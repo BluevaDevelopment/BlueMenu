@@ -70,16 +70,19 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
             <version>4.24.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.4.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
             <version>4.24.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.wesjd</groupId>
@@ -110,6 +113,7 @@
                                 <includes>
                                     <include>net.wesjd:anvilgui</include>
                                     <include>fr.mrmicky:fastinv</include>
+                                    <include>dev.dejvokep:boosted-yaml</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -120,6 +124,10 @@
                                 <relocation>
                                     <pattern>fr.mrmicky.fastinv</pattern>
                                     <shadedPattern>net.blueva.menu.libraries.fastinv</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>dev.dejvokep.boostedyaml</pattern>
+                                    <shadedPattern>net.blueva.menu.libraries.boostedyaml</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>

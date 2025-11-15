@@ -4,63 +4,63 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
-menuName: '      &b&lBlue&9&lMenu &7- &rExample'
+menuName: '      <bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray>- <reset>Example'
 menuSize: 54
 type: CHEST
 openCommand: /menu
 items:
   item1:
-    name: "&b&lBlue&9&lMenu"
+    name: "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold>"
     slot: 22
     itemStack:
       material: PLAYER_HEAD
       amount: 1
       value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTc4NDRhNDU1NGY5MzYzZDY1OTkwNmQ2MzEyODE4YTExMjJhMWY5YTkyYTIzMjYyYjFlNjc3MDIyMzJiYjcifX19
     lore:
-    - '&bwith &c❤ &bby Blueva'
+    - '<aqua>with <red>❤ <aqua>by Blueva'
   item2:
-    name: '&bDownload'
+    name: '<aqua>Download'
     slot: 29
     itemStack:
       material: PLAYER_HEAD
       amount: 1
       value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzkxMmQ0NWIxYzc4Y2MyMjQ1MjcyM2VlNjZiYTJkMTU3NzdjYzI4ODU2OGQ2YzFiNjJhNTQ1YjI5YzcxODcifX19
     lore:
-    - '&7Download the plugin here:'
-    - '&7blueva.net/resources/resource/4'
+    - '<gray>Download the plugin here:'
+    - '<gray>blueva.net/resources/resource/4'
     actions:
-    - '[LEFT_CLICK] MESSAGE;&b&lBlue&9&lMenu &7&l» &fDownload the plugin here: blueva.net/resources/resource/4'
-    - '[RIGHT_CLICK] MESSAGE;&b&lBlue&9&lMenu &7&l» &fDownload the plugin here: blueva.net/resources/resource/4'
+    - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
+    - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
   item3:
-    name: '&bWiki'
+    name: '<aqua>Wiki'
     slot: 31
     itemStack:
       material: PLAYER_HEAD
       amount: 1
       value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDAxYWZlOTczYzU0ODJmZGM3MWU2YWExMDY5ODgzM2M3OWM0MzdmMjEzMDhlYTlhMWEwOTU3NDZlYzI3NGEwZiJ9fX0=
     lore:
-    - '&7Visit the wiki here:'
-    - '&7blueva.net/wiki/bluemenu'
+    - '<gray>Visit the wiki here:'
+    - '<gray>blueva.net/wiki/bluemenu'
     actions:
-    - '[LEFT_CLICK] MESSAGE;&b&lBlue&9&lMenu &7&l» &fVisit the wiki here: blueva.net/wiki/bluemenu'
-    - '[RIGHT_CLICK] MESSAGE;&b&lBlue&9&lMenu &7&l» &fVisit the wiki here: blueva.net/wiki/bluemenu'
+    - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
+    - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
   item4:
-    name: '&bSupport'
+    name: '<aqua>Support'
     slot: 33
     itemStack:
       material: PLAYER_HEAD
       amount: 1
       value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTVhZWNkODBiNTNmMWMxM2NkNjE1NDdiMDkyYmY2OTNmNTZmYTRhYTNjOTczODkzZjdiOGMwZGJkYzA2Nzk1MiJ9fX0=
     lore:
-    - '&7Receive support on Discord:'
-    - '&7discord.gg/kgxBr8pwpU'
+    - '<gray>Receive support on Discord:'
+    - '<gray>discord.gg/kgxBr8pwpU'
     actions:
-    - '[LEFT_CLICK] MESSAGE;&b&lBlue&9&lMenu &7&l» &fReceive support on Discord: discord.gg/kgxBr8pwpU'
-    - '[RIGHT_CLICK] MESSAGE;&b&lBlue&9&lMenu &7&l» &fReceive support on Discord: discord.gg/kgxBr8pwpU'
+    - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
+    - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
 animations:

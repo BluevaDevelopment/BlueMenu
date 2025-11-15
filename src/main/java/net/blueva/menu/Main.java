@@ -12,6 +12,7 @@ import net.blueva.menu.configuration.ConfigManager;
 import net.blueva.menu.libraries.bstats.Metrics;
 import net.blueva.menu.listeners.*;
 import net.blueva.menu.managers.java.MenuManager;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,6 +28,9 @@ public class Main extends JavaPlugin implements Listener {
     public MenuManager javaMenuManager;
     public net.blueva.menu.managers.bedrock.MenuManager bedrockMenuManager;
     public ConfigManager configManager;
+
+    // Adventure
+    private BukkitAudiences adventure;
 
 
     // Lang File
@@ -45,11 +49,21 @@ public class Main extends JavaPlugin implements Listener {
         return plugin;
     }
 
+    public BukkitAudiences adventure() {
+        if(this.adventure == null) {
+            throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
+        }
+        return this.adventure;
+    }
+
 
 
     @Override
     public void onEnable() {
         plugin = this;
+
+        // Initialize Adventure
+        this.adventure = BukkitAudiences.create(this);
 
         // Register FastInv first
         FastInvManager.register(this);
@@ -97,6 +111,12 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        // Close Adventure
+        if(this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
+        }
+
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "  ____  _            __  __");
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " | __ )| |_   _  ___|  \\/  | ___ _ __  _   _");
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " |  _ \\| | | | |/ _ | |\\/| |/ _ | '_ \\| | | |");

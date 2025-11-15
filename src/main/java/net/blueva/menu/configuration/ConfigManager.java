@@ -2,6 +2,7 @@ package net.blueva.menu.configuration;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.configuration.updater.ConfigUpdater;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -31,7 +32,6 @@ public class ConfigManager {
 
             try {
                 generateFile("en_UK", "/language");
-                generateFile("es_ES", "/language");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -99,6 +99,9 @@ public class ConfigManager {
         defConfigStream = new InputStreamReader(Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files/language/" + main.actualLang + ".yml")), StandardCharsets.UTF_8);
         YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
         main.language.setDefaults(defConfig);
+
+        // Clear the prefix cache when language is reloaded
+        MessagesUtil.clearPrefixCache();
     }
 
     public void saveLang(){
