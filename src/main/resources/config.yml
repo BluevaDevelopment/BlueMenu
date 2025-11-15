@@ -32,29 +32,29 @@ language: 'en_UK'
 # Menus located in /plugins/BlueMenu/menus/java
 # Directory path where Java menus are located.
 java_menus:
-  - 'menu;default_menu.yml'  # Path to the default Java menu file.
-  # Note: Customize this file to define the structure and content of the Java menus.
+  - 'menu;chest_example.yml'  # Standard CHEST menu example with animations and items.
+  # Note: Demonstrates basic menu structure, player heads, actions, and animated borders.
 
-  - 'java_menu;java_menu.yml'  # Path to an additional Java menu file.
-  # Note: You can create and add more Java menu files to this list.
+  - 'slots;slots_helper.yml'  # Utility menu showing all slot numbers (0-53).
+  # Note: Helpful reference for designing menus and finding slot positions.
 
-  - 'conditions_example;conditions_menu.yml'  # Conditional menu example.
-  # Note: Demonstrates display_conditions with all/any/none logic.
+  - 'conditions_example;conditions_example.yml'  # Conditional CHEST menu example.
+  # Note: Demonstrates display_conditions with all/any/none logic for items.
 
 # Menus located in /plugins/BlueMenu/menus/bedrock
 # Directory path where Bedrock menus are located.
 bedrock_menus:
-  - 'menu;default_menu.yml'  # Path to the default Bedrock menu file.
-  # Note: Customize this file to define the structure and content of the Bedrock menus.
+  - 'menu;modal_example.yml'  # MODAL form example (2 buttons only).
+  # Note: Shows a simple dialog with exactly 2 buttons as per FloodgateAPI specs.
 
-  - 'bedrock_menu;bedrock_menu.yml'  # Path to an additional Bedrock menu file.
-  # Note: You can create and add more Bedrock menu files to this list.
+  - 'bedrock_menu;simple_example.yml'  # SIMPLE form example with multiple buttons.
+  # Note: Demonstrates button list with text, images, and actions.
 
-  - 'customform;custom_menu.yml'  # Path to CUSTOM form example menu file.
-  # Note: This is a comprehensive example showing all CUSTOM form components.
+  - 'customform;custom_example.yml'  # CUSTOM form example with all component types.
+  # Note: Comprehensive example showing INPUT, DROPDOWN, TOGGLE, SLIDER, STEPSLIDER, LABEL.
 
-  - 'simple_conditions;conditions_simple.yml'  # SIMPLE form with conditional buttons.
+  - 'simple_conditions;conditions_simple_example.yml'  # SIMPLE form with conditional buttons.
   # Note: Demonstrates display_conditions for buttons with all/any/none logic.
 
-  - 'custom_conditions;conditions_custom.yml'  # CUSTOM form with conditional components.
-  # Note: Demonstrates display_conditions for components with all/any/none logic.
+  - 'custom_conditions;conditions_custom_example.yml'  # CUSTOM form with conditional components.
+  # Note: Demonstrates display_conditions for form components with all/any/none logic.

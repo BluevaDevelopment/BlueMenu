@@ -49,9 +49,9 @@ public class ConfigManager {
             javaf.mkdirs();
 
             try {
-                generateFile("default_menu", "/menus/java");
-                generateFile("java_menu", "/menus/java");
-                generateFile("conditions_menu", "/menus/java");
+                generateFile("chest_example", "/menus/java");
+                generateFile("slots_helper", "/menus/java");
+                generateFile("conditions_example", "/menus/java");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -63,11 +63,11 @@ public class ConfigManager {
             bedrockf.mkdirs();
 
             try {
-                generateFile("default_menu", "/menus/bedrock");
-                generateFile("bedrock_menu", "/menus/bedrock");
-                generateFile("custom_menu", "/menus/bedrock");
-                generateFile("conditions_custom", "/menus/bedrock");
-                generateFile("conditions_simple", "/menus/bedrock");
+                generateFile("modal_example", "/menus/bedrock");
+                generateFile("simple_example", "/menus/bedrock");
+                generateFile("custom_example", "/menus/bedrock");
+                generateFile("conditions_custom_example", "/menus/bedrock");
+                generateFile("conditions_simple_example", "/menus/bedrock");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

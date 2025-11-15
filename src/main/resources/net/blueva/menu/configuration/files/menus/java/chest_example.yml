@@ -4,20 +4,38 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
+# ====================================
+# CHEST MENU EXAMPLE (Java Edition)
+# ====================================
+# This is a complete example of a CHEST menu for Java players.
+# It demonstrates:
+# - Basic menu structure with items
+# - Player head items with custom textures (base64 values)
+# - Click actions (LEFT_CLICK, RIGHT_CLICK)
+# - Animated items using frames
+# - Using gradients and colors in names/lore
+#
+# Menu size options: 9, 18, 27, 36, 45, 54 (multiples of 9)
+
 menuName: '      <bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray>- <reset>Example'
-menuSize: 54
-type: CHEST
-openCommand: /menu
+menuSize: 54           # 6 rows (54 slots)
+type: CHEST            # Standard inventory menu type
+openCommand: /menu     # Command to open this menu
+
+# Static menu items
 items:
+  # Central logo item with custom player head texture
   item1:
     name: "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold>"
-    slot: 22
+    slot: 22  # Center slot in the menu
     itemStack:
       material: PLAYER_HEAD
       amount: 1
-      value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTc4NDRhNDU1NGY5MzYzZDY1OTkwNmQ2MzEyODE4YTExMjJhMWY5YTkyYTIzMjYyYjFlNjc3MDIyMzJiYjcifX19
+      value: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTc4NDRhNDU1NGY5MzYzZDY1OTkwNmQ2MzEyODE4YTExMjJhMWY5YTkyYTIzMjYyYjFlNjc3MDIyMzJiYjcifX19  # Base64 texture value
     lore:
     - '<aqua>with <red>❤ <aqua>by Blueva'
+
+  # Download button
   item2:
     name: '<aqua>Download'
     slot: 29
@@ -63,9 +81,22 @@ items:
     - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
+
+# ====================================
+# ANIMATIONS
+# ====================================
+# Animations allow you to create dynamic, changing items in your menu.
+# Each animation cycles through multiple frames at a specified interval.
+#
+# Structure:
+# - interval: Time in ticks between frame changes (20 ticks = 1 second)
+# - frames: List of item states to cycle through
+#
+# This example creates a border animation with colored glass panes
 animations:
+  # Border animation slot 0 (top-left corner)
   animation1:
-    interval: 2
+    interval: 2  # Change frame every 2 ticks (0.1 seconds)
     frames:
       frame1:
         name: "&f"

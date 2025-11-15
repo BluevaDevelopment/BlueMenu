@@ -4,13 +4,34 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
+# ====================================
+# CONDITIONAL CHEST MENU EXAMPLE (Java Edition)
+# ====================================
+# This example demonstrates how to use display_conditions with CHEST menus.
+# Items are shown or hidden based on conditions using placeholders.
+#
+# Available condition syntaxes:
+# 1. Simple list: All conditions in the list must be true (AND logic)
+# 2. Boolean operators: Use && (AND), || (OR), ! (NOT) in expressions
+# 3. all/any/none: Advanced logic grouping
+#    - all: All conditions must be true
+#    - any: At least one condition must be true
+#    - none: None of the conditions must be true
+#
+# Supported comparison operators:
+# - Numeric: >=, <=, >, <, ==, !=
+# - String: startsWith, endsWith, contains, equals
+# - Math: +, -, *, /, %
+
 menuName: "&b&lConditional Menu"
-menuSize: 54
-type: CHEST
+menuSize: 54               # Menu size (must be multiple of 9, max 54)
+type: CHEST                # Menu type: CHEST displays a standard inventory GUI
 openCommand: /conditionalmenu
 
+# Item definitions with various condition examples
 items:
-  # Item only shown if player level is >= 10
+  # EXAMPLE 1: Simple single condition
+  # This item only appears if the player's level is 10 or higher
   level_item:
     name: "&6Level 10+ Item"
     slot: 10
@@ -21,12 +42,13 @@ items:
       - "&7Only visible if level >= 10"
       - "&7Your level: {player_level}"
     display_conditions:
-      - "{player_level} >= 10"
+      - "{player_level} >= 10"  # Single condition check
     actions:
       - "[LEFT_CLICK] MESSAGE;&aYou have level 10 or higher!"
       - "[RIGHT_CLICK] MESSAGE;&aYou have level 10 or higher!"
 
-  # Item only shown if player health > 10
+  # EXAMPLE 2: Another simple condition
+  # This item only appears if the player has more than 10 health
   healthy_item:
     name: "&cHealthy Player"
     slot: 11
@@ -37,12 +59,13 @@ items:
       - "&7Only visible if health > 10"
       - "&7Your health: {player_health}"
     display_conditions:
-      - "{player_health} > 10"
+      - "{player_health} > 10"  # Health check
     actions:
       - "[LEFT_CLICK] MESSAGE;&aYou're healthy!"
       - "[RIGHT_CLICK] MESSAGE;&aYou're healthy!"
 
-  # Item with multiple conditions (ALL must pass)
+  # EXAMPLE 3: Multiple conditions (AND logic)
+  # All conditions in the list must be true for the item to appear
   advanced_item:
     name: "&eAdvanced Item"
     slot: 12
@@ -54,13 +77,14 @@ items:
       - "&7Level: {player_level}"
       - "&7Health: {player_health}"
     display_conditions:
-      - "{player_level} >= 5"
-      - "{player_health} >= 8"
+      - "{player_level} >= 5"    # Condition 1
+      - "{player_health} >= 8"   # Condition 2
     actions:
       - "[LEFT_CLICK] MESSAGE;&aYou meet both requirements!"
       - "[RIGHT_CLICK] MESSAGE;&aYou meet both requirements!"
 
-  # Item with boolean operators
+  # EXAMPLE 4: Boolean operators
+  # Using && (AND), || (OR), ! (NOT) in a single expression
   boolean_item:
     name: "&dBoolean Example"
     slot: 13
@@ -70,12 +94,13 @@ items:
     lore:
       - "&7Shown if (level >= 10) AND (health > 5)"
     display_conditions:
-      - "({player_level} >= 10) && ({player_health} > 5)"
+      - "({player_level} >= 10) && ({player_health} > 5)"  # Combined with AND
     actions:
       - "[LEFT_CLICK] MESSAGE;&dYou passed the boolean check!"
       - "[RIGHT_CLICK] MESSAGE;&dYou passed the boolean check!"
 
-  # Item with negation
+  # EXAMPLE 5: Negation operator
+  # Using ! (NOT) to invert a condition
   low_level_item:
     name: "&7Low Level Item"
     slot: 14
@@ -85,11 +110,12 @@ items:
     lore:
       - "&7Only shown when level is NOT 50"
     display_conditions:
-      - "! ({player_level} == 50)"
+      - "! ({player_level} == 50)"  # NOT operator
     actions:
       - "[LEFT_CLICK] MESSAGE;&7You're not level 50!"
 
-  # Item with math operators
+  # EXAMPLE 6: Math operators in conditions
+  # You can use math operations: +, -, *, /, %
   math_item:
     name: "&aMath Example"
     slot: 15
@@ -100,12 +126,13 @@ items:
       - "&7Shown if level * 2 >= 20"
       - "&7Your level: {player_level}"
     display_conditions:
-      - "{player_level} * 2 >= 20"
+      - "{player_level} * 2 >= 20"  # Math operation
     actions:
       - "[LEFT_CLICK] MESSAGE;&aMath condition passed!"
       - "[RIGHT_CLICK] MESSAGE;&aMath condition passed!"
 
-  # Item with string comparison
+  # EXAMPLE 7: String comparison
+  # Supports: startsWith, endsWith, contains, equals
   name_item:
     name: "&bName Check"
     slot: 16
@@ -115,12 +142,13 @@ items:
     lore:
       - "&7Shown if name starts with 'A'"
     display_conditions:
-      - "{player_name} startsWith 'A'"
+      - "{player_name} startsWith 'A'"  # String comparison
     actions:
       - "[LEFT_CLICK] MESSAGE;&bYour name starts with A!"
       - "[RIGHT_CLICK] MESSAGE;&bYour name starts with A!"
 
-  # Item with all/any/none conditions
+  # EXAMPLE 8: Advanced all/any/none logic
+  # Demonstrates complex conditional logic with multiple groups
   complex_item:
     name: "&5Complex Conditions"
     slot: 20
@@ -133,19 +161,19 @@ items:
       - "&7Any: high level OR high health"
       - "&7None: not level 99"
     display_conditions:
-      all:     # All must be true
+      all:     # All of these must be true
         - "{player_level} >= 5"
         - "{player_health} >= 8"
-      any:     # At least one must be true
+      any:     # At least one of these must be true
         - "{player_level} >= 20"
         - "{player_health} >= 15"
-      none:    # None of them must be true
+      none:    # None of these must be true
         - "{player_level} == 99"
     actions:
       - "[LEFT_CLICK] MESSAGE;&5Complex conditions passed!"
       - "[RIGHT_CLICK] MESSAGE;&5Complex conditions passed!"
 
-  # Another all/any/none example
+  # EXAMPLE 9: Another all/any/none example with string conditions
   vip_item:
     name: "&6VIP Access"
     slot: 21
@@ -170,7 +198,8 @@ items:
       - "[LEFT_CLICK] MESSAGE;&6VIP access granted!"
       - "[RIGHT_CLICK] MESSAGE;&6VIP access granted!"
 
-  # Always visible item (no conditions)
+  # EXAMPLE 10: Item without conditions
+  # This item is always visible to all players
   always_visible:
     name: "&fAlways Visible"
     slot: 40

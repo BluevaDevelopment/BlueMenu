@@ -1,0 +1,135 @@
+#  ____  _            __  __
+# | __ )| |_   _  ___|  \/  | ___ _ __  _   _
+# |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
+# | |_) | | |_| |  __| |  | |  __| | | | |_| |
+# |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+# ====================================
+# CONDITIONAL CUSTOM FORM EXAMPLE (Bedrock Edition)
+# ====================================
+# This example demonstrates how to use display_conditions with CUSTOM forms.
+# Components (inputs, dropdowns, toggles, sliders, etc.) are shown or hidden
+# based on conditions using placeholders.
+#
+# Available condition syntaxes:
+# 1. Simple list: All conditions in the list must be true (AND logic)
+# 2. Boolean operators: Use && (AND), || (OR), ! (NOT) in expressions
+# 3. all/any/none: Advanced logic grouping
+#    - all: All conditions must be true
+#    - any: At least one condition must be true
+#    - none: None of the conditions must be true
+
+menuName: "&b&lConditional Custom Form"
+type: CUSTOM
+openCommand: /customconditional
+
+# Component definitions with various condition examples
+components:
+  # EXAMPLE 1: Component without conditions
+  # This label is always visible to all players
+  header:
+    type: LABEL
+    text: "&7Fill out the form below"
+
+  # EXAMPLE 2: Another always-visible label with placeholders
+  stats_label:
+    type: LABEL
+    text: "&eLevel: {player_level} | Health: {player_health}"
+
+  # EXAMPLE 3: INPUT with simple condition
+  # This input field only appears if player level is 10 or higher
+  level_input:
+    type: INPUT
+    text: "&6Message (Level 10+ only)"
+    placeholder: "Enter your message..."
+    default: ""
+    display_conditions:
+      - "{player_level} >= 10"  # Single condition check
+    actions:
+      - "MESSAGE;&aYour message: {level_input}"
+
+  # EXAMPLE 4: DROPDOWN with simple condition
+  # This dropdown only appears if player level is 5 or higher
+  options_dropdown:
+    type: DROPDOWN
+    text: "&eSelect Option (Level 5+)"
+    options:
+      - "Option 1"
+      - "Option 2"
+      - "Option 3"
+    default: 0
+    display_conditions:
+      - "{player_level} >= 5"  # Requires level 5+
+    actions:
+      - "MESSAGE;&aYou selected: {options_dropdown_text}"
+
+  # EXAMPLE 5: TOGGLE with simple condition
+  # This toggle only appears if player has more than 10 health
+  health_toggle:
+    type: TOGGLE
+    text: "&cHealthy Feature (Health > 10)"
+    default: false
+    display_conditions:
+      - "{player_health} > 10"  # Health check
+    actions:
+      - "MESSAGE;&cHealthy feature: {health_toggle}"
+
+  # EXAMPLE 6: SLIDER with multiple conditions (AND logic)
+  # All conditions in the list must be true for this slider to appear
+  power_slider:
+    type: SLIDER
+    text: "&dPower Level (Lvl 5+ & HP 8+)"
+    min: 0
+    max: 100
+    step: 10
+    default: 50
+    display_conditions:
+      - "{player_level} >= 5"    # Condition 1
+      - "{player_health} >= 8"   # Condition 2
+    actions:
+      - "MESSAGE;&dPower set to: {power_slider}"
+
+  # EXAMPLE 7: STEPSLIDER with boolean operators
+  # Using && (AND) in a single expression
+  difficulty_steps:
+    type: STEPSLIDER
+    text: "&6Difficulty"
+    steps:
+      - "Easy"
+      - "Normal"
+      - "Hard"
+    default: 1
+    display_conditions:
+      - "({player_level} >= 10) && ({player_health} > 5)"  # Combined with AND
+    actions:
+      - "MESSAGE;&6Difficulty: {difficulty_steps_text}"
+
+  # EXAMPLE 8: SLIDER with advanced all/any/none logic
+  # Demonstrates complex conditional logic with multiple groups
+  advanced_slider:
+    type: SLIDER
+    text: "&5Advanced Slider"
+    min: 0
+    max: 50
+    step: 5
+    default: 25
+    display_conditions:
+      all:     # All of these must be true
+        - "{player_level} >= 5"
+        - "{player_health} >= 8"
+      any:     # At least one of these must be true
+        - "{player_level} >= 20"
+        - "{player_health} >= 15"
+      none:    # None of these must be true
+        - "{player_level} == 1"
+    actions:
+      - "MESSAGE;&5Advanced value: {advanced_slider}"
+
+  # EXAMPLE 9: TOGGLE without conditions
+  # This toggle is always visible to all players
+  accept:
+    type: TOGGLE
+    text: "&aAccept Terms"
+    default: false
+    actions:
+      - "MESSAGE;&aAccepted: {accept}"

@@ -4,10 +4,29 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
+# ====================================
+# SLOTS HELPER MENU (Java Edition)
+# ====================================
+# This is a utility menu that helps you visualize slot positions in a CHEST menu.
+# Each item displays its slot number, making it easy to identify which slot
+# corresponds to which position when designing your menus.
+#
+# Slot numbering in a 54-slot chest menu:
+# Row 1:  0  1  2  3  4  5  6  7  8
+# Row 2:  9 10 11 12 13 14 15 16 17
+# Row 3: 18 19 20 21 22 23 24 25 26
+# Row 4: 27 28 29 30 31 32 33 34 35
+# Row 5: 36 37 38 39 40 41 42 43 44
+# Row 6: 45 46 47 48 49 50 51 52 53
+#
+# Use this menu to quickly find slot numbers for your menu designs.
+
 menuName: '     <bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray>- <reset>Java Slots'
-menuSize: 54
+menuSize: 54           # Full chest (6 rows x 9 columns = 54 slots)
 type: CHEST
-openCommand: /slots
+openCommand: /slots    # Open this helper menu with /slots
+
+# All 54 slots with their corresponding numbers
 items:
   item0:
     name: "Slot: <red>0"

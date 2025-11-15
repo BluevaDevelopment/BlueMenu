@@ -1,0 +1,55 @@
+#  ____  _            __  __
+# | __ )| |_   _  ___|  \/  | ___ _ __  _   _
+# |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
+# | |_) | | |_| |  __| |  | |  __| | | | |_| |
+# |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
+
+# ====================================
+# SIMPLE FORM EXAMPLE (Bedrock Edition)
+# ====================================
+# This is a basic example of a SIMPLE form for Bedrock players.
+# SIMPLE forms display a title, content lines, and a list of buttons.
+# Players can click on any button to execute the associated actions.
+
+menuName: "<gold>Example"  # The title shown at the top of the form
+type: SIMPLE               # Form type: SIMPLE displays a list of buttons with optional images
+openCommand: /bedrock      # Command to open this menu
+
+# Content lines displayed above the buttons
+content:
+  - "<aqua>Sample text"
+  - "Line 2"
+
+# Button definitions
+# Each button can have text, an optional image URL, and actions to execute when clicked
+buttons:
+  # Button with custom image URL
+  button1:
+    text: "<green>Test 1"
+    image: "https://avatars.githubusercontent.com/u/52673035?s=200&v=4"  # Optional: image displayed next to the button
+    actions:
+      - "CONSOLE;say You selected Button 1!"  # Execute console command
+      - "PLAYER;spawn"                         # Execute player command
+      - "MESSAGE;test"                         # Send message to player
+
+  # Button without image
+  button2:
+    text: "<green>Test 2"
+    actions:
+      - "CONSOLE;say You selected Button 2!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
+
+  button3:
+    text: "<green>Test 3"
+    actions:
+      - "CONSOLE;say You selected Button 3!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
+
+  button4:
+    text: "<green>Test 4"
+    actions:
+      - "CONSOLE;say You selected Button 4!"
+      - "PLAYER;spawn"
+      - "MESSAGE;test"
