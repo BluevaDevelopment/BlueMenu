@@ -10,14 +10,16 @@ openCommand: /customform
 
 # Form components
 # Each component can have actions that execute when the player submits the form
-# You can use {value} in actions to get the selected/entered value by the player
+# You can use {component_key} placeholders to access any component's value
+# Special placeholders:
+#   {component_key} - Gets the value/index of the component
+#   {component_key_text} - Gets the selected text for DROPDOWN and STEPSLIDER
 components:
 
   # LABEL - Displays informational text (no response value)
   label1:
     type: LABEL
     text: "<gold><bold>Welcome to the custom form!</bold></gold>"
-    # Labels don't have actions as they are informational only
 
   label2:
     type: LABEL
@@ -30,23 +32,23 @@ components:
     placeholder: "Enter your name here..."
     default: ""
     actions:
-      - "MESSAGE;<green>Your name is: {value}"
-      - "CONSOLE;say Player entered: {value}"
+      - "MESSAGE;<green>Your name is: {player_name}"
+      - "CONSOLE;say Player entered: {player_name}"
 
   # DROPDOWN - Dropdown menu with predefined options
   favorite_color:
     type: DROPDOWN
     text: "<yellow>Select your favorite color:"
     options:
-      - "<red>Red"
-      - "<blue>Blue"
-      - "<green>Green"
-      - "<yellow>Yellow"
-      - "<light_purple>Purple"
-    default: 0  # Index of default option (0 = first option)
+      - "Red"
+      - "Blue"
+      - "Green"
+      - "Yellow"
+      - "Purple"
+    default: 0
     actions:
-      - "MESSAGE;<gold>You selected option #{value}"
-      - "CONSOLE;say Color selected: index {value}"
+      - "MESSAGE;<gold>You selected option #{favorite_color}: {favorite_color_text}"
+      - "CONSOLE;say Color selected: {favorite_color_text}"
 
   # TOGGLE - On/off switch (true/false)
   accept_terms:
@@ -54,7 +56,7 @@ components:
     text: "<gray>Do you accept the terms and conditions?"
     default: false
     actions:
-      - "MESSAGE;<aqua>Your answer was: {value}"
+      - "MESSAGE;<aqua>Terms accepted: {accept_terms}"
 
   # SLIDER - Sliding bar with numeric values
   experience_level:
@@ -65,31 +67,30 @@ components:
     step: 5
     default: 50
     actions:
-      - "MESSAGE;<yellow>Your experience level is: {value}"
-      - "CONSOLE;xp add {player_name} {value} levels"
+      - "MESSAGE;<yellow>Your experience level is: {experience_level}"
 
   # STEPSLIDER - Step slider with text options
   difficulty:
     type: STEPSLIDER
     text: "<red>Select difficulty:"
     steps:
-      - "Easy"
-      - "Normal"
-      - "Hard"
-      - "Extreme"
-    default: 1  # Index of default step (1 = "Normal")
+      - "peaceful"
+      - "easy"
+      - "normal"
+      - "hard"
+    default: 2
     actions:
-      - "MESSAGE;<gold>Difficulty selected: index {value}"
-      - "CONSOLE;difficulty {value}"
+      - "MESSAGE;<gold>Difficulty selected: {difficulty_text}"
+      - "CONSOLE;difficulty {difficulty_text}"
 
-  # Another INPUT example with different placeholder
+  # Another INPUT example
   email:
     type: INPUT
     text: "<blue>Email (optional):"
     placeholder: "example@email.com"
     default: ""
     actions:
-      - "MESSAGE;<green>Email registered: {value}"
+      - "MESSAGE;<green>Email registered: {email}"
 
   # Another TOGGLE example
   newsletter:
@@ -97,9 +98,9 @@ components:
     text: "<aqua>Do you want to receive server news?"
     default: true
     actions:
-      - "MESSAGE;<yellow>Newsletter: {value}"
+      - "MESSAGE;<yellow>Newsletter: {newsletter}"
 
-  # Final LABEL
+  # Final LABEL - Shows summary using all component values
   final_label:
     type: LABEL
     text: "<gradient:#ff0000:#ffaa00>Thank you for completing the form!</gradient>"
@@ -108,17 +109,25 @@ components:
 # IMPORTANT NOTES:
 # ====================================
 # 1. Components are processed in the order they appear in this file
-# 2. You can use the {value} placeholder in actions to get the component's value
-# 3. The {value} values by type:
-#    - DROPDOWN: index of selected option (0, 1, 2, ...)
-#    - INPUT: text entered by the player
-#    - TOGGLE: "true" or "false"
-#    - SLIDER: numeric value (e.g: 25.0, 50.0, 75.5)
-#    - STEPSLIDER: index of selected step (0, 1, 2, ...)
-#    - LABEL: no value
-# 4. Available actions are:
+# 2. You can use {component_key} placeholders to access any component's value:
+#    - {player_name} = text entered in the "player_name" INPUT
+#    - {favorite_color} = index selected in the "favorite_color" DROPDOWN
+#    - {favorite_color_text} = text of the selected option in DROPDOWN
+#    - {accept_terms} = "true" or "false" from the TOGGLE
+#    - {experience_level} = numeric value from the SLIDER
+#    - {difficulty} = index from the STEPSLIDER
+#    - {difficulty_text} = text of the selected step in STEPSLIDER
+# 3. Component value formats by type:
+#    - DROPDOWN: {key} = index (0, 1, 2...), {key_text} = selected option text
+#    - INPUT: {key} = text entered by the player
+#    - TOGGLE: {key} = "true" or "false"
+#    - SLIDER: {key} = numeric value (integer if whole number, float otherwise)
+#    - STEPSLIDER: {key} = index (0, 1, 2...), {key_text} = selected step text
+#    - LABEL: no value (informational only)
+# 4. Available actions:
 #    - MESSAGE;text - Sends a message to the player
 #    - PLAYER;command - Executes a command as the player
 #    - CONSOLE;command - Executes a command from console
-#    - CLOSE - Closes the menu (no value required after ;)
-# 5. You can use all MiniMessage and PlaceholderAPI placeholders
+#    - CLOSE - Closes the menu
+# 5. You can also use PlaceholderAPI placeholders like {player_name}
+# 6. All actions from all components are executed when the form is submitted
