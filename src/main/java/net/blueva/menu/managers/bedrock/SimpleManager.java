@@ -40,20 +40,15 @@ public class SimpleManager {
                     // Check display conditions before adding the button
                     boolean shouldDisplay = true;
 
-                    // Check for display_conditions list
                     if (buttonSection.contains("display_conditions")) {
-                        List<String> displayConditions = buttonSection.getStringList("display_conditions");
-                        shouldDisplay = ConditionManager.evaluateConditions(player, displayConditions);
-                    }
-
-                    // Check for conditions map with all/any/none
-                    if (shouldDisplay && buttonSection.contains("conditions")) {
-                        Object conditionsObj = buttonSection.get("conditions");
+                        Object conditionsObj = buttonSection.get("display_conditions");
                         if (conditionsObj instanceof Map) {
+                            // Map format with all/any/none
                             @SuppressWarnings("unchecked")
                             Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
                             shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
                         } else if (conditionsObj instanceof List) {
+                            // Simple list format
                             @SuppressWarnings("unchecked")
                             List<String> conditionsList = (List<String>) conditionsObj;
                             shouldDisplay = ConditionManager.evaluateConditions(player, conditionsList);

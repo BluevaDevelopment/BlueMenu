@@ -49,20 +49,15 @@ public class CustomManager {
         // Check display conditions before adding the component
         boolean shouldDisplay = true;
 
-        // Check for display_conditions list
         if (component.contains("display_conditions")) {
-            List<String> displayConditions = component.getStringList("display_conditions");
-            shouldDisplay = ConditionManager.evaluateConditions(player, displayConditions);
-        }
-
-        // Check for conditions map with all/any/none
-        if (shouldDisplay && component.contains("conditions")) {
-            Object conditionsObj = component.get("conditions");
+            Object conditionsObj = component.get("display_conditions");
             if (conditionsObj instanceof Map) {
+                // Map format with all/any/none
                 @SuppressWarnings("unchecked")
                 Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
                 shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
             } else if (conditionsObj instanceof List) {
+                // Simple list format
                 @SuppressWarnings("unchecked")
                 List<String> conditionsList = (List<String>) conditionsObj;
                 shouldDisplay = ConditionManager.evaluateConditions(player, conditionsList);

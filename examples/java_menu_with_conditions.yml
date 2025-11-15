@@ -2,125 +2,165 @@
 # This demonstrates the ConditionManager features
 
 menuName: "&b&lConditional Menu"
-menuSize: 27
+menuSize: 54
 
 items:
   # Item only shown if player level is >= 10
-  vip_item:
-    name: "&6VIP Item"
+  level_item:
+    name: "&6Level 10+ Item"
     slot: 10
     itemStack:
       material: DIAMOND
       amount: 1
     lore:
       - "&7Only visible if level >= 10"
-      - "&7Your level: %player_level%"
+      - "&7Your level: {player_level}"
     display_conditions:
-      - "%player_level% >= 10"
+      - "{player_level} >= 10"
     actions:
-      - "MESSAGE;&aYou clicked the VIP item!"
+      - "MESSAGE;&aYou have level 10 or higher!"
 
-  # Item only shown if player health > 5
-  healing_item:
-    name: "&cHealing Potion"
+  # Item only shown if player health > 10
+  healthy_item:
+    name: "&cHealthy Player"
     slot: 11
     itemStack:
-      material: POTION
+      material: GOLDEN_APPLE
       amount: 1
     lore:
-      - "&7Only visible if health > 5"
-      - "&7Your health: %player_health%"
+      - "&7Only visible if health > 10"
+      - "&7Your health: {player_health}"
     display_conditions:
-      - "%player_health% > 5"
+      - "{player_health} > 10"
     actions:
-      - "CONSOLE;heal {player_name}"
+      - "MESSAGE;&aYou're healthy!"
 
   # Item with multiple conditions (ALL must pass)
-  world_specific_item:
-    name: "&eWorld Specific"
+  advanced_item:
+    name: "&eAdvanced Item"
     slot: 12
     itemStack:
-      material: GRASS_BLOCK
+      material: EMERALD
       amount: 1
     lore:
-      - "&7Only in 'world' with level >= 5"
+      - "&7Requires level >= 5 AND health >= 8"
+      - "&7Level: {player_level}"
+      - "&7Health: {player_health}"
     display_conditions:
-      - "%player_world% == 'world'"
-      - "%player_level% >= 5"
+      - "{player_level} >= 5"
+      - "{player_health} >= 8"
     actions:
-      - "MESSAGE;&aYou're in the right world!"
+      - "MESSAGE;&aYou meet both requirements!"
 
-  # Item with advanced conditions (all/any/none)
-  advanced_item:
-    name: "&dAdvanced Conditions"
+  # Item with boolean operators
+  boolean_item:
+    name: "&dBoolean Example"
     slot: 13
     itemStack:
       material: NETHER_STAR
       amount: 1
     lore:
-      - "&7Complex condition logic"
-      - "&7Requires level 20+"
-      - "&7And health 8+"
-      - "&7And either nether or elite group"
-      - "&7But not spectator mode"
-    conditions:
-      all:     # All must be true
-        - "%player_level% >= 20"
-        - "%player_health% >= 8"
-      any:     # At least one must be true
-        - "%player_world% == 'world_nether'"
-        - "%vault_group% contains 'elite'"
-      none:    # None of them must be true
-        - "%player_gamemode% == 'SPECTATOR'"
+      - "&7Shown if (level >= 10) AND (health > 5)"
+    display_conditions:
+      - "({player_level} >= 10) && ({player_health} > 5)"
     actions:
-      - "MESSAGE;&dYou meet all the advanced conditions!"
-
-  # Item with boolean and math operators
-  math_item:
-    name: "&aMath Example"
-    slot: 14
-    itemStack:
-      material: EMERALD
-      amount: 1
-    lore:
-      - "&7Shown if (level >= 10) AND (tps > 16)"
-    conditions:
-      - "(%player_level% >= 10) && (%server_tps% > 16)"
-    actions:
-      - "MESSAGE;&aServer is running well!"
+      - "MESSAGE;&dYou passed the boolean check!"
 
   # Item with negation
-  not_in_nether:
-    name: "&bNot in Nether"
+  low_level_item:
+    name: "&7Low Level Item"
+    slot: 14
+    itemStack:
+      material: WOODEN_SWORD
+      amount: 1
+    lore:
+      - "&7Only shown when level is NOT 50"
+    display_conditions:
+      - "! ({player_level} == 50)"
+    actions:
+      - "MESSAGE;&7You're not level 50!"
+
+  # Item with math operators
+  math_item:
+    name: "&aMath Example"
     slot: 15
     itemStack:
-      material: ICE
+      material: REDSTONE
       amount: 1
     lore:
-      - "&7Only shown when NOT in nether"
-    conditions:
-      - "! (%player_world% == 'world_nether')"
+      - "&7Shown if level * 2 >= 20"
+      - "&7Your level: {player_level}"
+    display_conditions:
+      - "{player_level} * 2 >= 20"
     actions:
-      - "MESSAGE;&bYou're not in the nether!"
+      - "MESSAGE;&aMath condition passed!"
 
-  # Item with text operators
-  text_example:
-    name: "&eText Operators"
+  # Item with string comparison
+  name_item:
+    name: "&bName Check"
     slot: 16
     itemStack:
-      material: BOOK
+      material: NAME_TAG
       amount: 1
     lore:
-      - "&7Shown if group contains 'vip'"
-    conditions:
-      - "%vault_group% contains 'vip'"
+      - "&7Shown if name starts with 'A'"
+    display_conditions:
+      - "{player_name} startsWith 'A'"
     actions:
-      - "MESSAGE;&eYou're a VIP!"
+      - "MESSAGE;&bYour name starts with A!"
 
-  # Always visible item
+  # Item with all/any/none conditions
+  complex_item:
+    name: "&5Complex Conditions"
+    slot: 20
+    itemStack:
+      material: ENCHANTED_BOOK
+      amount: 1
+    lore:
+      - "&7Uses all/any/none logic"
+      - "&7All: level >= 5 AND health >= 8"
+      - "&7Any: high level OR high health"
+      - "&7None: not level 99"
+    display_conditions:
+      all:     # All must be true
+        - "{player_level} >= 5"
+        - "{player_health} >= 8"
+      any:     # At least one must be true
+        - "{player_level} >= 20"
+        - "{player_health} >= 15"
+      none:    # None of them must be true
+        - "{player_level} == 99"
+    actions:
+      - "MESSAGE;&5Complex conditions passed!"
+
+  # Another all/any/none example
+  vip_item:
+    name: "&6VIP Access"
+    slot: 21
+    itemStack:
+      material: GOLD_BLOCK
+      amount: 1
+    lore:
+      - "&7All: level 10+ AND health > 5"
+      - "&7Any: name starts with A/B/C"
+      - "&7None: not level 1"
+    display_conditions:
+      all:
+        - "{player_level} >= 10"
+        - "{player_health} > 5"
+      any:
+        - "{player_name} startsWith 'A'"
+        - "{player_name} startsWith 'B'"
+        - "{player_name} startsWith 'C'"
+      none:
+        - "{player_level} == 1"
+    actions:
+      - "MESSAGE;&6VIP access granted!"
+
+  # Always visible item (no conditions)
   always_visible:
     name: "&fAlways Visible"
-    slot: 22
+    slot: 40
     itemStack:
       material: BARRIER
       amount: 1

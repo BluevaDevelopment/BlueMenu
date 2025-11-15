@@ -10,59 +10,61 @@ components:
     type: LABEL
     text: "&7Fill out the form below"
 
+  # Another label showing player stats
+  stats_label:
+    type: LABEL
+    text: "&eLevel: {player_level} | Health: {player_health}"
+
   # Input only shown if player level >= 10
-  vip_input:
+  level_input:
     type: INPUT
-    text: "&6VIP Message (Level 10+ only)"
-    placeholder: "Enter your VIP message..."
+    text: "&6Message (Level 10+ only)"
+    placeholder: "Enter your message..."
     default: ""
     display_conditions:
-      - "%player_level% >= 10"
+      - "{player_level} >= 10"
     actions:
-      - "MESSAGE;&aYour VIP message: {vip_input}"
+      - "MESSAGE;&aYour message: {level_input}"
 
-  # Dropdown with conditions
-  world_dropdown:
+  # Dropdown only shown if player level >= 5
+  options_dropdown:
     type: DROPDOWN
-    text: "&eSelect World"
+    text: "&eSelect Option (Level 5+)"
     options:
-      - "Overworld"
-      - "Nether"
-      - "End"
+      - "Option 1"
+      - "Option 2"
+      - "Option 3"
     default: 0
-    conditions:
-      - "%player_level% >= 5"
+    display_conditions:
+      - "{player_level} >= 5"
     actions:
-      - "MESSAGE;&aYou selected: {world_dropdown_text}"
+      - "MESSAGE;&aYou selected: {options_dropdown_text}"
 
-  # Toggle with advanced conditions
-  advanced_toggle:
+  # Toggle only shown if player health > 10
+  health_toggle:
     type: TOGGLE
-    text: "&dAdvanced Feature"
+    text: "&cHealthy Feature (Health > 10)"
     default: false
-    conditions:
-      all:
-        - "%player_level% >= 20"
-      any:
-        - "%vault_group% contains 'elite'"
-        - "%player_health% >= 15"
+    display_conditions:
+      - "{player_health} > 10"
     actions:
-      - "MESSAGE;&dAdvanced feature: {advanced_toggle}"
+      - "MESSAGE;&cHealthy feature: {health_toggle}"
 
-  # Slider with condition
+  # Slider with multiple conditions
   power_slider:
     type: SLIDER
-    text: "&cPower Level"
+    text: "&dPower Level (Lvl 5+ & HP 8+)"
     min: 0
     max: 100
     step: 10
     default: 50
     display_conditions:
-      - "%player_level% >= 15"
+      - "{player_level} >= 5"
+      - "{player_health} >= 8"
     actions:
-      - "MESSAGE;&cPower set to: {power_slider}"
+      - "MESSAGE;&dPower set to: {power_slider}"
 
-  # Step slider with text operator
+  # Step slider with boolean condition
   difficulty_steps:
     type: STEPSLIDER
     text: "&6Difficulty"
@@ -71,10 +73,30 @@ components:
       - "Normal"
       - "Hard"
     default: 1
-    conditions:
-      - "%vault_group% contains 'vip'"
+    display_conditions:
+      - "({player_level} >= 10) && ({player_health} > 5)"
     actions:
       - "MESSAGE;&6Difficulty: {difficulty_steps_text}"
+
+  # Slider with all/any/none conditions
+  advanced_slider:
+    type: SLIDER
+    text: "&5Advanced Slider"
+    min: 0
+    max: 50
+    step: 5
+    default: 25
+    display_conditions:
+      all:
+        - "{player_level} >= 5"
+        - "{player_health} >= 8"
+      any:
+        - "{player_level} >= 20"
+        - "{player_health} >= 15"
+      none:
+        - "{player_level} == 1"
+    actions:
+      - "MESSAGE;&5Advanced value: {advanced_slider}"
 
   # Always visible toggle
   accept:

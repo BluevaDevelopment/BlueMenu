@@ -7,48 +7,59 @@ type: SIMPLE
 content:
   - "&7Welcome to the conditional menu!"
   - "&7Buttons shown depend on your stats"
+  - ""
+  - "&eYour level: {player_level}"
+  - "&eYour health: {player_health}"
 
 buttons:
   # Button only shown if player level >= 10
-  vip_button:
-    text: "&6VIP Options"
-    image: "https://example.com/vip.png"
+  level_button:
+    text: "&6Level 10+ Options"
+    image: "https://example.com/diamond.png"
     display_conditions:
-      - "%player_level% >= 10"
+      - "{player_level} >= 10"
     actions:
-      - "MESSAGE;&aYou clicked VIP options!"
+      - "MESSAGE;&aYou clicked the level 10+ button!"
 
-  # Button only shown if player health > 5
-  healing_button:
-    text: "&cHeal Me"
+  # Button only shown if player health > 10
+  health_button:
+    text: "&cHealthy Options"
     display_conditions:
-      - "%player_health% > 5"
+      - "{player_health} > 10"
     actions:
-      - "CONSOLE;heal {player_name}"
-      - "MESSAGE;&aYou've been healed!"
+      - "MESSAGE;&aYou're healthy!"
 
   # Button with multiple conditions
-  world_button:
-    text: "&eWorld Teleport"
-    display_conditions:
-      - "%player_world% == 'world'"
-      - "%player_level% >= 5"
-    actions:
-      - "CONSOLE;spawn {player_name}"
-
-  # Button with advanced conditions
   advanced_button:
-    text: "&dAdvanced Access"
-    conditions:
-      all:
-        - "%player_level% >= 20"
-      any:
-        - "%player_world% == 'world_nether'"
-        - "%vault_group% contains 'elite'"
-      none:
-        - "%player_gamemode% == 'SPECTATOR'"
+    text: "&eAdvanced Options"
+    display_conditions:
+      - "{player_level} >= 5"
+      - "{player_health} >= 8"
     actions:
-      - "MESSAGE;&dYou have advanced access!"
+      - "MESSAGE;&eYou have advanced access!"
+
+  # Button with boolean operators
+  boolean_button:
+    text: "&dBoolean Test"
+    display_conditions:
+      - "({player_level} >= 10) && ({player_health} > 5)"
+    actions:
+      - "MESSAGE;&dBoolean condition passed!"
+
+  # Button with all/any/none conditions
+  complex_button:
+    text: "&5Complex Conditions"
+    display_conditions:
+      all:
+        - "{player_level} >= 5"
+        - "{player_health} >= 8"
+      any:
+        - "{player_level} >= 20"
+        - "{player_health} >= 15"
+      none:
+        - "{player_level} == 99"
+    actions:
+      - "MESSAGE;&5Complex conditions passed!"
 
   # Always visible button
   close_button:

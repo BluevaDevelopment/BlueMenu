@@ -66,16 +66,10 @@ public class MenuManager {
                         // Check display conditions before adding the item
                         boolean shouldDisplay = true;
 
-                        // Check for display_conditions list
                         if (itemSection.contains("display_conditions")) {
-                            List<String> displayConditions = itemSection.getStringList("display_conditions");
-                            shouldDisplay = ConditionManager.evaluateConditions(player, displayConditions);
-                        }
-
-                        // Check for conditions map with all/any/none
-                        if (shouldDisplay && itemSection.contains("conditions")) {
-                            Object conditionsObj = itemSection.get("conditions");
+                            Object conditionsObj = itemSection.get("display_conditions");
                             if (conditionsObj instanceof Map) {
+                                // Map format with all/any/none
                                 @SuppressWarnings("unchecked")
                                 Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
                                 shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
