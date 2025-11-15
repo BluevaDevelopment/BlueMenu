@@ -1,9 +1,9 @@
 package net.blueva.menu.managers.java;
 
+import dev.dejvokep.boostedyaml.block.implementation.Section;
 import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -13,14 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnimationManager {
-    static void startAnimation(Main main, Player player, ConfigurationSection animationConfig, int menuSize) {
+    static void startAnimation(Main main, Player player, Section animationConfig, int menuSize) {
         int interval = animationConfig.getInt("interval");
         List<ItemStack> frames = new ArrayList<>();
 
-        ConfigurationSection framesSection = animationConfig.getConfigurationSection("frames");
+        Section framesSection = animationConfig.getSection("frames");
         if (framesSection != null) {
-            for (String frame : framesSection.getKeys(false)) {
-                ConfigurationSection frameSection = framesSection.getConfigurationSection(frame);
+            for (Object frameObj : framesSection.getKeys()) {
+                String frame = frameObj.toString();
+                Section frameSection = framesSection.getSection(frame);
                 if (frameSection != null) {
                     ItemStack frameItem = ItemManager.createItemStackFromConfig(frameSection, player);
                     frames.add(frameItem);
@@ -51,7 +52,7 @@ public class AnimationManager {
 
                     // Clear previous frames
                     for (int i = 0; i < frames.size(); i++) {
-                        ConfigurationSection frameSection = framesSection.getConfigurationSection("frame" + (i + 1));
+                        Section frameSection = framesSection.getSection("frame" + (i + 1));
                         if (frameSection != null) {
                             int slot = frameSection.getInt("slot");
                             if (slot >= 0 && slot < menuSize) {
@@ -67,7 +68,7 @@ public class AnimationManager {
                         currentFrame = 0;
                     }
 
-                    ConfigurationSection currentFrameSection = framesSection.getConfigurationSection("frame" + (currentFrame + 1));
+                    Section currentFrameSection = framesSection.getSection("frame" + (currentFrame + 1));
                     if (currentFrameSection != null) {
                         int slot = currentFrameSection.getInt("slot");
                         if (slot >= 0 && slot < menuSize) {

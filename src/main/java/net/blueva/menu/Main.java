@@ -1,5 +1,6 @@
 package net.blueva.menu;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
 import fr.mrmicky.fastinv.FastInvManager;
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
@@ -15,7 +16,6 @@ import net.blueva.menu.managers.java.MenuManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -34,7 +34,7 @@ public class Main extends JavaPlugin implements Listener {
 
 
     // Lang File
-    public FileConfiguration language = null;
+    public YamlDocument language = null;
     public File languageFile = null;
     public String actualLang;
     public String langPath;

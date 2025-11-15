@@ -1,9 +1,9 @@
 package net.blueva.menu.managers.bedrock;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.geysermc.cumulus.form.CustomForm;
 import org.geysermc.cumulus.response.CustomFormResponse;
@@ -13,7 +13,7 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import java.util.*;
 
 public class CustomManager {
-    public static void openMenu(Player player, FileConfiguration menuConfig) {
+    public static void openMenu(Player player, YamlDocument menuConfig) {
         FloodgatePlayer playerB = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
 
         CustomForm.Builder formBuilder = CustomForm.builder()
@@ -23,10 +23,11 @@ public class CustomManager {
         List<ComponentData> componentsOrder = new ArrayList<>();
 
         // Procesar componentes
-        ConfigurationSection componentsConfig = menuConfig.getConfigurationSection("components");
+        Section componentsConfig = menuConfig.getSection("components");
         if (componentsConfig != null) {
-            for (String componentKey : componentsConfig.getKeys(false)) {
-                ConfigurationSection component = componentsConfig.getConfigurationSection(componentKey);
+            for (Object componentKeyObj : componentsConfig.getKeys()) {
+                String componentKey = componentKeyObj.toString();
+                Section component = componentsConfig.getSection(componentKey);
                 if (component != null) {
                     String type = component.getString("type");
                     if (type != null) {
@@ -43,7 +44,7 @@ public class CustomManager {
         playerB.sendForm(form);
     }
 
-    private static void addComponent(CustomForm.Builder formBuilder, ConfigurationSection component,
+    private static void addComponent(CustomForm.Builder formBuilder, Section component,
                                      String type, Player player, String componentKey,
                                      List<ComponentData> componentsOrder) {
         // Check display conditions before adding the component

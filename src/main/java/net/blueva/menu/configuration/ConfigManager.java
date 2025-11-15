@@ -1,16 +1,16 @@
 package net.blueva.menu.configuration;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import net.blueva.menu.Main;
-import net.blueva.menu.configuration.updater.ConfigUpdater;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ConfigManager {
@@ -77,17 +77,19 @@ public class ConfigManager {
 
     public void generateFile(String file, String folder) throws IOException {
         File cfgFile = new File(main.getDataFolder() + folder + "/", file + ".yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(cfgFile);
-        Reader defConfigStream = new InputStreamReader(Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files"+folder+"/" + file + ".yml")), StandardCharsets.UTF_8);
-        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-        cfg.setDefaults(defConfig);
-        cfg.options().copyDefaults(true);
-        cfg.save(cfgFile);
+        YamlDocument.create(
+            cfgFile,
+            Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files"+folder+"/" + file + ".yml")),
+            GeneralSettings.DEFAULT,
+            LoaderSettings.builder().setAutoUpdate(true).build(),
+            DumperSettings.DEFAULT,
+            UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+        );
     }
 
     //Config Files
     // Language Manager
-    public FileConfiguration getLang() {
+    public YamlDocument getLang() {
         if(main.language == null) {
             reloadLang();
         }
@@ -95,23 +97,29 @@ public class ConfigManager {
     }
 
     public void reloadLang(){
-        if(main.language == null){
-            main.languageFile = new File(main.getDataFolder()+"/language/",main.actualLang+".yml");
-        }
-        main.language = YamlConfiguration.loadConfiguration(main.languageFile);
-        Reader defConfigStream;
-        defConfigStream = new InputStreamReader(Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files/language/" + main.actualLang + ".yml")), StandardCharsets.UTF_8);
-        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-        main.language.setDefaults(defConfig);
+        try {
+            if(main.language == null){
+                main.languageFile = new File(main.getDataFolder()+"/language/",main.actualLang+".yml");
+            }
+            main.language = YamlDocument.create(
+                main.languageFile,
+                Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files/language/" + main.actualLang + ".yml")),
+                GeneralSettings.DEFAULT,
+                LoaderSettings.builder().setAutoUpdate(true).build(),
+                DumperSettings.DEFAULT,
+                UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+            );
 
-        // Clear the prefix cache when language is reloaded
-        MessagesUtil.clearPrefixCache();
+            // Clear the prefix cache when language is reloaded
+            MessagesUtil.clearPrefixCache();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void saveLang(){
         try{
-            main.language.save(main.languageFile);
-            ConfigUpdater.update(main, "net/blueva/menu/configuration/files/language/"+main.actualLang+".yml", new File(main.getDataFolder()+"/language/"+main.actualLang+".yml"));
+            main.language.save();
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -120,8 +128,7 @@ public class ConfigManager {
     public void registerLang(){
         main.languageFile = new File(main.getDataFolder()+"/language/",main.actualLang+".yml");
         if(!main.languageFile.exists()){
-            this.getLang().options().copyDefaults(true);
-            main.langPath = getLang().getCurrentPath();
+            reloadLang();
             saveLang();
         }
     }

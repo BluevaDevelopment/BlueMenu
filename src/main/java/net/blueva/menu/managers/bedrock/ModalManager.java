@@ -1,9 +1,9 @@
 package net.blueva.menu.managers.bedrock;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.geysermc.cumulus.form.ModalForm;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ModalManager {
-    public static void openMenu(Player player, FileConfiguration menuConfig) {
+    public static void openMenu(Player player, YamlDocument menuConfig) {
         FloodgatePlayer playerB = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
 
         List<String> content = MessagesUtil.format(player, menuConfig.getStringList("content"));
@@ -27,8 +27,8 @@ public class ModalManager {
         // Conditions only prevent actions from executing, not button display
 
         // Get button configurations
-        ConfigurationSection button1Config = menuConfig.getConfigurationSection("buttons.button1");
-        ConfigurationSection button2Config = menuConfig.getConfigurationSection("buttons.button2");
+        Section button1Config = menuConfig.getSection("buttons.button1");
+        Section button2Config = menuConfig.getSection("buttons.button2");
 
         // Check button1 conditions
         boolean button1Visible = true;

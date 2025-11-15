@@ -4,6 +4,7 @@
 # | |_) | | |_| |  __| |  | |  __| | | | |_| |
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
+file_version: 1
 language: "English (UK)"
 prefix: "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>»</dark_gray>"
 global:

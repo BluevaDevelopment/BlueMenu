@@ -1,8 +1,8 @@
 package net.blueva.menu.listeners;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
 import net.blueva.menu.Main;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,7 +38,7 @@ public class PlayerCommandPreprocessListener implements Listener {
     }
 
     private static void checkJavaMenu(Main main, PlayerCommandPreprocessEvent e) {
-        for (FileConfiguration menuConfig : main.javaMenuManager.menuConfigs.values()) {
+        for (YamlDocument menuConfig : main.javaMenuManager.menuConfigs.values()) {
             String openCommand = menuConfig.getString("openCommand");
             if(e.getMessage().equalsIgnoreCase(openCommand)) {
                 e.setCancelled(true);
@@ -50,7 +50,7 @@ public class PlayerCommandPreprocessListener implements Listener {
     }
 
     private static void checkBedrockMenu(Main main, PlayerCommandPreprocessEvent e) {
-        for (FileConfiguration menuConfig : main.bedrockMenuManager.menuConfigs.values()) {
+        for (YamlDocument menuConfig : main.bedrockMenuManager.menuConfigs.values()) {
             String openCommand = menuConfig.getString("openCommand");
             if(e.getMessage().equalsIgnoreCase(openCommand)) {
                 e.setCancelled(true);

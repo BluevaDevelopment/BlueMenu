@@ -1,9 +1,9 @@
 package net.blueva.menu.managers.bedrock;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.geysermc.cumulus.form.SimpleForm;
 import org.geysermc.cumulus.util.FormImage;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class SimpleManager {
-    public static void openMenu(Player player, FileConfiguration menuConfig) {
+    public static void openMenu(Player player, YamlDocument menuConfig) {
         FloodgatePlayer playerB = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
 
         List<String> content = MessagesUtil.format(player, menuConfig.getStringList("content"));
@@ -32,10 +32,11 @@ public class SimpleManager {
         // Store visible buttons for action handling
         List<String> visibleButtons = new ArrayList<>();
 
-        ConfigurationSection buttonsConfig = menuConfig.getConfigurationSection("buttons");
+        Section buttonsConfig = menuConfig.getSection("buttons");
         if (buttonsConfig != null) {
-            for (String buttonKey : buttonsConfig.getKeys(false)) {
-                ConfigurationSection buttonSection = buttonsConfig.getConfigurationSection(buttonKey);
+            for (Object buttonKeyObj : buttonsConfig.getKeys()) {
+                String buttonKey = buttonKeyObj.toString();
+                Section buttonSection = buttonsConfig.getSection(buttonKey);
                 if (buttonSection != null) {
                     // Check display conditions before adding the button
                     boolean shouldDisplay = true;
@@ -58,7 +59,7 @@ public class SimpleManager {
                     // Only add the button if conditions pass
                     if (shouldDisplay) {
                         String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonSection.getString("text")));
-                        if (buttonSection.isSet("image")) {
+                        if (buttonSection.contains("image")) {
                             formBuilder.button(buttonText, FormImage.Type.URL, Objects.requireNonNull(buttonSection.getString("image")));
                         } else {
                             formBuilder.button(buttonText);
@@ -70,11 +71,11 @@ public class SimpleManager {
         }
 
         SimpleForm form = formBuilder.validResultHandler(result -> {
-            ConfigurationSection buttonsConfigSection = menuConfig.getConfigurationSection("buttons");
+            Section buttonsConfigSection = menuConfig.getSection("buttons");
             if (buttonsConfigSection != null) {
                 // Only check visible buttons for action execution
                 for (String buttonKey : visibleButtons) {
-                    ConfigurationSection buttonSection = buttonsConfigSection.getConfigurationSection(buttonKey);
+                    Section buttonSection = buttonsConfigSection.getSection(buttonKey);
                     if (buttonSection != null) {
                         String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonSection.getString("text")));
                         if (result.clickedButton().text().equals(buttonText)) {

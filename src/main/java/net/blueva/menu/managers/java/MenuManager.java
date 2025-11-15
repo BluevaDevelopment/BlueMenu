@@ -1,22 +1,27 @@
 package net.blueva.menu.managers.java;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
 import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static org.bukkit.Bukkit.getLogger;
 
 public class MenuManager {
-    public final Map<String, FileConfiguration> menuConfigs = new HashMap<>();
+    public final Map<String, YamlDocument> menuConfigs = new HashMap<>();
     public final List<String> menuNames = new ArrayList<>();
     public final Map<Player, FastInv> activeMenus = new HashMap<>();
 
@@ -37,9 +42,20 @@ public class MenuManager {
                 String menuFileName = menuData[1].trim();
                 File menuConfigFile = new File(main.getDataFolder()+"/menus/java", menuFileName);
                 if (menuConfigFile.exists()) {
-                    FileConfiguration menuConfig = YamlConfiguration.loadConfiguration(menuConfigFile);
-                    menuConfigs.put(menuName, menuConfig);
-                    menuNames.add(menuName);
+                    try {
+                        YamlDocument menuConfig = YamlDocument.create(
+                            menuConfigFile,
+                            GeneralSettings.DEFAULT,
+                            LoaderSettings.builder().setAutoUpdate(true).build(),
+                            DumperSettings.DEFAULT,
+                            UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+                        );
+                        menuConfigs.put(menuName, menuConfig);
+                        menuNames.add(menuName);
+                    } catch (IOException e) {
+                        getLogger().warning("Failed to load menu file: " + menuFileName);
+                        e.printStackTrace();
+                    }
                 } else {
                     getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu_file")).replace("{name}", menuFileName));
                 }
@@ -50,7 +66,7 @@ public class MenuManager {
     }
 
     public void openMenu(Player player, String menuName) {
-        FileConfiguration menuConfig = menuConfigs.get(menuName);
+        YamlDocument menuConfig = menuConfigs.get(menuName);
         if (menuConfig != null) {
             int menuSize = menuConfig.getInt("menuSize");
             String menuTitle = MessagesUtil.format(player, menuConfig.getString("menuName"));
@@ -58,10 +74,11 @@ public class MenuManager {
             // Create FastInv menu
             FastInv menu = new FastInv(menuSize, menuTitle);
 
-            ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
+            Section itemsSection = menuConfig.getSection("items");
             if (itemsSection != null) {
-                for (String itemName : itemsSection.getKeys(false)) {
-                    ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
+                for (Object itemNameObj : itemsSection.getKeys()) {
+                    String itemName = itemNameObj.toString();
+                    Section itemSection = itemsSection.getSection(itemName);
                     if (itemSection != null) {
                         // Check display conditions before adding the item
                         boolean shouldDisplay = true;
@@ -113,10 +130,11 @@ public class MenuManager {
 
             // Start animations if configured
             if (menuConfig.contains("animations")) {
-                ConfigurationSection animationsConfig = menuConfig.getConfigurationSection("animations");
+                Section animationsConfig = menuConfig.getSection("animations");
                 if(animationsConfig != null) {
-                    for (String animationName : animationsConfig.getKeys(false)) {
-                        ConfigurationSection animationConfig = animationsConfig.getConfigurationSection(animationName);
+                    for (Object animationNameObj : animationsConfig.getKeys()) {
+                        String animationName = animationNameObj.toString();
+                        Section animationConfig = animationsConfig.getSection(animationName);
                         if(animationConfig != null) {
                             AnimationManager.startAnimation(main, player, animationConfig, menuSize);
                         }
