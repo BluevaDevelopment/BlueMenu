@@ -1,8 +1,13 @@
-# Example Java menu with display conditions
-# This demonstrates the ConditionManager features
+#  ____  _            __  __
+# | __ )| |_   _  ___|  \/  | ___ _ __  _   _
+# |  _ \| | | | |/ _ | |\/| |/ _ | '_ \| | | |
+# | |_) | | |_| |  __| |  | |  __| | | | |_| |
+# |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
 menuName: "&b&lConditional Menu"
 menuSize: 54
+type: CHEST
+openCommand: /conditionalmenu
 
 items:
   # Item only shown if player level is >= 10
@@ -18,7 +23,8 @@ items:
     display_conditions:
       - "{player_level} >= 10"
     actions:
-      - "MESSAGE;&aYou have level 10 or higher!"
+      - "[LEFT_CLICK] MESSAGE;&aYou have level 10 or higher!"
+      - "[RIGHT_CLICK] MESSAGE;&aYou have level 10 or higher!"
 
   # Item only shown if player health > 10
   healthy_item:
@@ -33,7 +39,8 @@ items:
     display_conditions:
       - "{player_health} > 10"
     actions:
-      - "MESSAGE;&aYou're healthy!"
+      - "[LEFT_CLICK] MESSAGE;&aYou're healthy!"
+      - "[RIGHT_CLICK] MESSAGE;&aYou're healthy!"
 
   # Item with multiple conditions (ALL must pass)
   advanced_item:
@@ -50,7 +57,8 @@ items:
       - "{player_level} >= 5"
       - "{player_health} >= 8"
     actions:
-      - "MESSAGE;&aYou meet both requirements!"
+      - "[LEFT_CLICK] MESSAGE;&aYou meet both requirements!"
+      - "[RIGHT_CLICK] MESSAGE;&aYou meet both requirements!"
 
   # Item with boolean operators
   boolean_item:
@@ -64,7 +72,8 @@ items:
     display_conditions:
       - "({player_level} >= 10) && ({player_health} > 5)"
     actions:
-      - "MESSAGE;&dYou passed the boolean check!"
+      - "[LEFT_CLICK] MESSAGE;&dYou passed the boolean check!"
+      - "[RIGHT_CLICK] MESSAGE;&dYou passed the boolean check!"
 
   # Item with negation
   low_level_item:
@@ -78,7 +87,7 @@ items:
     display_conditions:
       - "! ({player_level} == 50)"
     actions:
-      - "MESSAGE;&7You're not level 50!"
+      - "[LEFT_CLICK] MESSAGE;&7You're not level 50!"
 
   # Item with math operators
   math_item:
@@ -93,7 +102,8 @@ items:
     display_conditions:
       - "{player_level} * 2 >= 20"
     actions:
-      - "MESSAGE;&aMath condition passed!"
+      - "[LEFT_CLICK] MESSAGE;&aMath condition passed!"
+      - "[RIGHT_CLICK] MESSAGE;&aMath condition passed!"
 
   # Item with string comparison
   name_item:
@@ -107,7 +117,8 @@ items:
     display_conditions:
       - "{player_name} startsWith 'A'"
     actions:
-      - "MESSAGE;&bYour name starts with A!"
+      - "[LEFT_CLICK] MESSAGE;&bYour name starts with A!"
+      - "[RIGHT_CLICK] MESSAGE;&bYour name starts with A!"
 
   # Item with all/any/none conditions
   complex_item:
@@ -131,7 +142,8 @@ items:
       none:    # None of them must be true
         - "{player_level} == 99"
     actions:
-      - "MESSAGE;&5Complex conditions passed!"
+      - "[LEFT_CLICK] MESSAGE;&5Complex conditions passed!"
+      - "[RIGHT_CLICK] MESSAGE;&5Complex conditions passed!"
 
   # Another all/any/none example
   vip_item:
@@ -155,7 +167,8 @@ items:
       none:
         - "{player_level} == 1"
     actions:
-      - "MESSAGE;&6VIP access granted!"
+      - "[LEFT_CLICK] MESSAGE;&6VIP access granted!"
+      - "[RIGHT_CLICK] MESSAGE;&6VIP access granted!"
 
   # Always visible item (no conditions)
   always_visible:
@@ -168,4 +181,5 @@ items:
       - "&7This item has no conditions"
       - "&7So it's always visible"
     actions:
-      - "CLOSE"
+      - "[LEFT_CLICK] CLOSE"
+      - "[RIGHT_CLICK] CLOSE"

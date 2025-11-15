@@ -51,6 +51,7 @@ public class ConfigManager {
             try {
                 generateFile("default_menu", "/menus/java");
                 generateFile("java_menu", "/menus/java");
+                generateFile("conditions_menu", "/menus/java");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -65,7 +66,8 @@ public class ConfigManager {
                 generateFile("default_menu", "/menus/bedrock");
                 generateFile("bedrock_menu", "/menus/bedrock");
                 generateFile("custom_menu", "/menus/bedrock");
-                generateFile("teleport_menu", "/menus/bedrock");
+                generateFile("conditions_custom", "/menus/bedrock");
+                generateFile("conditions_simple", "/menus/bedrock");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

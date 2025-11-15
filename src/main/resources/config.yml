@@ -38,7 +38,7 @@ java_menus:
   - 'java_menu;java_menu.yml'  # Path to an additional Java menu file.
   # Note: You can create and add more Java menu files to this list.
 
-  - 'conditions_example;java_menu_with_conditions.yml'  # Conditional menu example.
+  - 'conditions_example;conditions_menu.yml'  # Conditional menu example.
   # Note: Demonstrates display_conditions with all/any/none logic.
 
 # Menus located in /plugins/BlueMenu/menus/bedrock
@@ -53,11 +53,8 @@ bedrock_menus:
   - 'customform;custom_menu.yml'  # Path to CUSTOM form example menu file.
   # Note: This is a comprehensive example showing all CUSTOM form components.
 
-  - 'tpform;teleport_menu.yml'  # Path to CUSTOM form teleport example.
-  # Note: Practical example of a CUSTOM form for teleportation.
-
-  - 'simple_conditions;simple_with_conditions.yml'  # SIMPLE form with conditional buttons.
+  - 'simple_conditions;conditions_simple.yml'  # SIMPLE form with conditional buttons.
   # Note: Demonstrates display_conditions for buttons with all/any/none logic.
 
-  - 'custom_conditions;custom_with_conditions.yml'  # CUSTOM form with conditional components.
+  - 'custom_conditions;conditions_custom.yml'  # CUSTOM form with conditional components.
   # Note: Demonstrates display_conditions for components with all/any/none logic.
