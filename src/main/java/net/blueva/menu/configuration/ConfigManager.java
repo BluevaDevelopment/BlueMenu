@@ -64,6 +64,8 @@ public class ConfigManager {
             try {
                 generateFile("default_menu", "/menus/bedrock");
                 generateFile("bedrock_menu", "/menus/bedrock");
+                generateFile("custom_menu", "/menus/bedrock");
+                generateFile("teleport_menu", "/menus/bedrock");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
