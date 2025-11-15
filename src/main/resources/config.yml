@@ -50,5 +50,5 @@ bedrock_menus:
   - 'customform;custom_menu.yml'  # Path to CUSTOM form example menu file.
   # Note: This is a comprehensive example showing all CUSTOM form components.
 
-  - 'tpform;teleport_form.yml'  # Path to CUSTOM form teleport example.
+  - 'tpform;teleport_menu.yml'  # Path to CUSTOM form teleport example.
   # Note: Practical example of a CUSTOM form for teleportation.
