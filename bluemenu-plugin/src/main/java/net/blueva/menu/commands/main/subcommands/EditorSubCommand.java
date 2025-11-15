@@ -22,29 +22,29 @@ public class EditorSubCommand implements CommandInterface {
     }
 
     @Override
-    public void onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws IOException {
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws IOException {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(MessagesUtil.getColoredMessage("&cThis command can only be used by players."));
-            return;
+            MessagesUtil.sendMessage(sender, "&cThis command can only be used by players.");
+            return true;
         }
 
         Player player = (Player) sender;
 
         if (!player.hasPermission("bluemenu.editor")) {
-            player.sendMessage(MessagesUtil.getColoredMessage(
-                main.getConfigManager().getLanguage().getString("commands.bluemenu.no_permission")
-            ));
-            return;
+            MessagesUtil.sendMessage(player,
+                main.configManager.getLang().getString("global.error.insufficient_permissions")
+            );
+            return true;
         }
 
         // Check if web editor is enabled
         if (!main.getWebEditorManager().isEnabled()) {
-            player.sendMessage(MessagesUtil.getColoredMessage("&cWeb editor is disabled in config.yml"));
-            return;
+            MessagesUtil.sendMessage(player, "&cWeb editor is disabled in config.yml");
+            return true;
         }
 
         // Show loading message
-        player.sendMessage(MessagesUtil.getColoredMessage("&eCreating editor session..."));
+        MessagesUtil.sendMessage(player, "&eCreating editor session...");
 
         // Create session asynchronously
         main.getWebEditorManager().createSession().thenAccept(sessionId -> {
@@ -52,7 +52,7 @@ public class EditorSubCommand implements CommandInterface {
             main.getServer().getScheduler().runTask(main, () -> {
                 String editorUrl = main.getWebEditorManager().getEditorUrl(sessionId);
 
-                // Send clickable link
+                // Send clickable link using Adventure
                 Component message = Component.text()
                     .append(Component.text("✓ ", NamedTextColor.GREEN))
                     .append(Component.text("Editor session created!", NamedTextColor.YELLOW))
@@ -65,17 +65,20 @@ public class EditorSubCommand implements CommandInterface {
                     .append(Component.text("Session expires in 1 hour", NamedTextColor.DARK_GRAY, TextDecoration.ITALIC))
                     .build();
 
-                player.sendMessage(message);
+                // Send using Adventure API
+                main.adventure().sender(player).sendMessage(message);
 
                 main.getLogger().info("Editor session created for " + player.getName() + ": " + sessionId);
             });
         }).exceptionally(ex -> {
             // Run on main thread to send error
             main.getServer().getScheduler().runTask(main, () -> {
-                player.sendMessage(MessagesUtil.getColoredMessage("&cFailed to create editor session: " + ex.getMessage()));
+                MessagesUtil.sendMessage(player, "&cFailed to create editor session: " + ex.getMessage());
                 main.getLogger().warning("Failed to create editor session for " + player.getName() + ": " + ex.getMessage());
             });
             return null;
         });
+
+        return true;
     }
 }
