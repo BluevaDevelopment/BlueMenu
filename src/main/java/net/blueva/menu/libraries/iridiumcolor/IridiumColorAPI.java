@@ -297,7 +297,11 @@ public class IridiumColorAPI {
      */
     private static int getVersion() {
         String version = Bukkit.getVersion();
-        Validate.notEmpty(version, "Cannot get major Minecraft version from null or empty string");
+
+        // Replace Validate.notEmpty with manual validation
+        if (version == null || version.isEmpty()) {
+            throw new IllegalArgumentException("Cannot get major Minecraft version from null or empty string");
+        }
 
         // getVersion()
         int index = version.lastIndexOf("MC:");
