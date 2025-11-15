@@ -1,5 +1,7 @@
 package net.blueva.menu.managers.java;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Bukkit;
@@ -17,6 +19,8 @@ import org.bukkit.profile.PlayerTextures;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -107,6 +111,7 @@ public class ItemManager {
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         try {
+            // First try to parse as customModelData (integer)
             int customModelData = Integer.parseInt(value);
             assert itemMeta != null;
             itemMeta.setCustomModelData(customModelData);
@@ -119,13 +124,24 @@ public class ItemManager {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
 
-                // Decode base64 texture or use URL directly
                 String textureUrl;
+
                 if (value.startsWith("http://") || value.startsWith("https://")) {
+                    // Direct URL
                     textureUrl = value;
                 } else {
-                    // Assume it's a base64 encoded texture value
-                    textureUrl = "http://textures.minecraft.net/texture/" + value;
+                    // Decode base64 texture value
+                    try {
+                        String decoded = new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
+                        JsonObject jsonObject = JsonParser.parseString(decoded).getAsJsonObject();
+                        textureUrl = jsonObject.getAsJsonObject("textures")
+                                               .getAsJsonObject("SKIN")
+                                               .get("url")
+                                               .getAsString();
+                    } catch (Exception decodeEx) {
+                        // If decoding fails, assume it's a texture hash
+                        textureUrl = "http://textures.minecraft.net/texture/" + value;
+                    }
                 }
 
                 textures.setSkin(new URL(textureUrl));
