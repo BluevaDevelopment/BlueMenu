@@ -6,7 +6,6 @@ import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
-import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
 import net.blueva.menu.managers.ConditionManager;
@@ -43,12 +42,13 @@ public class MenuManager {
                 File menuConfigFile = new File(main.getDataFolder()+"/menus/java", menuFileName);
                 if (menuConfigFile.exists()) {
                     try {
+                        // Menus are user-created content, so no auto-update or versioning
                         YamlDocument menuConfig = YamlDocument.create(
                             menuConfigFile,
                             GeneralSettings.DEFAULT,
-                            LoaderSettings.builder().setAutoUpdate(true).build(),
+                            LoaderSettings.DEFAULT,
                             DumperSettings.DEFAULT,
-                            UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+                            UpdaterSettings.DEFAULT
                         );
                         menuConfigs.put(menuName, menuConfig);
                         menuNames.add(menuName);
