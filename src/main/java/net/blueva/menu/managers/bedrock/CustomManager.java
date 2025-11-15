@@ -134,7 +134,11 @@ public class CustomManager {
                 case "SLIDER":
                     float sliderValue = response.asSlider();
                     // Ejecutar acciones reemplazando {value} con el valor del slider
-                    executeActionsWithValue(player, actions, String.valueOf(sliderValue));
+                    // Si el valor es un número entero, usar formato int para evitar ".0"
+                    String sliderValueStr = (sliderValue == (int) sliderValue)
+                        ? String.valueOf((int) sliderValue)
+                        : String.valueOf(sliderValue);
+                    executeActionsWithValue(player, actions, sliderValueStr);
                     break;
 
                 case "STEPSLIDER":
