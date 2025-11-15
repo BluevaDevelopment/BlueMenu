@@ -53,6 +53,9 @@ public class MenuManager {
                 if(menuType.equalsIgnoreCase("MODAL")) {
                     ModalManager.openMenu(player, menuConfig);
                 }
+                if(menuType.equalsIgnoreCase("CUSTOM")) {
+                    CustomManager.openMenu(player, menuConfig);
+                }
             }
         }
     }

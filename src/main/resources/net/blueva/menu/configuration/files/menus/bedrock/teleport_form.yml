@@ -1,0 +1,78 @@
+# ====================================
+# TELEPORT FORM - Ejemplo Práctico
+# ====================================
+# Este ejemplo muestra un formulario de teletransporte personalizado
+
+menuName: "<gradient:#5555ff:#00aaff>Teletransporte</gradient>"
+type: CUSTOM
+openCommand: /tpform
+
+components:
+
+  title_label:
+    type: LABEL
+    text: "<bold><gold>Sistema de Teletransporte</gold></bold>"
+
+  description:
+    type: LABEL
+    text: "<gray>Selecciona tu destino y configura las opciones"
+
+  # Selector de mundo
+  world_selector:
+    type: DROPDOWN
+    text: "<aqua>Mundo de destino:"
+    options:
+      - "Mundo Normal"
+      - "Nether"
+      - "End"
+      - "Lobby"
+    default: 0
+    actions:
+      - "CONSOLE;say Mundo seleccionado: {value}"
+
+  # Coordenadas X
+  coord_x:
+    type: INPUT
+    text: "<yellow>Coordenada X:"
+    placeholder: "0"
+    default: "0"
+    actions: []
+
+  # Coordenadas Y
+  coord_y:
+    type: SLIDER
+    text: "<yellow>Coordenada Y (altura):"
+    min: -64
+    max: 320
+    step: 1
+    default: 64
+    actions: []
+
+  # Coordenadas Z
+  coord_z:
+    type: INPUT
+    text: "<yellow>Coordenada Z:"
+    placeholder: "0"
+    default: "0"
+    actions: []
+
+  # Guardar ubicación
+  save_location:
+    type: TOGGLE
+    text: "<green>¿Guardar esta ubicación como favorita?"
+    default: false
+    actions:
+      - "MESSAGE;<aqua>Guardar ubicación: {value}"
+
+  # Modo de teletransporte
+  tp_mode:
+    type: STEPSLIDER
+    text: "<red>Modo de teletransporte:"
+    steps:
+      - "Instantáneo"
+      - "Con efectos"
+      - "Con cuenta regresiva"
+    default: 0
+    actions:
+      - "CONSOLE;tp {player_name} {coord_x} {coord_y} {coord_z}"
+      - "MESSAGE;<green>¡Teletransporte exitoso! Modo: {value}"
