@@ -1,9 +1,9 @@
 # ====================================
-# TELEPORT FORM - Ejemplo Práctico
+# TELEPORT FORM - Practical Example
 # ====================================
-# Este ejemplo muestra un formulario de teletransporte personalizado
+# This example shows a custom teleport form
 
-menuName: "<gradient:#5555ff:#00aaff>Teletransporte</gradient>"
+menuName: "<gradient:#5555ff:#00aaff>Teleport</gradient>"
 type: CUSTOM
 openCommand: /tpform
 
@@ -11,68 +11,68 @@ components:
 
   title_label:
     type: LABEL
-    text: "<bold><gold>Sistema de Teletransporte</gold></bold>"
+    text: "<bold><gold>Teleport System</gold></bold>"
 
   description:
     type: LABEL
-    text: "<gray>Selecciona tu destino y configura las opciones"
+    text: "<gray>Select your destination and configure options"
 
-  # Selector de mundo
+  # World selector
   world_selector:
     type: DROPDOWN
-    text: "<aqua>Mundo de destino:"
+    text: "<aqua>Destination world:"
     options:
-      - "Mundo Normal"
+      - "Overworld"
       - "Nether"
       - "End"
       - "Lobby"
     default: 0
     actions:
-      - "CONSOLE;say Mundo seleccionado: {value}"
+      - "CONSOLE;say World selected: {value}"
 
-  # Coordenadas X
+  # X coordinate
   coord_x:
     type: INPUT
-    text: "<yellow>Coordenada X:"
+    text: "<yellow>X Coordinate:"
     placeholder: "0"
     default: "0"
     actions: []
 
-  # Coordenadas Y
+  # Y coordinate
   coord_y:
     type: SLIDER
-    text: "<yellow>Coordenada Y (altura):"
+    text: "<yellow>Y Coordinate (height):"
     min: -64
     max: 320
     step: 1
     default: 64
     actions: []
 
-  # Coordenadas Z
+  # Z coordinate
   coord_z:
     type: INPUT
-    text: "<yellow>Coordenada Z:"
+    text: "<yellow>Z Coordinate:"
     placeholder: "0"
     default: "0"
     actions: []
 
-  # Guardar ubicación
+  # Save location
   save_location:
     type: TOGGLE
-    text: "<green>¿Guardar esta ubicación como favorita?"
+    text: "<green>Save this location as favorite?"
     default: false
     actions:
-      - "MESSAGE;<aqua>Guardar ubicación: {value}"
+      - "MESSAGE;<aqua>Save location: {value}"
 
-  # Modo de teletransporte
+  # Teleport mode
   tp_mode:
     type: STEPSLIDER
-    text: "<red>Modo de teletransporte:"
+    text: "<red>Teleport mode:"
     steps:
-      - "Instantáneo"
-      - "Con efectos"
-      - "Con cuenta regresiva"
+      - "Instant"
+      - "With effects"
+      - "With countdown"
     default: 0
     actions:
       - "CONSOLE;tp {player_name} {coord_x} {coord_y} {coord_z}"
-      - "MESSAGE;<green>¡Teletransporte exitoso! Modo: {value}"
+      - "MESSAGE;<green>Teleport successful! Mode: {value}"

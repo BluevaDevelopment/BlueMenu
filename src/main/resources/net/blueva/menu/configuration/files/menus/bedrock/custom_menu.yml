@@ -1,124 +1,124 @@
 # ====================================
 # CUSTOM MENU - BlueMenu Example
 # ====================================
-# Este es un ejemplo de menú CUSTOM que muestra TODOS los componentes disponibles
-# Los formularios CUSTOM soportan: dropdown, input, toggle, slider, stepSlider y label
+# This is an example of a CUSTOM menu showing ALL available components
+# CUSTOM forms support: dropdown, input, toggle, slider, stepSlider and label
 
 menuName: "<gradient:#00d4ff:#0099ff><bold>Custom Form Example</gradient>"
 type: CUSTOM
 openCommand: /customform
 
-# Componentes del formulario
-# Cada componente puede tener acciones que se ejecutan cuando el jugador envía el formulario
-# Puedes usar {value} en las acciones para obtener el valor seleccionado/ingresado por el jugador
+# Form components
+# Each component can have actions that execute when the player submits the form
+# You can use {value} in actions to get the selected/entered value by the player
 components:
 
-  # LABEL - Muestra texto informativo (no tiene valor de respuesta)
+  # LABEL - Displays informational text (no response value)
   label1:
     type: LABEL
-    text: "<gold><bold>Bienvenido al formulario personalizado!</bold></gold>"
-    # Los labels no tienen acciones ya que son solo informativos
+    text: "<gold><bold>Welcome to the custom form!</bold></gold>"
+    # Labels don't have actions as they are informational only
 
   label2:
     type: LABEL
-    text: "<gray>Por favor completa el siguiente formulario:"
+    text: "<gray>Please complete the following form:"
 
-  # INPUT - Campo de texto donde el jugador puede escribir
+  # INPUT - Text field where the player can type
   player_name:
     type: INPUT
-    text: "<aqua>¿Cómo te llamas?"
-    placeholder: "Ingresa tu nombre aquí..."
+    text: "<aqua>What's your name?"
+    placeholder: "Enter your name here..."
     default: ""
     actions:
-      - "MESSAGE;<green>Tu nombre es: {value}"
-      - "CONSOLE;say El jugador ingresó: {value}"
+      - "MESSAGE;<green>Your name is: {value}"
+      - "CONSOLE;say Player entered: {value}"
 
-  # DROPDOWN - Menú desplegable con opciones predefinidas
+  # DROPDOWN - Dropdown menu with predefined options
   favorite_color:
     type: DROPDOWN
-    text: "<yellow>Selecciona tu color favorito:"
+    text: "<yellow>Select your favorite color:"
     options:
-      - "<red>Rojo"
-      - "<blue>Azul"
-      - "<green>Verde"
-      - "<yellow>Amarillo"
-      - "<light_purple>Morado"
-    default: 0  # Índice de la opción por defecto (0 = primera opción)
+      - "<red>Red"
+      - "<blue>Blue"
+      - "<green>Green"
+      - "<yellow>Yellow"
+      - "<light_purple>Purple"
+    default: 0  # Index of default option (0 = first option)
     actions:
-      - "MESSAGE;<gold>Seleccionaste la opción #{value}"
-      - "CONSOLE;say Color seleccionado: índice {value}"
+      - "MESSAGE;<gold>You selected option #{value}"
+      - "CONSOLE;say Color selected: index {value}"
 
-  # TOGGLE - Interruptor on/off (true/false)
+  # TOGGLE - On/off switch (true/false)
   accept_terms:
     type: TOGGLE
-    text: "<gray>¿Aceptas los términos y condiciones?"
+    text: "<gray>Do you accept the terms and conditions?"
     default: false
     actions:
-      - "MESSAGE;<aqua>Tu respuesta fue: {value}"
+      - "MESSAGE;<aqua>Your answer was: {value}"
 
-  # SLIDER - Barra deslizante con valores numéricos
+  # SLIDER - Sliding bar with numeric values
   experience_level:
     type: SLIDER
-    text: "<green>¿Cuál es tu nivel de experiencia? (0-100)"
+    text: "<green>What's your experience level? (0-100)"
     min: 0
     max: 100
     step: 5
     default: 50
     actions:
-      - "MESSAGE;<yellow>Tu nivel de experiencia es: {value}"
+      - "MESSAGE;<yellow>Your experience level is: {value}"
       - "CONSOLE;xp add {player_name} {value} levels"
 
-  # STEPSLIDER - Deslizador por pasos con opciones de texto
+  # STEPSLIDER - Step slider with text options
   difficulty:
     type: STEPSLIDER
-    text: "<red>Selecciona la dificultad:"
+    text: "<red>Select difficulty:"
     steps:
-      - "Fácil"
+      - "Easy"
       - "Normal"
-      - "Difícil"
-      - "Extremo"
-    default: 1  # Índice del step por defecto (1 = "Normal")
+      - "Hard"
+      - "Extreme"
+    default: 1  # Index of default step (1 = "Normal")
     actions:
-      - "MESSAGE;<gold>Dificultad seleccionada: índice {value}"
+      - "MESSAGE;<gold>Difficulty selected: index {value}"
       - "CONSOLE;difficulty {value}"
 
-  # Otro ejemplo de INPUT con placeholder diferente
+  # Another INPUT example with different placeholder
   email:
     type: INPUT
-    text: "<blue>Correo electrónico (opcional):"
-    placeholder: "ejemplo@correo.com"
+    text: "<blue>Email (optional):"
+    placeholder: "example@email.com"
     default: ""
     actions:
-      - "MESSAGE;<green>Email registrado: {value}"
+      - "MESSAGE;<green>Email registered: {value}"
 
-  # Otro ejemplo de TOGGLE
+  # Another TOGGLE example
   newsletter:
     type: TOGGLE
-    text: "<aqua>¿Deseas recibir noticias del servidor?"
+    text: "<aqua>Do you want to receive server news?"
     default: true
     actions:
       - "MESSAGE;<yellow>Newsletter: {value}"
 
-  # LABEL final
+  # Final LABEL
   final_label:
     type: LABEL
-    text: "<gradient:#ff0000:#ffaa00>Gracias por completar el formulario!</gradient>"
+    text: "<gradient:#ff0000:#ffaa00>Thank you for completing the form!</gradient>"
 
 # ====================================
-# NOTAS IMPORTANTES:
+# IMPORTANT NOTES:
 # ====================================
-# 1. Los componentes se procesan en el orden en que aparecen en este archivo
-# 2. Puedes usar el placeholder {value} en las acciones para obtener el valor del componente
-# 3. Los valores de {value} por tipo:
-#    - DROPDOWN: índice de la opción seleccionada (0, 1, 2, ...)
-#    - INPUT: el texto que ingresó el jugador
-#    - TOGGLE: "true" o "false"
-#    - SLIDER: valor numérico (ej: 25.0, 50.0, 75.5)
-#    - STEPSLIDER: índice del step seleccionado (0, 1, 2, ...)
-#    - LABEL: no tiene valor
-# 4. Las acciones disponibles son:
-#    - MESSAGE;texto - Envía un mensaje al jugador
-#    - PLAYER;comando - Ejecuta un comando como el jugador
-#    - CONSOLE;comando - Ejecuta un comando desde la consola
-#    - CLOSE - Cierra el menú (no requiere valor después de ;)
-# 5. Puedes usar todos los placeholders de MiniMessage y PlaceholderAPI
+# 1. Components are processed in the order they appear in this file
+# 2. You can use the {value} placeholder in actions to get the component's value
+# 3. The {value} values by type:
+#    - DROPDOWN: index of selected option (0, 1, 2, ...)
+#    - INPUT: text entered by the player
+#    - TOGGLE: "true" or "false"
+#    - SLIDER: numeric value (e.g: 25.0, 50.0, 75.5)
+#    - STEPSLIDER: index of selected step (0, 1, 2, ...)
+#    - LABEL: no value
+# 4. Available actions are:
+#    - MESSAGE;text - Sends a message to the player
+#    - PLAYER;command - Executes a command as the player
+#    - CONSOLE;command - Executes a command from console
+#    - CLOSE - Closes the menu (no value required after ;)
+# 5. You can use all MiniMessage and PlaceholderAPI placeholders
