@@ -140,18 +140,7 @@ public class ConditionManager {
                 return !evaluateCondition(player, innerCondition);
             }
 
-            // Handle logical AND operator (&&)
-            if (condition.contains("&&")) {
-                String[] parts = splitByOperator(condition, "&&");
-                for (String part : parts) {
-                    if (!evaluateCondition(player, part.trim())) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            // Handle logical OR operator (||)
+            // Handle logical OR operator (||) - lower precedence, evaluate first
             if (condition.contains("||")) {
                 String[] parts = splitByOperator(condition, "||");
                 for (String part : parts) {
@@ -160,6 +149,17 @@ public class ConditionManager {
                     }
                 }
                 return false;
+            }
+
+            // Handle logical AND operator (&&) - higher precedence, evaluate after OR
+            if (condition.contains("&&")) {
+                String[] parts = splitByOperator(condition, "&&");
+                for (String part : parts) {
+                    if (!evaluateCondition(player, part.trim())) {
+                        return false;
+                    }
+                }
+                return true;
             }
 
             // Remove outer parentheses if present
@@ -323,6 +323,21 @@ public class ConditionManager {
         // Remove quotes if present
         expression = cleanValue(expression);
 
+        // Handle parentheses - evaluate inner expressions first
+        while (expression.contains("(")) {
+            int openIndex = expression.lastIndexOf('(');
+            int closeIndex = expression.indexOf(')', openIndex);
+
+            if (closeIndex == -1) {
+                throw new NumberFormatException("Mismatched parentheses in expression: " + expression);
+            }
+
+            String innerExpression = expression.substring(openIndex + 1, closeIndex);
+            double innerResult = evaluateExpression(innerExpression);
+
+            expression = expression.substring(0, openIndex) + innerResult + expression.substring(closeIndex + 1);
+        }
+
         // Try direct numeric conversion first
         try {
             return Double.parseDouble(expression);
@@ -330,40 +345,61 @@ public class ConditionManager {
             // Continue to expression evaluation
         }
 
-        // Handle addition and subtraction
-        Pattern addSubPattern = Pattern.compile("([^+\\-]+)([+\\-].+)");
-        Matcher addSubMatcher = addSubPattern.matcher(expression);
-        if (addSubMatcher.matches()) {
-            double left = evaluateExpression(addSubMatcher.group(1));
-            String rest = addSubMatcher.group(2);
-            char operator = rest.charAt(0);
-            double right = evaluateExpression(rest.substring(1));
+        // Handle addition and subtraction (lower precedence - evaluate last)
+        // Find rightmost + or - to split on (left-to-right evaluation)
+        int addSubIndex = -1;
+        char addSubOp = ' ';
+        for (int i = expression.length() - 1; i >= 0; i--) {
+            char c = expression.charAt(i);
+            if (c == '+' || c == '-') {
+                // Make sure it's not a negative sign at the start or after an operator
+                if (i > 0) {
+                    addSubIndex = i;
+                    addSubOp = c;
+                    break;
+                }
+            }
+        }
 
-            if (operator == '+') {
+        if (addSubIndex > 0) {
+            double left = evaluateExpression(expression.substring(0, addSubIndex));
+            double right = evaluateExpression(expression.substring(addSubIndex + 1));
+
+            if (addSubOp == '+') {
                 return left + right;
             } else {
                 return left - right;
             }
         }
 
-        // Handle multiplication, division, and modulo
-        if (expression.contains("*")) {
-            String[] parts = expression.split("\\*", 2);
-            return evaluateExpression(parts[0]) * evaluateExpression(parts[1]);
-        }
-
-        if (expression.contains("/")) {
-            String[] parts = expression.split("/", 2);
-            double divisor = evaluateExpression(parts[1]);
-            if (divisor == 0) {
-                throw new NumberFormatException("Division by zero");
+        // Handle multiplication, division, and modulo (higher precedence)
+        // Find rightmost *, /, or % to split on
+        int mulDivIndex = -1;
+        char mulDivOp = ' ';
+        for (int i = expression.length() - 1; i >= 0; i--) {
+            char c = expression.charAt(i);
+            if (c == '*' || c == '/' || c == '%') {
+                mulDivIndex = i;
+                mulDivOp = c;
+                break;
             }
-            return evaluateExpression(parts[0]) / divisor;
         }
 
-        if (expression.contains("%")) {
-            String[] parts = expression.split("%", 2);
-            return evaluateExpression(parts[0]) % evaluateExpression(parts[1]);
+        if (mulDivIndex > 0) {
+            double left = evaluateExpression(expression.substring(0, mulDivIndex));
+            double right = evaluateExpression(expression.substring(mulDivIndex + 1));
+
+            switch (mulDivOp) {
+                case '*':
+                    return left * right;
+                case '/':
+                    if (right == 0) {
+                        throw new NumberFormatException("Division by zero");
+                    }
+                    return left / right;
+                case '%':
+                    return left % right;
+            }
         }
 
         throw new NumberFormatException("Cannot parse expression: " + expression);
