@@ -15,7 +15,6 @@ import net.blueva.menu.libraries.iridiumcolor.patterns.Pattern;
 import net.blueva.menu.libraries.iridiumcolor.patterns.RainbowPattern;
 import net.blueva.menu.libraries.iridiumcolor.patterns.SolidPattern;
 import net.md_5.bungee.api.ChatColor;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
