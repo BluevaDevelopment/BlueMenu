@@ -6,7 +6,7 @@
 
 menuName: "<gradient:#00d4ff:#0099ff><bold>Custom Form Example</gradient>"
 type: CUSTOM
-openCommand: /customform
+openCommand: /custommenu
 
 # Form components
 # Each component can have actions that execute when the player submits the form
@@ -129,5 +129,5 @@ components:
 #    - PLAYER;command - Executes a command as the player
 #    - CONSOLE;command - Executes a command from console
 #    - CLOSE - Closes the menu
-# 5. You can also use PlaceholderAPI placeholders like {player_name}
+# 5. You can also use PlaceholderAPI placeholders like %player_name%
 # 6. All actions from all components are executed when the form is submitted
