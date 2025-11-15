@@ -97,10 +97,10 @@ public class CustomManager {
                 break;
 
             case "SLIDER":
-                float min = (float) component.getDouble("min", 0);
-                float max = (float) component.getDouble("max", 10);
-                float step = (float) component.getDouble("step", 1);
-                float defaultSlider = (float) component.getDouble("default", min);
+                float min = (float) component.getDouble("min", 0.0);
+                float max = (float) component.getDouble("max", 10.0);
+                float step = (float) component.getDouble("step", 1.0);
+                float defaultSlider = (float) component.getDouble("default", (double)min);
                 formBuilder.slider(text, min, max, step, defaultSlider);
                 componentsOrder.add(new ComponentData(componentKey, "SLIDER", component.getStringList("actions"), null));
                 break;
