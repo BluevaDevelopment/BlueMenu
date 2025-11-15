@@ -1,5 +1,6 @@
 package net.blueva.menu;
 
+import fr.mrmicky.fastinv.FastInvManager;
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
 import net.blueva.menu.commands.main.subcommands.HelpSubCommand;
@@ -49,6 +50,9 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         plugin = this;
+
+        // Register FastInv first
+        FastInvManager.register(this);
 
         javaMenuManager = new MenuManager(this);
         bedrockMenuManager = new net.blueva.menu.managers.bedrock.MenuManager(this);
@@ -119,9 +123,8 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public void registerEvents() {
-        getServer().getPluginManager().registerEvents(new InventoryClickListener(this), this);
-        getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
-        getServer().getPluginManager().registerEvents(new InventoryDragListener(), this);
+        // FastInv handles inventory click, drag, and close events automatically
+        // Only register non-inventory related listeners
         getServer().getPluginManager().registerEvents(new InventoryInteractListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerCommandPreprocessListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);

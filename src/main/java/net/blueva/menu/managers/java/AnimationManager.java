@@ -1,7 +1,7 @@
 package net.blueva.menu.managers.java;
 
+import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -10,9 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AnimationManager {
     static void startAnimation(Main main, Player player, ConfigurationSection animationConfig, int menuSize) {
@@ -42,8 +40,16 @@ public class AnimationManager {
                         return;
                     }
 
+                    // Get the active FastInv menu
+                    FastInv menu = main.javaMenuManager.getActiveMenu(player);
+                    if (menu == null) {
+                        cancel();
+                        return;
+                    }
+
+                    Inventory inventory = menu.getInventory();
+
                     // Clear previous frames
-                    Inventory inventory = player.getOpenInventory().getTopInventory();
                     for (int i = 0; i < frames.size(); i++) {
                         ConfigurationSection frameSection = framesSection.getConfigurationSection("frame" + (i + 1));
                         if (frameSection != null) {

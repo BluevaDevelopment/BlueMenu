@@ -1,9 +1,8 @@
 package net.blueva.menu.managers.java;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -13,8 +12,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 
-import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -109,17 +111,27 @@ public class ItemManager {
             assert itemMeta != null;
             itemMeta.setCustomModelData(customModelData);
         } catch (NumberFormatException e) {
+            // Use the new Bukkit PlayerProfile API instead of com.mojang.authlib
             SkullMeta skullMeta = (SkullMeta) itemMeta;
-            GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-            profile.getProperties().put("textures", new Property("textures", value));
-            Field profileField;
 
             try {
                 assert skullMeta != null;
-                profileField = skullMeta.getClass().getDeclaredField("profile");
-                profileField.setAccessible(true);
-                profileField.set(skullMeta, profile);
-            } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
+                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+                PlayerTextures textures = profile.getTextures();
+
+                // Decode base64 texture or use URL directly
+                String textureUrl;
+                if (value.startsWith("http://") || value.startsWith("https://")) {
+                    textureUrl = value;
+                } else {
+                    // Assume it's a base64 encoded texture value
+                    textureUrl = "http://textures.minecraft.net/texture/" + value;
+                }
+
+                textures.setSkin(new URL(textureUrl));
+                profile.setTextures(textures);
+                skullMeta.setOwnerProfile(profile);
+            } catch (MalformedURLException ex) {
                 ex.printStackTrace();
             }
         }

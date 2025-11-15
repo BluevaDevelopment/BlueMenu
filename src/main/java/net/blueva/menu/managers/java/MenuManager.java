@@ -1,18 +1,13 @@
 package net.blueva.menu.managers.java;
 
+import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.util.*;
@@ -22,6 +17,7 @@ import static org.bukkit.Bukkit.getLogger;
 public class MenuManager {
     public final Map<String, FileConfiguration> menuConfigs = new HashMap<>();
     public final List<String> menuNames = new ArrayList<>();
+    public final Map<Player, FastInv> activeMenus = new HashMap<>();
 
     private final Main main;
 
@@ -57,7 +53,9 @@ public class MenuManager {
         if (menuConfig != null) {
             int menuSize = menuConfig.getInt("menuSize");
             String menuTitle = MessagesUtil.format(player, menuConfig.getString("menuName"));
-            Inventory menuInventory = Bukkit.createInventory(null, menuSize, menuTitle);
+
+            // Create FastInv menu
+            FastInv menu = new FastInv(menuSize, menuTitle);
 
             ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
             if (itemsSection != null) {
@@ -66,22 +64,39 @@ public class MenuManager {
                     if (itemSection != null) {
                         ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
                         int slot = itemSection.getInt("slot");
-                        menuInventory.setItem(slot, itemStack);
+                        List<String> actions = itemSection.getStringList("actions");
+
+                        // Add item with click handler
+                        menu.setItem(slot, itemStack, e -> {
+                            e.setCancelled(true);
+                            ActionManager.executeActions(player, actions, e.getClick());
+                        });
                     }
                 }
             }
 
-            player.openInventory(menuInventory);
+            // Add close handler
+            menu.addCloseHandler(e -> {
+                activeMenus.remove(player);
+                PlayerManager.closeMenu(player);
+            });
+
+            // Store active menu for animations
+            activeMenus.put(player, menu);
+
+            // Open the menu
+            menu.open(player);
 
             PlayerManager.openMenu(player, menuConfig.getString("menuName"));
 
+            // Start animations if configured
             if (menuConfig.contains("animations")) {
                 ConfigurationSection animationsConfig = menuConfig.getConfigurationSection("animations");
                 if(animationsConfig != null) {
                     for (String animationName : animationsConfig.getKeys(false)) {
                         ConfigurationSection animationConfig = animationsConfig.getConfigurationSection(animationName);
                         if(animationConfig != null) {
-                            AnimationManager.startAnimation(main, player, animationConfig, menuInventory.getSize()); // Pass the menu size
+                            AnimationManager.startAnimation(main, player, animationConfig, menuSize);
                         }
                     }
                 }
@@ -91,20 +106,11 @@ public class MenuManager {
         }
     }
 
-    public FileConfiguration getMenuConfig(Inventory inventory, Player player) {
-        for (FileConfiguration menuConfig : menuConfigs.values()) {
-            String menuName = MessagesUtil.format(player, menuConfig.getString("menuName"));
-            int menuSize = menuConfig.getInt("menuSize");
-            if (inventory.getType() == InventoryType.CHEST && inventory.getSize() == menuSize && PlayerManager.playerMenuTitle.get(player).equals(menuName)) {
-                return menuConfig;
-            }
-        }
-        return null;
+    public FastInv getActiveMenu(Player player) {
+        return activeMenus.get(player);
     }
 
     static boolean isMenuOpen(Player player) {
-        InventoryView openInventory = player.getOpenInventory();
-        InventoryType openInventoryType = openInventory.getType();
-        return openInventoryType == InventoryType.CHEST;
+        return PlayerManager.isPlayerInMenu(player);
     }
 }
