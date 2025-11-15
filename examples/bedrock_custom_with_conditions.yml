@@ -1,0 +1,85 @@
+# Example Bedrock Custom Form with display conditions
+# This demonstrates the ConditionManager features for Bedrock players
+
+menuName: "&b&lConditional Custom Form"
+type: CUSTOM
+
+components:
+  # Always visible label
+  header:
+    type: LABEL
+    text: "&7Fill out the form below"
+
+  # Input only shown if player level >= 10
+  vip_input:
+    type: INPUT
+    text: "&6VIP Message (Level 10+ only)"
+    placeholder: "Enter your VIP message..."
+    default: ""
+    display_conditions:
+      - "%player_level% >= 10"
+    actions:
+      - "MESSAGE;&aYour VIP message: {vip_input}"
+
+  # Dropdown with conditions
+  world_dropdown:
+    type: DROPDOWN
+    text: "&eSelect World"
+    options:
+      - "Overworld"
+      - "Nether"
+      - "End"
+    default: 0
+    conditions:
+      - "%player_level% >= 5"
+    actions:
+      - "MESSAGE;&aYou selected: {world_dropdown_text}"
+
+  # Toggle with advanced conditions
+  advanced_toggle:
+    type: TOGGLE
+    text: "&dAdvanced Feature"
+    default: false
+    conditions:
+      all:
+        - "%player_level% >= 20"
+      any:
+        - "%vault_group% contains 'elite'"
+        - "%player_health% >= 15"
+    actions:
+      - "MESSAGE;&dAdvanced feature: {advanced_toggle}"
+
+  # Slider with condition
+  power_slider:
+    type: SLIDER
+    text: "&cPower Level"
+    min: 0
+    max: 100
+    step: 10
+    default: 50
+    display_conditions:
+      - "%player_level% >= 15"
+    actions:
+      - "MESSAGE;&cPower set to: {power_slider}"
+
+  # Step slider with text operator
+  difficulty_steps:
+    type: STEPSLIDER
+    text: "&6Difficulty"
+    steps:
+      - "Easy"
+      - "Normal"
+      - "Hard"
+    default: 1
+    conditions:
+      - "%vault_group% contains 'vip'"
+    actions:
+      - "MESSAGE;&6Difficulty: {difficulty_steps_text}"
+
+  # Always visible toggle
+  accept:
+    type: TOGGLE
+    text: "&aAccept Terms"
+    default: false
+    actions:
+      - "MESSAGE;&aAccepted: {accept}"

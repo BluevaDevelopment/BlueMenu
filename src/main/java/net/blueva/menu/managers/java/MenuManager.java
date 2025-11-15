@@ -2,6 +2,7 @@ package net.blueva.menu.managers.java;
 
 import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
+import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -62,15 +63,42 @@ public class MenuManager {
                 for (String itemName : itemsSection.getKeys(false)) {
                     ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemName);
                     if (itemSection != null) {
-                        ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
-                        int slot = itemSection.getInt("slot");
-                        List<String> actions = itemSection.getStringList("actions");
+                        // Check display conditions before adding the item
+                        boolean shouldDisplay = true;
 
-                        // Add item with click handler
-                        menu.setItem(slot, itemStack, e -> {
-                            e.setCancelled(true);
-                            ActionManager.executeActions(player, actions, e.getClick());
-                        });
+                        // Check for display_conditions list
+                        if (itemSection.contains("display_conditions")) {
+                            List<String> displayConditions = itemSection.getStringList("display_conditions");
+                            shouldDisplay = ConditionManager.evaluateConditions(player, displayConditions);
+                        }
+
+                        // Check for conditions map with all/any/none
+                        if (shouldDisplay && itemSection.contains("conditions")) {
+                            Object conditionsObj = itemSection.get("conditions");
+                            if (conditionsObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
+                                shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
+                            } else if (conditionsObj instanceof List) {
+                                // Simple list format
+                                @SuppressWarnings("unchecked")
+                                List<String> conditionsList = (List<String>) conditionsObj;
+                                shouldDisplay = ConditionManager.evaluateConditions(player, conditionsList);
+                            }
+                        }
+
+                        // Only add the item if conditions pass
+                        if (shouldDisplay) {
+                            ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
+                            int slot = itemSection.getInt("slot");
+                            List<String> actions = itemSection.getStringList("actions");
+
+                            // Add item with click handler
+                            menu.setItem(slot, itemStack, e -> {
+                                e.setCancelled(true);
+                                ActionManager.executeActions(player, actions, e.getClick());
+                            });
+                        }
                     }
                 }
             }

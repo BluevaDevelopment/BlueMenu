@@ -1,5 +1,6 @@
 package net.blueva.menu.managers.bedrock;
 
+import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,7 +10,9 @@ import org.geysermc.cumulus.util.FormImage;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class SimpleManager {
@@ -26,14 +29,47 @@ public class SimpleManager {
                 .title(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("menuName"))))
                 .content(keyResult.toString());
 
+        // Store visible buttons for action handling
+        List<String> visibleButtons = new ArrayList<>();
+
         ConfigurationSection buttonsConfig = menuConfig.getConfigurationSection("buttons");
         if (buttonsConfig != null) {
             for (String buttonKey : buttonsConfig.getKeys(false)) {
-                String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonsConfig.getString(buttonKey + ".text")));
-                if(buttonsConfig.isSet(buttonKey+".image")) {
-                    formBuilder.button(buttonText, FormImage.Type.URL, Objects.requireNonNull(buttonsConfig.getString(buttonKey + ".image")));
-                } else {
-                    formBuilder.button(buttonText);
+                ConfigurationSection buttonSection = buttonsConfig.getConfigurationSection(buttonKey);
+                if (buttonSection != null) {
+                    // Check display conditions before adding the button
+                    boolean shouldDisplay = true;
+
+                    // Check for display_conditions list
+                    if (buttonSection.contains("display_conditions")) {
+                        List<String> displayConditions = buttonSection.getStringList("display_conditions");
+                        shouldDisplay = ConditionManager.evaluateConditions(player, displayConditions);
+                    }
+
+                    // Check for conditions map with all/any/none
+                    if (shouldDisplay && buttonSection.contains("conditions")) {
+                        Object conditionsObj = buttonSection.get("conditions");
+                        if (conditionsObj instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
+                            shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
+                        } else if (conditionsObj instanceof List) {
+                            @SuppressWarnings("unchecked")
+                            List<String> conditionsList = (List<String>) conditionsObj;
+                            shouldDisplay = ConditionManager.evaluateConditions(player, conditionsList);
+                        }
+                    }
+
+                    // Only add the button if conditions pass
+                    if (shouldDisplay) {
+                        String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonSection.getString("text")));
+                        if (buttonSection.isSet("image")) {
+                            formBuilder.button(buttonText, FormImage.Type.URL, Objects.requireNonNull(buttonSection.getString("image")));
+                        } else {
+                            formBuilder.button(buttonText);
+                        }
+                        visibleButtons.add(buttonKey);
+                    }
                 }
             }
         }
@@ -41,10 +77,14 @@ public class SimpleManager {
         SimpleForm form = formBuilder.validResultHandler(result -> {
             ConfigurationSection buttonsConfigSection = menuConfig.getConfigurationSection("buttons");
             if (buttonsConfigSection != null) {
-                for (String buttonKey : buttonsConfigSection.getKeys(false)) {
-                    String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonsConfigSection.getString(buttonKey + ".text")));
-                    if (result.clickedButton().text().equals(buttonText)) {
-                        ActionManager.executeActions(player, buttonsConfigSection.getStringList(buttonKey + ".actions"));
+                // Only check visible buttons for action execution
+                for (String buttonKey : visibleButtons) {
+                    ConfigurationSection buttonSection = buttonsConfigSection.getConfigurationSection(buttonKey);
+                    if (buttonSection != null) {
+                        String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonSection.getString("text")));
+                        if (result.clickedButton().text().equals(buttonText)) {
+                            ActionManager.executeActions(player, buttonSection.getStringList("actions"));
+                        }
                     }
                 }
             }

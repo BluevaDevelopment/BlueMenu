@@ -1,0 +1,57 @@
+# Example Bedrock Simple Form with display conditions
+# This demonstrates the ConditionManager features for Bedrock players
+
+menuName: "&b&lConditional Simple Form"
+type: SIMPLE
+
+content:
+  - "&7Welcome to the conditional menu!"
+  - "&7Buttons shown depend on your stats"
+
+buttons:
+  # Button only shown if player level >= 10
+  vip_button:
+    text: "&6VIP Options"
+    image: "https://example.com/vip.png"
+    display_conditions:
+      - "%player_level% >= 10"
+    actions:
+      - "MESSAGE;&aYou clicked VIP options!"
+
+  # Button only shown if player health > 5
+  healing_button:
+    text: "&cHeal Me"
+    display_conditions:
+      - "%player_health% > 5"
+    actions:
+      - "CONSOLE;heal {player_name}"
+      - "MESSAGE;&aYou've been healed!"
+
+  # Button with multiple conditions
+  world_button:
+    text: "&eWorld Teleport"
+    display_conditions:
+      - "%player_world% == 'world'"
+      - "%player_level% >= 5"
+    actions:
+      - "CONSOLE;spawn {player_name}"
+
+  # Button with advanced conditions
+  advanced_button:
+    text: "&dAdvanced Access"
+    conditions:
+      all:
+        - "%player_level% >= 20"
+      any:
+        - "%player_world% == 'world_nether'"
+        - "%vault_group% contains 'elite'"
+      none:
+        - "%player_gamemode% == 'SPECTATOR'"
+    actions:
+      - "MESSAGE;&dYou have advanced access!"
+
+  # Always visible button
+  close_button:
+    text: "&cClose"
+    actions:
+      - "MESSAGE;&7Menu closed"

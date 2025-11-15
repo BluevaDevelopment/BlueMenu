@@ -1,0 +1,131 @@
+# Example Java menu with display conditions
+# This demonstrates the ConditionManager features
+
+menuName: "&b&lConditional Menu"
+menuSize: 27
+
+items:
+  # Item only shown if player level is >= 10
+  vip_item:
+    name: "&6VIP Item"
+    slot: 10
+    itemStack:
+      material: DIAMOND
+      amount: 1
+    lore:
+      - "&7Only visible if level >= 10"
+      - "&7Your level: %player_level%"
+    display_conditions:
+      - "%player_level% >= 10"
+    actions:
+      - "MESSAGE;&aYou clicked the VIP item!"
+
+  # Item only shown if player health > 5
+  healing_item:
+    name: "&cHealing Potion"
+    slot: 11
+    itemStack:
+      material: POTION
+      amount: 1
+    lore:
+      - "&7Only visible if health > 5"
+      - "&7Your health: %player_health%"
+    display_conditions:
+      - "%player_health% > 5"
+    actions:
+      - "CONSOLE;heal {player_name}"
+
+  # Item with multiple conditions (ALL must pass)
+  world_specific_item:
+    name: "&eWorld Specific"
+    slot: 12
+    itemStack:
+      material: GRASS_BLOCK
+      amount: 1
+    lore:
+      - "&7Only in 'world' with level >= 5"
+    display_conditions:
+      - "%player_world% == 'world'"
+      - "%player_level% >= 5"
+    actions:
+      - "MESSAGE;&aYou're in the right world!"
+
+  # Item with advanced conditions (all/any/none)
+  advanced_item:
+    name: "&dAdvanced Conditions"
+    slot: 13
+    itemStack:
+      material: NETHER_STAR
+      amount: 1
+    lore:
+      - "&7Complex condition logic"
+      - "&7Requires level 20+"
+      - "&7And health 8+"
+      - "&7And either nether or elite group"
+      - "&7But not spectator mode"
+    conditions:
+      all:     # All must be true
+        - "%player_level% >= 20"
+        - "%player_health% >= 8"
+      any:     # At least one must be true
+        - "%player_world% == 'world_nether'"
+        - "%vault_group% contains 'elite'"
+      none:    # None of them must be true
+        - "%player_gamemode% == 'SPECTATOR'"
+    actions:
+      - "MESSAGE;&dYou meet all the advanced conditions!"
+
+  # Item with boolean and math operators
+  math_item:
+    name: "&aMath Example"
+    slot: 14
+    itemStack:
+      material: EMERALD
+      amount: 1
+    lore:
+      - "&7Shown if (level >= 10) AND (tps > 16)"
+    conditions:
+      - "(%player_level% >= 10) && (%server_tps% > 16)"
+    actions:
+      - "MESSAGE;&aServer is running well!"
+
+  # Item with negation
+  not_in_nether:
+    name: "&bNot in Nether"
+    slot: 15
+    itemStack:
+      material: ICE
+      amount: 1
+    lore:
+      - "&7Only shown when NOT in nether"
+    conditions:
+      - "! (%player_world% == 'world_nether')"
+    actions:
+      - "MESSAGE;&bYou're not in the nether!"
+
+  # Item with text operators
+  text_example:
+    name: "&eText Operators"
+    slot: 16
+    itemStack:
+      material: BOOK
+      amount: 1
+    lore:
+      - "&7Shown if group contains 'vip'"
+    conditions:
+      - "%vault_group% contains 'vip'"
+    actions:
+      - "MESSAGE;&eYou're a VIP!"
+
+  # Always visible item
+  always_visible:
+    name: "&fAlways Visible"
+    slot: 22
+    itemStack:
+      material: BARRIER
+      amount: 1
+    lore:
+      - "&7This item has no conditions"
+      - "&7So it's always visible"
+    actions:
+      - "CLOSE"

@@ -1,5 +1,6 @@
 package net.blueva.menu.managers.bedrock;
 
+import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -45,6 +46,34 @@ public class CustomManager {
     private static void addComponent(CustomForm.Builder formBuilder, ConfigurationSection component,
                                      String type, Player player, String componentKey,
                                      List<ComponentData> componentsOrder) {
+        // Check display conditions before adding the component
+        boolean shouldDisplay = true;
+
+        // Check for display_conditions list
+        if (component.contains("display_conditions")) {
+            List<String> displayConditions = component.getStringList("display_conditions");
+            shouldDisplay = ConditionManager.evaluateConditions(player, displayConditions);
+        }
+
+        // Check for conditions map with all/any/none
+        if (shouldDisplay && component.contains("conditions")) {
+            Object conditionsObj = component.get("conditions");
+            if (conditionsObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
+                shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
+            } else if (conditionsObj instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<String> conditionsList = (List<String>) conditionsObj;
+                shouldDisplay = ConditionManager.evaluateConditions(player, conditionsList);
+            }
+        }
+
+        // Only add the component if conditions pass
+        if (!shouldDisplay) {
+            return;
+        }
+
         String text = MessagesUtil.format(player, Objects.requireNonNull(component.getString("text", "")));
 
         switch (type.toUpperCase()) {
