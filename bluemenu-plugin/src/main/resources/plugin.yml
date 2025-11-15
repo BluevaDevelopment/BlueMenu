@@ -18,3 +18,14 @@ commands:
       - bm
       - pluginmenu
       - custommenu
+
+permissions:
+  bluemenu.admin:
+    description: Access to all BlueMenu commands
+    default: op
+  bluemenu.editor:
+    description: Access to the web editor
+    default: op
+  bluemenu.open:
+    description: Open menus for self or others
+    default: true

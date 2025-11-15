@@ -21,6 +21,9 @@ public class BlueMenuTabComplete implements TabCompleter {
                 subCommands.add("open");
                 subCommands.add("reload");
             }
+            if(sender.hasPermission("bluemenu.editor")) {
+                subCommands.add("editor");
+            }
             return subCommands;
         }
         return null;

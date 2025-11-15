@@ -4,6 +4,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import fr.mrmicky.fastinv.FastInvManager;
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
+import net.blueva.menu.commands.main.subcommands.EditorSubCommand;
 import net.blueva.menu.commands.main.subcommands.HelpSubCommand;
 import net.blueva.menu.commands.main.subcommands.ListSubCommand;
 import net.blueva.menu.commands.main.subcommands.OpenSubCommand;
@@ -13,6 +14,7 @@ import net.blueva.menu.configuration.ConfigManager;
 import net.blueva.menu.libraries.bstats.Metrics;
 import net.blueva.menu.listeners.*;
 import net.blueva.menu.managers.java.MenuManager;
+import net.blueva.menu.webeditor.WebEditorManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,6 +30,7 @@ public class Main extends JavaPlugin implements Listener {
     public MenuManager javaMenuManager;
     public net.blueva.menu.managers.bedrock.MenuManager bedrockMenuManager;
     public ConfigManager configManager;
+    private WebEditorManager webEditorManager;
 
     // Adventure
     private BukkitAudiences adventure;
@@ -54,6 +57,14 @@ public class Main extends JavaPlugin implements Listener {
             throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
         }
         return this.adventure;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public WebEditorManager getWebEditorManager() {
+        return webEditorManager;
     }
 
 
@@ -107,10 +118,27 @@ public class Main extends JavaPlugin implements Listener {
         javaMenuManager.loadJavaMenus();
         bedrockMenuManager.loadBedrockMenus();
         registerCommands();
+
+        // Initialize web editor if enabled
+        boolean webEditorEnabled = getConfig().getBoolean("webeditor.enabled", false);
+        String webEditorUrl = getConfig().getString("webeditor.server-url", "ws://localhost:8081");
+        webEditorManager = new WebEditorManager(this, webEditorUrl, webEditorEnabled);
+
+        if (webEditorEnabled) {
+            getLogger().info("Web Editor is enabled, connecting to " + webEditorUrl);
+            webEditorManager.connect();
+        } else {
+            getLogger().info("Web Editor is disabled in config.yml");
+        }
     }
 
     @Override
     public void onDisable() {
+        // Disconnect web editor
+        if (webEditorManager != null) {
+            webEditorManager.disconnect();
+        }
+
         // Close Adventure
         if(this.adventure != null) {
             this.adventure.close();
@@ -137,6 +165,7 @@ public class Main extends JavaPlugin implements Listener {
         handler.register("open", new OpenSubCommand(this));
         handler.register("list", new ListSubCommand(this));
         handler.register("reload", new ReloadSubCommand(this));
+        handler.register("editor", new EditorSubCommand(this));
 
         Objects.requireNonNull(getCommand("bluemenu")).setExecutor(handler);
         Objects.requireNonNull(getCommand("bluemenu")).setTabCompleter(new BlueMenuTabComplete());

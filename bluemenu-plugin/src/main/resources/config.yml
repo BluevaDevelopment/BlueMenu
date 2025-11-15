@@ -29,6 +29,24 @@ metrics: true
 # Spanish (ES): es_ES
 language: 'en_UK'
 
+# Web Editor:
+# Enable the web-based menu editor for real-time menu editing from a browser
+# Requires the BlueMenu WebServer running separately (menu.blueva.net or your own server)
+webeditor:
+  # Enable/disable web editor functionality
+  enabled: false
+
+  # WebSocket server URL (where BlueMenu WebServer is running)
+  # Default: ws://localhost:8081 (for local testing)
+  # Production: ws://menu.blueva.net:8081 (or your server IP/domain)
+  server-url: 'ws://localhost:8081'
+
+  # Auto-save changes made in the web editor
+  auto-save: true
+
+  # Auto-reload menus when changes are saved
+  auto-reload: true
+
 # Menus located in /plugins/BlueMenu/menus/java
 # Directory path where Java menus are located.
 java_menus:
