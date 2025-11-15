@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,13 +18,15 @@ import java.util.regex.Pattern;
 
 public class MessagesUtil {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private static final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
+    private static final LegacyComponentSerializer legacySerializerAmpersand = LegacyComponentSerializer.legacyAmpersand();
+    private static final LegacyComponentSerializer legacySerializerSection = LegacyComponentSerializer.legacySection();
     private static Component cachedPrefix = null;
 
-    // Legacy method for backward compatibility - returns String (for Bedrock)
+    // Legacy method for backward compatibility - returns String with § codes for Spigot
     public static @NotNull String format (Player player, String text) {
         Component component = formatComponent(player, text);
-        return legacySerializer.serialize(component);
+        // Use section serializer (§) instead of ampersand (&) for Spigot compatibility
+        return legacySerializerSection.serialize(component);
     }
 
     public static @NotNull List<String> format(Player player, List<String> textList) {
