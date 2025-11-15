@@ -26,10 +26,10 @@ public class HelpSubCommand implements CommandInterface
         if(sender.hasPermission("bluemenu.help")) {
             List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.help");
             for (String message : list) {
-                sender.sendMessage(MessagesUtil.format((Player) sender, message.replace("{plugin_version}", main.pluginversion)));
+                MessagesUtil.sendMessage(sender, message.replace("{plugin_version}", main.pluginversion));
             }
         } else {
-            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.insufficient_permissions"));
         }
 
         return true;

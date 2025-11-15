@@ -47,10 +47,7 @@ public class ActionManager {
                     String playerCommand = MessagesUtil.formatPlaceholders(player, actionCommand);
                     player.chat("/"+playerCommand);
                 }
-                case "MESSAGE" -> {
-                    String message = MessagesUtil.format(player, actionCommand);
-                    player.sendMessage(message);
-                }
+                case "MESSAGE" -> MessagesUtil.sendMessage(player, actionCommand);
                 default -> getLogger().warning("Invalid action target: " + actionTarget);
             }
         } else if (actionParts.length == 1) {

@@ -3,6 +3,8 @@ package net.blueva.menu.managers.java;
 import fr.mrmicky.fastinv.FastInv;
 import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -52,10 +54,10 @@ public class MenuManager {
         FileConfiguration menuConfig = menuConfigs.get(menuName);
         if (menuConfig != null) {
             int menuSize = menuConfig.getInt("menuSize");
-            String menuTitle = MessagesUtil.format(player, menuConfig.getString("menuName"));
+            Component menuTitle = MessagesUtil.formatComponent(player, menuConfig.getString("menuName"));
 
-            // Create FastInv menu
-            FastInv menu = new FastInv(menuSize, menuTitle);
+            // Create FastInv menu with Adventure Component support
+            FastInv menu = new FastInv(owner -> Bukkit.createInventory(owner, menuSize, menuTitle));
 
             ConfigurationSection itemsSection = menuConfig.getConfigurationSection("items");
             if (itemsSection != null) {
@@ -102,7 +104,7 @@ public class MenuManager {
                 }
             }
         } else {
-            player.sendMessage(MessagesUtil.format(player, Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu")));
+            MessagesUtil.sendMessage(player, Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu"));
         }
     }
 

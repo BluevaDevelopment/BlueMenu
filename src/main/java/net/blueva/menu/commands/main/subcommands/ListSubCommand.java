@@ -35,7 +35,7 @@ public class ListSubCommand implements CommandInterface
                         message = message.replace("{number_menus}", String.valueOf(main.javaMenuManager.menuNames.size()));
                         message = message.replace("{list_menus}", menuList);
 
-                        sender.sendMessage(MessagesUtil.format((Player) sender, message));
+                        MessagesUtil.sendMessage(sender, message);
                     }
                 } else if (arg.equalsIgnoreCase("java")) {
                     String menuList = String.join(", ", main.javaMenuManager.menuNames);
@@ -46,16 +46,16 @@ public class ListSubCommand implements CommandInterface
                         message = message.replace("{number_menus}", String.valueOf(main.javaMenuManager.menuNames.size()));
                         message = message.replace("{list_menus}", menuList);
 
-                        sender.sendMessage(MessagesUtil.format((Player) sender, message));
+                        MessagesUtil.sendMessage(sender, message);
                     }
                 } else {
-                    sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.other.use_list_subcommand")));
+                    MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.other.use_list_subcommand"));
                 }
             } else {
-                sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.other.use_list_subcommand")));
+                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.other.use_list_subcommand"));
             }
         } else {
-            sender.sendMessage(MessagesUtil.format((Player) sender, main.configManager.getLang().getString("global.error.insufficient_permissions")));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.insufficient_permissions"));
         }
         return true;
     }

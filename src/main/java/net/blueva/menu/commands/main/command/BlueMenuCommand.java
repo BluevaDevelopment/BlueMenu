@@ -2,7 +2,7 @@ package net.blueva.menu.commands.main.command;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.commands.CommandInterface;
-import org.bukkit.ChatColor;
+import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -24,7 +24,7 @@ public class BlueMenuCommand implements CommandInterface
         if(sender.hasPermission("bluemenu.info")) {
             List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.info");
             for (String message : list) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message.replace("{plugin_version}", main.pluginversion)));
+                MessagesUtil.sendMessage(sender, message.replace("{plugin_version}", main.pluginversion));
             }
         }
         return false;

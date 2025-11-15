@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import net.blueva.menu.Main;
@@ -17,29 +18,46 @@ import java.util.regex.Pattern;
 public class MessagesUtil {
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
     private static final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
-    private static String cachedPrefix = null;
+    private static Component cachedPrefix = null;
 
+    // Legacy method for backward compatibility - returns String (for Bedrock)
     public static @NotNull String format (Player player, String text) {
-        if(player == null) {
-            return formatColors(text);
-        }
-        if(text == null) {
-            text = "";
-        }
-        String textfinal = formatPlaceholders(player, text);
-        return formatColors(textfinal);
+        Component component = formatComponent(player, text);
+        return legacySerializer.serialize(component);
     }
 
     public static @NotNull List<String> format(Player player, List<String> textList) {
         List<String> formattedTextList = new ArrayList<>();
 
         for (String text : textList) {
-            String formattedText = formatPlaceholders(player, text);
-            formattedText = formatColors(formattedText);
-            formattedTextList.add(formattedText);
+            formattedTextList.add(format(player, text));
         }
 
         return formattedTextList;
+    }
+
+    // New method that returns Adventure Component
+    public static @NotNull Component formatComponent(Player player, String text) {
+        if(text == null) {
+            return Component.empty();
+        }
+
+        String processed = formatPlaceholders(player, text);
+        processed = replacePrefixPlaceholder(processed);
+        processed = convertLegacyToMiniMessage(processed);
+
+        return miniMessage.deserialize(processed);
+    }
+
+    // Send message to player using Adventure
+    public static void sendMessage(CommandSender sender, String text) {
+        if(sender instanceof Player player) {
+            Component component = formatComponent(player, text);
+            Main.getPlugin().adventure().sender(sender).sendMessage(component);
+        } else {
+            // For console, convert to legacy
+            sender.sendMessage(format(null, text));
+        }
     }
 
     public static String formatPlaceholders(Player player, String text) {
@@ -66,22 +84,6 @@ public class MessagesUtil {
         return text;
     }
 
-    public static @NotNull String formatColors(String text) {
-        if(text == null) {
-            return "";
-        }
-
-        // Replace {prefix} with the actual prefix from language file
-        text = replacePrefixPlaceholder(text);
-
-        // Convert legacy color codes to MiniMessage format
-        text = convertLegacyToMiniMessage(text);
-
-        // Process with MiniMessage and convert back to legacy for Bukkit compatibility
-        Component component = miniMessage.deserialize(text);
-        return legacySerializer.serialize(component);
-    }
-
     private static String replacePrefixPlaceholder(String text) {
         if(!text.contains("{prefix}")) {
             return text;
@@ -91,13 +93,16 @@ public class MessagesUtil {
             // Get prefix from language file
             String rawPrefix = Main.getPlugin().language.getString("prefix", "");
             if(!rawPrefix.isEmpty()) {
-                cachedPrefix = formatColors(rawPrefix);
+                String processed = convertLegacyToMiniMessage(rawPrefix);
+                cachedPrefix = miniMessage.deserialize(processed);
             } else {
-                cachedPrefix = "";
+                cachedPrefix = Component.empty();
             }
         }
 
-        return text.replace("{prefix}", cachedPrefix);
+        // Replace {prefix} with serialized prefix for MiniMessage processing
+        String serializedPrefix = miniMessage.serialize(cachedPrefix);
+        return text.replace("{prefix}", serializedPrefix);
     }
 
     public static void clearPrefixCache() {
@@ -105,7 +110,7 @@ public class MessagesUtil {
     }
 
     private static String convertLegacyToMiniMessage(String text) {
-        // Pattern to match legacy color codes
+        // Convert hex colors &#RRGGBB to <color:#RRGGBB>
         Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
         Matcher hexMatcher = hexPattern.matcher(text);
         StringBuffer sb = new StringBuffer();
