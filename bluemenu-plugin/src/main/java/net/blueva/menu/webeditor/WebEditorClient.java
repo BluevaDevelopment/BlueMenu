@@ -56,6 +56,8 @@ public class WebEditorClient extends WebSocketClient {
                 case MENU_SAVE -> handleMenuSave(msg);
                 case PONG -> {} // Silent
                 case ERROR -> handleError(msg);
+                // Messages we send (ignore when broadcast back to us)
+                case MENU_LIST, MENU_DATA, MENU_SAVED -> {} // Silent (we sent these)
                 default -> logger.warning("Unhandled message type: " + msg.getType());
             }
         } catch (Exception e) {
