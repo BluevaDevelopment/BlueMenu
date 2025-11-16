@@ -12,7 +12,9 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +50,7 @@ public class WebEditorClient extends WebSocketClient {
                 case SESSION_VALID -> handleSessionValid(msg);
                 case MENU_LIST_REQUEST -> handleMenuListRequest(msg);
                 case MENU_GET -> handleMenuGet(msg);
+                case MENU_SAVE -> handleMenuSave(msg);
                 case PONG -> logger.fine("Pong received");
                 case ERROR -> handleError(msg);
                 default -> logger.warning("Unhandled message type: " + msg.getType());
@@ -153,6 +156,42 @@ public class WebEditorClient extends WebSocketClient {
             sendMenuData(fileName, platform, menuContent, sessionId);
         } else {
             logger.warning("Menu not found: " + fileName);
+        }
+    }
+
+    /**
+     * Handle menu save request (save modified menu content to disk)
+     */
+    private void handleMenuSave(WebSocketMessage msg) {
+        JsonObject data = msg.getData();
+        String fileName = data.has("fileName") ? data.get("fileName").getAsString() : null;
+        String platform = data.has("platform") ? data.get("platform").getAsString() : null;
+        String content = data.has("content") ? data.get("content").getAsString() : null;
+        String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
+
+        logger.info("Menu save requested: " + fileName + " (platform: " + platform + ")");
+
+        if (fileName == null || platform == null || content == null) {
+            logger.warning("Missing fileName, platform or content in MENU_SAVE request");
+            sendError("Missing required fields", sessionId);
+            return;
+        }
+
+        // Save menu to disk
+        boolean success = saveMenuToDisk(fileName, platform, content);
+
+        if (success) {
+            // Auto-reload if enabled
+            boolean autoReload = plugin.getConfig().getBoolean("webeditor.auto-reload", true);
+            if (autoReload) {
+                reloadMenus(platform);
+            }
+
+            // Send success confirmation
+            sendMenuSaved(fileName, platform, sessionId);
+            logger.info("Menu saved successfully: " + fileName);
+        } else {
+            sendError("Failed to save menu to disk", sessionId);
         }
     }
 
@@ -284,5 +323,90 @@ public class WebEditorClient extends WebSocketClient {
         send(gson.toJson(msg));
 
         logger.info("Sent menu data: " + fileName + " (" + content.length() + " bytes)");
+    }
+
+    /**
+     * Save menu content to disk
+     */
+    private boolean saveMenuToDisk(String fileName, String platform, String content) {
+        try {
+            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+            File menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+
+            // Create parent directories if they don't exist
+            menuFile.getParentFile().mkdirs();
+
+            // Write content to file
+            try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
+                writer.write(content);
+            }
+
+            logger.info("Menu file written to disk: " + menuFile.getPath());
+            return true;
+        } catch (Exception e) {
+            logger.severe("Error writing menu file: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Reload menus in memory after saving
+     */
+    private void reloadMenus(String platform) {
+        try {
+            // Run on main thread
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                if (platform.equalsIgnoreCase("JAVA")) {
+                    plugin.javaMenuManager.loadJavaMenus();
+                    logger.info("Java menus reloaded");
+                } else {
+                    plugin.bedrockMenuManager.loadBedrockMenus();
+                    logger.info("Bedrock menus reloaded");
+                }
+            });
+        } catch (Exception e) {
+            logger.severe("Error reloading menus: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Send menu saved confirmation to the server
+     */
+    private void sendMenuSaved(String fileName, String platform, String sessionId) {
+        WebSocketMessage msg = new WebSocketMessage(MessageType.MENU_SAVED);
+        JsonObject data = new JsonObject();
+
+        data.addProperty("fileName", fileName);
+        data.addProperty("platform", platform);
+        data.addProperty("success", true);
+        data.addProperty("message", "Menu saved successfully");
+        if (sessionId != null) {
+            data.addProperty("sessionId", sessionId);
+        }
+
+        msg.setData(data);
+        send(gson.toJson(msg));
+
+        logger.info("Sent menu saved confirmation: " + fileName);
+    }
+
+    /**
+     * Send error message to the server
+     */
+    private void sendError(String errorMessage, String sessionId) {
+        WebSocketMessage msg = new WebSocketMessage(MessageType.ERROR);
+        JsonObject data = new JsonObject();
+
+        data.addProperty("message", errorMessage);
+        if (sessionId != null) {
+            data.addProperty("sessionId", sessionId);
+        }
+
+        msg.setData(data);
+        send(gson.toJson(msg));
+
+        logger.warning("Sent error: " + errorMessage);
     }
 }

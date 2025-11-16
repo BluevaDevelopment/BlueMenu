@@ -8,6 +8,7 @@ public enum MessageType {
     SESSION_CREATE,
     MENU_UPDATE,
     MENU_LIST,
+    MENU_SAVED,
 
     // WebServer -> Plugin
     SESSION_VALIDATE,
