@@ -105,21 +105,31 @@ public class WebEditorManager {
      * Get the editor URL for a session
      */
     public String getEditorUrl(String sessionId) {
-        // Extract host and port from WebSocket URL
         try {
             URI uri = new URI(serverUrl);
             String host = uri.getHost();
             int port = uri.getPort();
+            String scheme;
 
-            // Assume HTTP is on port 8080 if WebSocket is on 8081
+            // If port is -1, assume Caddy with HTTPS on default port 443
+            if (port == -1) {
+                scheme = "https";
+                return String.format("%s://%s/editor/%s", scheme, host, sessionId);
+            }
+
+            // Old behavior: websocket was on 8081, HTTP on 8080
             if (port == 8081) {
                 port = 8080;
             }
 
-            return String.format("http://%s:%d/editor/%s", host, port, sessionId);
+            scheme = "http";
+
+            return String.format("%s://%s:%d/editor/%s", scheme, host, port, sessionId);
+
         } catch (Exception e) {
             logger.severe("Error generating editor URL: " + e.getMessage());
             return "Error generating URL";
         }
     }
+
 }
