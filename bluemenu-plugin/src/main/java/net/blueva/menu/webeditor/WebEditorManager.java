@@ -36,7 +36,7 @@ public class WebEditorManager {
 
         try {
             URI serverUri = new URI(WEBSOCKET_URL);
-            client = new WebEditorClient(serverUri);
+            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin);
             client.connect();
             logger.info("Connecting to official BlueMenu web editor at " + WEBSOCKET_URL);
         } catch (Exception e) {

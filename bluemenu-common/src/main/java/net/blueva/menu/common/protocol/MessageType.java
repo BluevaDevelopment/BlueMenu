@@ -11,6 +11,7 @@ public enum MessageType {
 
     // WebServer -> Plugin
     SESSION_VALIDATE,
+    MENU_LIST_REQUEST,
     MENU_GET,
     MENU_SAVE,
     MENU_CREATE,

@@ -2,12 +2,18 @@ package net.blueva.menu.webeditor;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
+import net.blueva.menu.Main;
+import net.blueva.menu.common.dto.MenuMetadataDTO;
 import net.blueva.menu.common.protocol.MessageType;
 import net.blueva.menu.common.protocol.WebSocketMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
@@ -17,10 +23,12 @@ import java.util.logging.Logger;
 public class WebEditorClient extends WebSocketClient {
     private static final Logger logger = Logger.getLogger(WebEditorClient.class.getName());
     private final Gson gson = new Gson();
+    private final Main plugin;
     private CompletableFuture<String> sessionCreationFuture;
 
-    public WebEditorClient(URI serverUri) {
+    public WebEditorClient(URI serverUri, Main plugin) {
         super(serverUri);
+        this.plugin = plugin;
     }
 
     @Override
@@ -36,6 +44,7 @@ public class WebEditorClient extends WebSocketClient {
 
             switch (msg.getType()) {
                 case SESSION_VALID -> handleSessionValid(msg);
+                case MENU_LIST_REQUEST -> handleMenuListRequest(msg);
                 case PONG -> logger.fine("Pong received");
                 case ERROR -> handleError(msg);
                 default -> logger.warning("Unhandled message type: " + msg.getType());
@@ -103,5 +112,107 @@ public class WebEditorClient extends WebSocketClient {
         if (sessionCreationFuture != null && !sessionCreationFuture.isDone()) {
             sessionCreationFuture.completeExceptionally(new RuntimeException(errorMessage));
         }
+    }
+
+    /**
+     * Handle menu list request from the server
+     */
+    private void handleMenuListRequest(WebSocketMessage msg) {
+        JsonObject data = msg.getData();
+        String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
+
+        logger.info("Menu list requested for session: " + sessionId);
+
+        // Get menu list and send it back
+        List<MenuMetadataDTO> menus = getMenuList();
+        sendMenuList(menus, sessionId);
+    }
+
+    /**
+     * Get list of all menus (Java + Bedrock)
+     */
+    private List<MenuMetadataDTO> getMenuList() {
+        List<MenuMetadataDTO> menus = new ArrayList<>();
+
+        // Java menus
+        for (String menuName : plugin.javaMenuManager.menuNames) {
+            YamlDocument config = plugin.javaMenuManager.menuConfigs.get(menuName);
+            if (config != null) {
+                String fileName = getFileNameForMenu(menuName, "java");
+                String displayName = config.getString("menuName", menuName);
+                String type = config.getString("type", "CHEST");
+                String openCommand = config.getString("openCommand", "");
+
+                // Count items
+                int itemCount = 0;
+                Section itemsSection = config.getSection("items");
+                if (itemsSection != null) {
+                    itemCount = itemsSection.getKeys().size();
+                }
+
+                menus.add(new MenuMetadataDTO(fileName, displayName, "JAVA", type, openCommand, itemCount));
+            }
+        }
+
+        // Bedrock menus
+        for (String menuName : plugin.bedrockMenuManager.menuNames) {
+            YamlDocument config = plugin.bedrockMenuManager.menuConfigs.get(menuName);
+            if (config != null) {
+                String fileName = getFileNameForMenu(menuName, "bedrock");
+                String displayName = config.getString("menuName", menuName);
+                String type = config.getString("type", "SIMPLE");
+                String openCommand = config.getString("openCommand", "");
+
+                // Count buttons/components
+                int itemCount = 0;
+                Section buttonsSection = config.getSection("buttons");
+                Section componentsSection = config.getSection("components");
+                if (buttonsSection != null) {
+                    itemCount = buttonsSection.getKeys().size();
+                } else if (componentsSection != null) {
+                    itemCount = componentsSection.getKeys().size();
+                }
+
+                menus.add(new MenuMetadataDTO(fileName, displayName, "BEDROCK", type, openCommand, itemCount));
+            }
+        }
+
+        logger.info("Found " + menus.size() + " menus");
+        return menus;
+    }
+
+    /**
+     * Get filename for a menu from the config
+     */
+    private String getFileNameForMenu(String menuName, String platform) {
+        String configKey = platform.equals("java") ? "java_menus" : "bedrock_menus";
+        List<String> menuList = plugin.getConfig().getStringList(configKey);
+
+        for (String entry : menuList) {
+            String[] parts = entry.split(";");
+            if (parts.length == 2 && parts[0].trim().equals(menuName)) {
+                return parts[1].trim();
+            }
+        }
+
+        return menuName + ".yml"; // Fallback
+    }
+
+    /**
+     * Send menu list to the server
+     */
+    public void sendMenuList(List<MenuMetadataDTO> menus, String sessionId) {
+        WebSocketMessage msg = new WebSocketMessage(MessageType.MENU_LIST);
+        JsonObject data = new JsonObject();
+
+        if (sessionId != null) {
+            data.addProperty("sessionId", sessionId);
+        }
+        data.add("menus", gson.toJsonTree(menus));
+
+        msg.setData(data);
+        send(gson.toJson(msg));
+
+        logger.info("Sent menu list: " + menus.size() + " menus");
     }
 }
