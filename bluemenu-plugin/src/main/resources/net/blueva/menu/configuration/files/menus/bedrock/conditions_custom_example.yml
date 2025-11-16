@@ -20,8 +20,6 @@
 #    - any: At least one condition must be true
 #    - none: None of the conditions must be true
 
-file_version: 1
-
 menuName: "&b&lConditional Custom Form"
 type: CUSTOM
 openCommand: /customconditional
