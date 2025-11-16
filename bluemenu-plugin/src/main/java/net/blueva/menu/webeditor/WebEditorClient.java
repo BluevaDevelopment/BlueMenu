@@ -11,7 +11,9 @@ import net.blueva.menu.common.protocol.WebSocketMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -45,6 +47,7 @@ public class WebEditorClient extends WebSocketClient {
             switch (msg.getType()) {
                 case SESSION_VALID -> handleSessionValid(msg);
                 case MENU_LIST_REQUEST -> handleMenuListRequest(msg);
+                case MENU_GET -> handleMenuGet(msg);
                 case PONG -> logger.fine("Pong received");
                 case ERROR -> handleError(msg);
                 default -> logger.warning("Unhandled message type: " + msg.getType());
@@ -126,6 +129,31 @@ public class WebEditorClient extends WebSocketClient {
         // Get menu list and send it back
         List<MenuMetadataDTO> menus = getMenuList();
         sendMenuList(menus, sessionId);
+    }
+
+    /**
+     * Handle menu get request (request for full menu content)
+     */
+    private void handleMenuGet(WebSocketMessage msg) {
+        JsonObject data = msg.getData();
+        String fileName = data.has("fileName") ? data.get("fileName").getAsString() : null;
+        String platform = data.has("platform") ? data.get("platform").getAsString() : null;
+        String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
+
+        logger.info("Menu content requested: " + fileName + " (platform: " + platform + ")");
+
+        if (fileName == null || platform == null) {
+            logger.warning("Missing fileName or platform in MENU_GET request");
+            return;
+        }
+
+        // Get menu content and send it back
+        String menuContent = getMenuContent(fileName, platform);
+        if (menuContent != null) {
+            sendMenuData(fileName, platform, menuContent, sessionId);
+        } else {
+            logger.warning("Menu not found: " + fileName);
+        }
     }
 
     /**
@@ -214,5 +242,47 @@ public class WebEditorClient extends WebSocketClient {
         send(gson.toJson(msg));
 
         logger.info("Sent menu list: " + menus.size() + " menus");
+    }
+
+    /**
+     * Get full menu content as YAML string
+     */
+    private String getMenuContent(String fileName, String platform) {
+        try {
+            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+            File menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+
+            if (!menuFile.exists()) {
+                logger.warning("Menu file not found: " + menuFile.getPath());
+                return null;
+            }
+
+            // Read file content as string
+            return Files.readString(menuFile.toPath());
+        } catch (Exception e) {
+            logger.severe("Error reading menu file: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Send menu data (full content) to the server
+     */
+    private void sendMenuData(String fileName, String platform, String content, String sessionId) {
+        WebSocketMessage msg = new WebSocketMessage(MessageType.MENU_DATA);
+        JsonObject data = new JsonObject();
+
+        data.addProperty("fileName", fileName);
+        data.addProperty("platform", platform);
+        data.addProperty("content", content);
+        if (sessionId != null) {
+            data.addProperty("sessionId", sessionId);
+        }
+
+        msg.setData(data);
+        send(gson.toJson(msg));
+
+        logger.info("Sent menu data: " + fileName + " (" + content.length() + " bytes)");
     }
 }
