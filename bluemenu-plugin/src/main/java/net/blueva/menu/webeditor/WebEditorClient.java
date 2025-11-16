@@ -184,9 +184,9 @@ public class WebEditorClient extends WebSocketClient {
         boolean success = saveMenuToDisk(fileName, platform, content);
 
         if (success) {
-            // Auto-reload if enabled
+            // Auto-reload if enabled (but not for config.yml)
             boolean autoReload = plugin.getConfig().getBoolean("webeditor.auto-reload", true);
-            if (autoReload) {
+            if (autoReload && !platform.equalsIgnoreCase("CONFIG")) {
                 reloadMenus(platform, fileName);
             }
 
@@ -199,55 +199,71 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Get list of all menus (Java + Bedrock)
+     * Get list of all menus (Java + Bedrock) by scanning filesystem
      */
     private List<MenuMetadataDTO> getMenuList() {
         List<MenuMetadataDTO> menus = new ArrayList<>();
 
-        // Java menus
-        for (String menuName : plugin.javaMenuManager.menuNames) {
-            YamlDocument config = plugin.javaMenuManager.menuConfigs.get(menuName);
-            if (config != null) {
-                String fileName = getFileNameForMenu(menuName, "java");
-                String displayName = config.getString("menuName", menuName);
-                String type = config.getString("type", "CHEST");
-                String openCommand = config.getString("openCommand", "");
+        // Scan Java menus from filesystem
+        File javaMenusDir = new File(plugin.getDataFolder(), "menus/java");
+        if (javaMenusDir.exists() && javaMenusDir.isDirectory()) {
+            File[] javaFiles = javaMenusDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+            if (javaFiles != null) {
+                for (File file : javaFiles) {
+                    try {
+                        YamlDocument config = YamlDocument.create(file);
+                        String fileName = file.getName();
+                        String displayName = config.getString("menuName", fileName.replace(".yml", ""));
+                        String type = config.getString("type", "CHEST");
+                        String openCommand = config.getString("openCommand", "");
 
-                // Count items
-                int itemCount = 0;
-                Section itemsSection = config.getSection("items");
-                if (itemsSection != null) {
-                    itemCount = itemsSection.getKeys().size();
+                        // Count items
+                        int itemCount = 0;
+                        Section itemsSection = config.getSection("items");
+                        if (itemsSection != null) {
+                            itemCount = itemsSection.getKeys().size();
+                        }
+
+                        menus.add(new MenuMetadataDTO(fileName, displayName, "JAVA", type, openCommand, itemCount));
+                    } catch (Exception e) {
+                        logger.warning("Error reading Java menu file: " + file.getName() + " - " + e.getMessage());
+                    }
                 }
-
-                menus.add(new MenuMetadataDTO(fileName, displayName, "JAVA", type, openCommand, itemCount));
             }
         }
 
-        // Bedrock menus
-        for (String menuName : plugin.bedrockMenuManager.menuNames) {
-            YamlDocument config = plugin.bedrockMenuManager.menuConfigs.get(menuName);
-            if (config != null) {
-                String fileName = getFileNameForMenu(menuName, "bedrock");
-                String displayName = config.getString("menuName", menuName);
-                String type = config.getString("type", "SIMPLE");
-                String openCommand = config.getString("openCommand", "");
+        // Scan Bedrock menus from filesystem
+        File bedrockMenusDir = new File(plugin.getDataFolder(), "menus/bedrock");
+        if (bedrockMenusDir.exists() && bedrockMenusDir.isDirectory()) {
+            File[] bedrockFiles = bedrockMenusDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
+            if (bedrockFiles != null) {
+                for (File file : bedrockFiles) {
+                    try {
+                        YamlDocument config = YamlDocument.create(file);
+                        String fileName = file.getName();
+                        String displayName = config.getString("menuName", fileName.replace(".yml", ""));
+                        String type = config.getString("type", "FORM");
+                        String openCommand = config.getString("openCommand", "");
 
-                // Count buttons/components
-                int itemCount = 0;
-                Section buttonsSection = config.getSection("buttons");
-                Section componentsSection = config.getSection("components");
-                if (buttonsSection != null) {
-                    itemCount = buttonsSection.getKeys().size();
-                } else if (componentsSection != null) {
-                    itemCount = componentsSection.getKeys().size();
+                        // Count buttons/components
+                        int itemCount = 0;
+                        Section buttonsSection = config.getSection("buttons");
+                        Section componentsSection = config.getSection("components");
+                        if (buttonsSection != null) {
+                            itemCount = buttonsSection.getKeys().size();
+                        } else if (componentsSection != null) {
+                            itemCount = componentsSection.getKeys().size();
+                        }
+
+                        menus.add(new MenuMetadataDTO(fileName, displayName, "BEDROCK", type, openCommand, itemCount));
+                    } catch (Exception e) {
+                        logger.warning("Error reading Bedrock menu file: " + file.getName() + " - " + e.getMessage());
+                    }
                 }
-
-                menus.add(new MenuMetadataDTO(fileName, displayName, "BEDROCK", type, openCommand, itemCount));
             }
         }
 
-        logger.fine("Found " + menus.size() + " menus");
+        logger.fine("Found " + menus.size() + " menus from filesystem");
         return menus;
     }
 
@@ -291,8 +307,15 @@ public class WebEditorClient extends WebSocketClient {
      */
     private String getMenuContent(String fileName, String platform) {
         try {
-            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
-            File menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+            File menuFile;
+
+            // Special handling for config.yml
+            if (platform.equalsIgnoreCase("CONFIG")) {
+                menuFile = new File(plugin.getDataFolder(), fileName);
+            } else {
+                String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+                menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+            }
 
             if (!menuFile.exists()) {
                 logger.warning("Menu file not found: " + menuFile.getPath());
@@ -333,8 +356,15 @@ public class WebEditorClient extends WebSocketClient {
      */
     private boolean saveMenuToDisk(String fileName, String platform, String content) {
         try {
-            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
-            File menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+            File menuFile;
+
+            // Special handling for config.yml
+            if (platform.equalsIgnoreCase("CONFIG")) {
+                menuFile = new File(plugin.getDataFolder(), fileName);
+            } else {
+                String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+                menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+            }
 
             // Create parent directories if they don't exist
             menuFile.getParentFile().mkdirs();
