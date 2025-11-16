@@ -463,12 +463,12 @@ public class WebEditorClient extends WebSocketClient {
                 if (platform.equalsIgnoreCase("JAVA")) {
                     // Unregister from Java menu manager
                     plugin.javaMenuManager.menuNames.remove(menuNameWithoutExtension);
-                    plugin.javaMenuManager.menus.remove(menuNameWithoutExtension);
+                    plugin.javaMenuManager.menuConfigs.remove(menuNameWithoutExtension);
                     logger.info("Unregistered Java menu: " + menuNameWithoutExtension);
                 } else if (platform.equalsIgnoreCase("BEDROCK")) {
                     // Unregister from Bedrock menu manager
                     plugin.bedrockMenuManager.menuNames.remove(menuNameWithoutExtension);
-                    plugin.bedrockMenuManager.menus.remove(menuNameWithoutExtension);
+                    plugin.bedrockMenuManager.menuConfigs.remove(menuNameWithoutExtension);
                     logger.info("Unregistered Bedrock menu: " + menuNameWithoutExtension);
                 }
             });
