@@ -185,10 +185,16 @@ public class WebEditorClient extends WebSocketClient {
         boolean success = saveMenuToDisk(fileName, platform, content);
 
         if (success) {
-            // Auto-reload if enabled (but not for config.yml)
-            boolean autoReload = plugin.getConfig().getBoolean("webeditor.auto-reload", true);
-            if (autoReload && !platform.equalsIgnoreCase("CONFIG")) {
-                reloadMenus(platform, fileName);
+            // Special handling for config.yml - reload entire plugin
+            if (platform.equalsIgnoreCase("CONFIG")) {
+                reloadPlugin();
+                logger.info("Config saved - plugin reloaded");
+            } else {
+                // Auto-reload menus if enabled
+                boolean autoReload = plugin.getConfig().getBoolean("webeditor.auto-reload", true);
+                if (autoReload) {
+                    reloadMenus(platform, fileName);
+                }
             }
 
             // Send success confirmation
@@ -504,6 +510,33 @@ public class WebEditorClient extends WebSocketClient {
             });
         } catch (Exception e) {
             logger.severe("Error reloading menus: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Reload entire plugin (used when config.yml is saved)
+     */
+    private void reloadPlugin() {
+        try {
+            // Run on main thread
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                try {
+                    // Reload config.yml
+                    plugin.reloadConfig();
+
+                    // Reload all menus
+                    plugin.javaMenuManager.loadJavaMenus();
+                    plugin.bedrockMenuManager.loadBedrockMenus();
+
+                    logger.info("Plugin configuration and menus reloaded successfully");
+                } catch (Exception e) {
+                    logger.severe("Error reloading plugin: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            logger.severe("Error scheduling plugin reload: " + e.getMessage());
             e.printStackTrace();
         }
     }
