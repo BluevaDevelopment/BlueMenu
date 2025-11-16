@@ -44,14 +44,17 @@ public class WebEditorClient extends WebSocketClient {
     public void onMessage(String message) {
         try {
             WebSocketMessage msg = gson.fromJson(message, WebSocketMessage.class);
-            logger.info("Received message type: " + msg.getType());
+            // Only log important message types
+            if (msg.getType() != MessageType.PONG) {
+                logger.fine("Received message type: " + msg.getType());
+            }
 
             switch (msg.getType()) {
                 case SESSION_VALID -> handleSessionValid(msg);
                 case MENU_LIST_REQUEST -> handleMenuListRequest(msg);
                 case MENU_GET -> handleMenuGet(msg);
                 case MENU_SAVE -> handleMenuSave(msg);
-                case PONG -> logger.fine("Pong received");
+                case PONG -> {} // Silent
                 case ERROR -> handleError(msg);
                 default -> logger.warning("Unhandled message type: " + msg.getType());
             }
@@ -127,7 +130,7 @@ public class WebEditorClient extends WebSocketClient {
         JsonObject data = msg.getData();
         String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
 
-        logger.info("Menu list requested for session: " + sessionId);
+        logger.fine("Menu list requested for session: " + sessionId);
 
         // Get menu list and send it back
         List<MenuMetadataDTO> menus = getMenuList();
@@ -143,7 +146,7 @@ public class WebEditorClient extends WebSocketClient {
         String platform = data.has("platform") ? data.get("platform").getAsString() : null;
         String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
 
-        logger.info("Menu content requested: " + fileName + " (platform: " + platform + ")");
+        logger.fine("Menu content requested: " + fileName + " (platform: " + platform + ")");
 
         if (fileName == null || platform == null) {
             logger.warning("Missing fileName or platform in MENU_GET request");
@@ -169,8 +172,6 @@ public class WebEditorClient extends WebSocketClient {
         String content = data.has("content") ? data.get("content").getAsString() : null;
         String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
 
-        logger.info("Menu save requested: " + fileName + " (platform: " + platform + ")");
-
         if (fileName == null || platform == null || content == null) {
             logger.warning("Missing fileName, platform or content in MENU_SAVE request");
             sendError("Missing required fields", sessionId);
@@ -184,12 +185,12 @@ public class WebEditorClient extends WebSocketClient {
             // Auto-reload if enabled
             boolean autoReload = plugin.getConfig().getBoolean("webeditor.auto-reload", true);
             if (autoReload) {
-                reloadMenus(platform);
+                reloadMenus(platform, fileName);
             }
 
             // Send success confirmation
             sendMenuSaved(fileName, platform, sessionId);
-            logger.info("Menu saved successfully: " + fileName);
+            logger.info("Menu saved: " + fileName);
         } else {
             sendError("Failed to save menu to disk", sessionId);
         }
@@ -244,7 +245,7 @@ public class WebEditorClient extends WebSocketClient {
             }
         }
 
-        logger.info("Found " + menus.size() + " menus");
+        logger.fine("Found " + menus.size() + " menus");
         return menus;
     }
 
@@ -280,7 +281,7 @@ public class WebEditorClient extends WebSocketClient {
         msg.setData(data);
         send(gson.toJson(msg));
 
-        logger.info("Sent menu list: " + menus.size() + " menus");
+        logger.fine("Sent menu list: " + menus.size() + " menus");
     }
 
     /**
@@ -322,7 +323,7 @@ public class WebEditorClient extends WebSocketClient {
         msg.setData(data);
         send(gson.toJson(msg));
 
-        logger.info("Sent menu data: " + fileName + " (" + content.length() + " bytes)");
+        logger.fine("Sent menu data: " + fileName + " (" + content.length() + " bytes)");
     }
 
     /**
@@ -341,7 +342,7 @@ public class WebEditorClient extends WebSocketClient {
                 writer.write(content);
             }
 
-            logger.info("Menu file written to disk: " + menuFile.getPath());
+            logger.fine("Menu file written to disk: " + menuFile.getPath());
             return true;
         } catch (Exception e) {
             logger.severe("Error writing menu file: " + e.getMessage());
@@ -351,23 +352,89 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Reload menus in memory after saving
+     * Reload menus in memory after saving and refresh open menus
      */
-    private void reloadMenus(String platform) {
+    private void reloadMenus(String platform, String fileName) {
         try {
             // Run on main thread
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 if (platform.equalsIgnoreCase("JAVA")) {
+                    // Get menu name from fileName
+                    String menuName = getMenuNameFromFileName(fileName, "java");
+
+                    // Close and reopen menus for players who have it open
+                    if (menuName != null) {
+                        refreshOpenMenus(menuName);
+                    }
+
+                    // Reload menus in memory
                     plugin.javaMenuManager.loadJavaMenus();
-                    logger.info("Java menus reloaded");
+                    logger.info("Java menu reloaded and refreshed: " + fileName);
                 } else {
+                    // Bedrock menus don't need refresh (can't force close)
                     plugin.bedrockMenuManager.loadBedrockMenus();
-                    logger.info("Bedrock menus reloaded");
+                    logger.info("Bedrock menus reloaded: " + fileName);
                 }
             });
         } catch (Exception e) {
             logger.severe("Error reloading menus: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Get menu name from file name
+     */
+    private String getMenuNameFromFileName(String fileName, String platform) {
+        String configKey = platform.equals("java") ? "java_menus" : "bedrock_menus";
+        List<String> menuList = plugin.getConfig().getStringList(configKey);
+
+        for (String entry : menuList) {
+            String[] parts = entry.split(";");
+            if (parts.length == 2 && parts[1].trim().equals(fileName)) {
+                return parts[0].trim();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Refresh (close and reopen) menus for players who have them open
+     * Only works for Java menus
+     */
+    private void refreshOpenMenus(String menuName) {
+        // Get all players who have this menu open
+        List<org.bukkit.entity.Player> playersToRefresh = new ArrayList<>();
+
+        for (var entry : plugin.javaMenuManager.activeMenus.entrySet()) {
+            org.bukkit.entity.Player player = entry.getKey();
+            fr.mrmicky.fastinv.FastInv menu = entry.getValue();
+
+            // Check if this player has the specific menu open
+            if (menu != null) {
+                playersToRefresh.add(player);
+            }
+        }
+
+        // Close and reopen menus after a short delay
+        if (!playersToRefresh.isEmpty()) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                for (org.bukkit.entity.Player player : playersToRefresh) {
+                    if (player.isOnline() && plugin.javaMenuManager.activeMenus.containsKey(player)) {
+                        // Close current menu
+                        player.closeInventory();
+
+                        // Reopen menu after a tick
+                        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                            if (player.isOnline()) {
+                                plugin.javaMenuManager.openMenu(player, menuName);
+                                logger.fine("Refreshed menu for player: " + player.getName());
+                            }
+                        }, 2L);
+                    }
+                }
+            }, 5L);
         }
     }
 
@@ -389,7 +456,7 @@ public class WebEditorClient extends WebSocketClient {
         msg.setData(data);
         send(gson.toJson(msg));
 
-        logger.info("Sent menu saved confirmation: " + fileName);
+        logger.fine("Sent menu saved confirmation: " + fileName);
     }
 
     /**
