@@ -54,10 +54,11 @@ public class WebEditorClient extends WebSocketClient {
                 case MENU_LIST_REQUEST -> handleMenuListRequest(msg);
                 case MENU_GET -> handleMenuGet(msg);
                 case MENU_SAVE -> handleMenuSave(msg);
+                case MENU_DELETE -> handleMenuDelete(msg);
                 case PONG -> {} // Silent
                 case ERROR -> handleError(msg);
                 // Messages we send (ignore when broadcast back to us)
-                case MENU_LIST, MENU_DATA, MENU_SAVED -> {} // Silent (we sent these)
+                case MENU_LIST, MENU_DATA, MENU_SAVED, MENU_DELETED -> {} // Silent (we sent these)
                 default -> logger.warning("Unhandled message type: " + msg.getType());
             }
         } catch (Exception e) {
@@ -195,6 +196,43 @@ public class WebEditorClient extends WebSocketClient {
             logger.info("Menu saved: " + fileName);
         } else {
             sendError("Failed to save menu to disk", sessionId);
+        }
+    }
+
+    /**
+     * Handle menu delete request (delete menu file from disk)
+     */
+    private void handleMenuDelete(WebSocketMessage msg) {
+        JsonObject data = msg.getData();
+        String fileName = data.has("fileName") ? data.get("fileName").getAsString() : null;
+        String platform = data.has("platform") ? data.get("platform").getAsString() : null;
+        String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
+
+        if (fileName == null || platform == null) {
+            logger.warning("Missing fileName or platform in MENU_DELETE request");
+            sendError("Missing required fields", sessionId);
+            return;
+        }
+
+        // Prevent deletion of config.yml
+        if (platform.equalsIgnoreCase("CONFIG")) {
+            logger.warning("Attempt to delete config.yml blocked");
+            sendError("Cannot delete config.yml", sessionId);
+            return;
+        }
+
+        // Delete menu from disk
+        boolean success = deleteMenuFromDisk(fileName, platform);
+
+        if (success) {
+            // Unregister menu if loaded
+            unregisterMenu(platform, fileName);
+
+            // Send success confirmation
+            sendMenuDeleted(fileName, platform, sessionId);
+            logger.info("Menu deleted: " + fileName);
+        } else {
+            sendError("Failed to delete menu from disk", sessionId);
         }
     }
 
@@ -384,6 +422,62 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
+     * Delete menu file from disk
+     */
+    private boolean deleteMenuFromDisk(String fileName, String platform) {
+        try {
+            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+            File menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+
+            if (!menuFile.exists()) {
+                logger.warning("Menu file not found for deletion: " + menuFile.getPath());
+                return false;
+            }
+
+            // Delete the file
+            boolean deleted = menuFile.delete();
+
+            if (deleted) {
+                logger.fine("Menu file deleted from disk: " + menuFile.getPath());
+            } else {
+                logger.warning("Failed to delete menu file: " + menuFile.getPath());
+            }
+
+            return deleted;
+        } catch (Exception e) {
+            logger.severe("Error deleting menu file: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Unregister menu from memory
+     */
+    private void unregisterMenu(String platform, String fileName) {
+        try {
+            // Run on main thread
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                String menuNameWithoutExtension = fileName.replace(".yml", "");
+
+                if (platform.equalsIgnoreCase("JAVA")) {
+                    // Unregister from Java menu manager
+                    plugin.javaMenuManager.menuNames.remove(menuNameWithoutExtension);
+                    plugin.javaMenuManager.menus.remove(menuNameWithoutExtension);
+                    logger.info("Unregistered Java menu: " + menuNameWithoutExtension);
+                } else if (platform.equalsIgnoreCase("BEDROCK")) {
+                    // Unregister from Bedrock menu manager
+                    plugin.bedrockMenuManager.menuNames.remove(menuNameWithoutExtension);
+                    plugin.bedrockMenuManager.menus.remove(menuNameWithoutExtension);
+                    logger.info("Unregistered Bedrock menu: " + menuNameWithoutExtension);
+                }
+            });
+        } catch (Exception e) {
+            logger.warning("Error unregistering menu: " + e.getMessage());
+        }
+    }
+
+    /**
      * Reload menus in memory after saving and refresh open menus
      */
     private void reloadMenus(String platform, String fileName) {
@@ -489,6 +583,27 @@ public class WebEditorClient extends WebSocketClient {
         send(gson.toJson(msg));
 
         logger.fine("Sent menu saved confirmation: " + fileName);
+    }
+
+    /**
+     * Send menu deleted confirmation to the server
+     */
+    private void sendMenuDeleted(String fileName, String platform, String sessionId) {
+        WebSocketMessage msg = new WebSocketMessage(MessageType.MENU_DELETED);
+        JsonObject data = new JsonObject();
+
+        data.addProperty("fileName", fileName);
+        data.addProperty("platform", platform);
+        data.addProperty("success", true);
+        data.addProperty("message", "Menu deleted successfully");
+        if (sessionId != null) {
+            data.addProperty("sessionId", sessionId);
+        }
+
+        msg.setData(data);
+        send(gson.toJson(msg));
+
+        logger.fine("Sent menu deleted confirmation: " + fileName);
     }
 
     /**

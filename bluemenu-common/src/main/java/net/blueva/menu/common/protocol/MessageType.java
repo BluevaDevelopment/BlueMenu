@@ -9,6 +9,7 @@ public enum MessageType {
     MENU_UPDATE,
     MENU_LIST,
     MENU_SAVED,
+    MENU_DELETED,
 
     // WebServer -> Plugin
     SESSION_VALIDATE,
