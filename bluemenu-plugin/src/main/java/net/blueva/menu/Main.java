@@ -121,11 +121,10 @@ public class Main extends JavaPlugin implements Listener {
 
         // Initialize web editor if enabled
         boolean webEditorEnabled = getConfig().getBoolean("webeditor.enabled", false);
-        String webEditorUrl = getConfig().getString("webeditor.server-url", "ws://localhost:8081");
-        webEditorManager = new WebEditorManager(this, webEditorUrl, webEditorEnabled);
+        webEditorManager = new WebEditorManager(this, webEditorEnabled);
 
         if (webEditorEnabled) {
-            getLogger().info("Web Editor is enabled, connecting to " + webEditorUrl);
+            getLogger().info("Web Editor is enabled, connecting to official BlueMenu server");
             webEditorManager.connect();
         } else {
             getLogger().info("Web Editor is disabled in config.yml");

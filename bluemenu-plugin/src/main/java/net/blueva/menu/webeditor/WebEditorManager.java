@@ -10,16 +10,18 @@ import java.util.logging.Logger;
  * Manages the web editor connection
  */
 public class WebEditorManager {
+    // Official BlueMenu Web Editor URLs - hardcoded for all users
+    private static final String WEBSOCKET_URL = "wss://menu.blueva.net/ws";
+    private static final String EDITOR_BASE_URL = "https://menu.blueva.net";
+
     private final Plugin plugin;
     private final Logger logger;
-    private final String serverUrl;
     private final boolean enabled;
     private WebEditorClient client;
 
-    public WebEditorManager(Plugin plugin, String serverUrl, boolean enabled) {
+    public WebEditorManager(Plugin plugin, boolean enabled) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
-        this.serverUrl = serverUrl;
         this.enabled = enabled;
     }
 
@@ -33,10 +35,10 @@ public class WebEditorManager {
         }
 
         try {
-            URI serverUri = new URI(serverUrl);
+            URI serverUri = new URI(WEBSOCKET_URL);
             client = new WebEditorClient(serverUri);
             client.connect();
-            logger.info("Connecting to web editor server at " + serverUrl);
+            logger.info("Connecting to official BlueMenu web editor at " + WEBSOCKET_URL);
         } catch (Exception e) {
             logger.severe("Failed to connect to web editor server: " + e.getMessage());
         }
@@ -105,31 +107,7 @@ public class WebEditorManager {
      * Get the editor URL for a session
      */
     public String getEditorUrl(String sessionId) {
-        try {
-            URI uri = new URI(serverUrl);
-            String host = uri.getHost();
-            int port = uri.getPort();
-            String scheme;
-
-            // If port is -1, assume Caddy with HTTPS on default port 443
-            if (port == -1) {
-                scheme = "https";
-                return String.format("%s://%s/editor/%s", scheme, host, sessionId);
-            }
-
-            // Old behavior: websocket was on 8081, HTTP on 8080
-            if (port == 8081) {
-                port = 8080;
-            }
-
-            scheme = "http";
-
-            return String.format("%s://%s:%d/editor/%s", scheme, host, port, sessionId);
-
-        } catch (Exception e) {
-            logger.severe("Error generating editor URL: " + e.getMessage());
-            return "Error generating URL";
-        }
+        return String.format("%s/editor/%s", EDITOR_BASE_URL, sessionId);
     }
 
 }

@@ -31,15 +31,11 @@ language: 'en_UK'
 
 # Web Editor:
 # Enable the web-based menu editor for real-time menu editing from a browser
-# Requires the BlueMenu WebServer running separately (menu.blueva.net or your own server)
+# Connects to the official BlueMenu Web Editor at https://menu.blueva.net
 webeditor:
   # Enable/disable web editor functionality
+  # When enabled, connects automatically to the official BlueMenu server
   enabled: false
-
-  # WebSocket server URL (where BlueMenu WebServer is running)
-  # Default: ws://localhost:8081 (for local testing)
-  # Production: ws://menu.blueva.net:8081 (or your server IP/domain)
-  server-url: 'ws://localhost:8081'
 
   # Auto-save changes made in the web editor
   auto-save: true
