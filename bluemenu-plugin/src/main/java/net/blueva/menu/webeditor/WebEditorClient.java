@@ -396,7 +396,7 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Save menu content to disk
+     * Save menu content to disk using BootedYaml to preserve comments and spacing
      */
     private boolean saveMenuToDisk(String fileName, String platform, String content) {
         try {
@@ -413,13 +413,44 @@ public class WebEditorClient extends WebSocketClient {
             // Create parent directories if they don't exist
             menuFile.getParentFile().mkdirs();
 
-            // Write content to file
-            try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
-                writer.write(content);
+            // If file doesn't exist, just write directly (no comments to preserve)
+            if (!menuFile.exists()) {
+                try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
+                    writer.write(content);
+                }
+                logger.fine("New menu file created: " + menuFile.getPath());
+                return true;
             }
 
-            logger.fine("Menu file written to disk: " + menuFile.getPath());
-            return true;
+            // File exists - use BootedYaml to preserve comments and spacing
+            try {
+                // Load the new content as YAML to extract values
+                YamlDocument newData = YamlDocument.create(new java.io.ByteArrayInputStream(
+                    content.getBytes(StandardCharsets.UTF_8)
+                ));
+
+                // Load the existing file with BootedYaml (preserves comments)
+                YamlDocument existingDoc = YamlDocument.create(menuFile);
+
+                // Update all top-level keys from new data to existing doc
+                for (String key : newData.getKeys()) {
+                    Object value = newData.get(key);
+                    existingDoc.set(key, value);
+                }
+
+                // Save the updated document (preserves comments and formatting)
+                existingDoc.save(menuFile);
+
+                logger.fine("Menu file updated preserving comments: " + menuFile.getPath());
+                return true;
+            } catch (Exception e) {
+                // Fallback: if BootedYaml parsing fails, write directly
+                logger.warning("BootedYaml update failed, falling back to direct write: " + e.getMessage());
+                try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
+                    writer.write(content);
+                }
+                return true;
+            }
         } catch (Exception e) {
             logger.severe("Error writing menu file: " + e.getMessage());
             e.printStackTrace();
