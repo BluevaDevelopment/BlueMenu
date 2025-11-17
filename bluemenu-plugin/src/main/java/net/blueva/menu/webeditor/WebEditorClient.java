@@ -433,7 +433,8 @@ public class WebEditorClient extends WebSocketClient {
                 YamlDocument existingDoc = YamlDocument.create(menuFile);
 
                 // Update all top-level keys from new data to existing doc
-                for (String key : newData.getKeys()) {
+                for (Object keyObj : newData.getKeys()) {
+                    String key = keyObj.toString();
                     Object value = newData.get(key);
                     existingDoc.set(key, value);
                 }
