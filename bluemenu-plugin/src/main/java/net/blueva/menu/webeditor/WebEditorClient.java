@@ -167,7 +167,6 @@ public class WebEditorClient extends WebSocketClient {
 
     /**
      * Handle menu save request (save modified menu content to disk)
-     * Now validates YAML with BoostedYAML before saving to preserve comments and formatting
      */
     private void handleMenuSave(WebSocketMessage msg) {
         JsonObject data = msg.getData();
@@ -182,16 +181,7 @@ public class WebEditorClient extends WebSocketClient {
             return;
         }
 
-        // Validate YAML with BoostedYAML before saving
-        // This preserves comments, spaces, and all fields (like openCommand, file_version)
-        String validationError = validateYamlContent(content, fileName);
-        if (validationError != null) {
-            logger.warning("YAML validation failed for " + fileName + ": " + validationError);
-            sendError("Error de validación YAML: " + validationError, sessionId);
-            return;
-        }
-
-        // Save menu to disk (raw content, preserving everything)
+        // Save menu to disk (content validated by frontend with 'yaml' library)
         boolean success = saveMenuToDisk(fileName, platform, content);
 
         if (success) {
@@ -403,44 +393,6 @@ public class WebEditorClient extends WebSocketClient {
         send(gson.toJson(msg));
 
         logger.fine("Sent menu data: " + fileName + " (" + content.length() + " bytes)");
-    }
-
-    /**
-     * Validate YAML content with BoostedYAML
-     * Returns null if valid, or error message if invalid
-     */
-    private String validateYamlContent(String content, String fileName) {
-        try {
-            // Create a temporary file to validate with BoostedYAML
-            File tempFile = File.createTempFile("bluemenu_validate_", ".yml");
-            tempFile.deleteOnExit();
-
-            // Write content to temp file
-            try (FileWriter writer = new FileWriter(tempFile, StandardCharsets.UTF_8)) {
-                writer.write(content);
-            }
-
-            // Try to load with BoostedYAML - this will throw exception if invalid
-            YamlDocument.create(tempFile);
-
-            // If we got here, YAML is valid
-            tempFile.delete();
-            return null;
-
-        } catch (Exception e) {
-            // Return descriptive error message
-            String errorMsg = e.getMessage();
-            if (errorMsg == null || errorMsg.isEmpty()) {
-                errorMsg = "Error desconocido al validar YAML";
-            }
-
-            // Clean up error message for better readability
-            if (errorMsg.contains("while")) {
-                errorMsg = errorMsg.substring(0, errorMsg.indexOf("while")).trim();
-            }
-
-            return errorMsg;
-        }
     }
 
     /**
