@@ -173,30 +173,16 @@ public class WebEditorClient extends WebSocketClient {
         String fileName = data.has("fileName") ? data.get("fileName").getAsString() : null;
         String platform = data.has("platform") ? data.get("platform").getAsString() : null;
         String content = data.has("content") ? data.get("content").getAsString() : null;
-        JsonObject structuredData = data.has("structuredData") ? data.getAsJsonObject("structuredData") : null;
         String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
 
-        if (fileName == null || platform == null) {
-            logger.warning("Missing fileName or platform in MENU_SAVE request");
+        if (fileName == null || platform == null || content == null) {
+            logger.warning("Missing fileName, platform or content in MENU_SAVE request");
             sendError("Missing required fields", sessionId);
             return;
         }
 
-        if (content == null && structuredData == null) {
-            logger.warning("Missing both content and structuredData in MENU_SAVE request");
-            sendError("Missing content or structured data", sessionId);
-            return;
-        }
-
-        boolean success;
-
-        // If we have structured data (from visual editor), use it to preserve comments
-        if (structuredData != null) {
-            success = saveMenuFromStructuredData(fileName, platform, structuredData);
-        } else {
-            // Fall back to string content (from YAML editor)
-            success = saveMenuToDisk(fileName, platform, content);
-        }
+        // Save menu to disk
+        boolean success = saveMenuToDisk(fileName, platform, content);
 
         if (success) {
             // Special handling for config.yml - reload entire plugin
@@ -410,7 +396,9 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Save menu content to disk using BootedYaml to preserve comments and spacing
+     * Save menu content to disk
+     * Note: This writes the content directly, which means comments may be lost
+     * when saving from the visual editor. Use YAML mode to preserve comments.
      */
     private boolean saveMenuToDisk(String fileName, String platform, String content) {
         try {
@@ -427,221 +415,17 @@ public class WebEditorClient extends WebSocketClient {
             // Create parent directories if they don't exist
             menuFile.getParentFile().mkdirs();
 
-            // If file doesn't exist, just write directly (no comments to preserve)
-            if (!menuFile.exists()) {
-                try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
-                    writer.write(content);
-                }
-                logger.fine("New menu file created: " + menuFile.getPath());
-                return true;
+            // Write content directly to file
+            try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
+                writer.write(content);
             }
 
-            // File exists - use BootedYaml to preserve comments and spacing
-            try {
-                // Load the new content as YAML to extract values
-                YamlDocument newData = YamlDocument.create(new java.io.ByteArrayInputStream(
-                    content.getBytes(StandardCharsets.UTF_8)
-                ));
-
-                // Load the existing file with BootedYaml (preserves comments)
-                YamlDocument existingDoc = YamlDocument.create(menuFile);
-
-                // Update all top-level keys from new data to existing doc
-                for (Object keyObj : newData.getKeys()) {
-                    String key = keyObj.toString();
-                    Object value = newData.get(key);
-                    existingDoc.set(key, value);
-                }
-
-                // Save the updated document (preserves comments and formatting)
-                existingDoc.save(menuFile);
-
-                logger.fine("Menu file updated preserving comments: " + menuFile.getPath());
-                return true;
-            } catch (Exception e) {
-                // Fallback: if BootedYaml parsing fails, write directly
-                logger.warning("BootedYaml update failed, falling back to direct write: " + e.getMessage());
-                try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
-                    writer.write(content);
-                }
-                return true;
-            }
+            logger.fine("Menu file saved: " + menuFile.getPath());
+            return true;
         } catch (Exception e) {
             logger.severe("Error writing menu file: " + e.getMessage());
             e.printStackTrace();
             return false;
-        }
-    }
-
-    /**
-     * Save menu from structured data (JSON) using BootedYaml to preserve comments
-     * This is used when saving from the visual editor
-     */
-    private boolean saveMenuFromStructuredData(String fileName, String platform, JsonObject structuredData) {
-        try {
-            File menuFile;
-
-            // Special handling for config.yml
-            if (platform.equalsIgnoreCase("CONFIG")) {
-                menuFile = new File(plugin.getDataFolder(), fileName);
-            } else {
-                String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
-                menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
-            }
-
-            // Create parent directories if they don't exist
-            menuFile.getParentFile().mkdirs();
-
-            // Load existing file with BootedYaml (preserves comments)
-            YamlDocument doc = YamlDocument.create(menuFile);
-
-            // Update fields from structured data
-            // Preserved fields (file_version, openCommand, etc.)
-            if (structuredData.has("_preservedFields")) {
-                JsonObject preserved = structuredData.getAsJsonObject("_preservedFields");
-                if (preserved.has("file_version")) {
-                    doc.set("file_version", preserved.get("file_version").getAsInt());
-                }
-                if (preserved.has("openCommand")) {
-                    doc.set("openCommand", preserved.get("openCommand").getAsString());
-                }
-            }
-
-            // Main menu properties
-            if (structuredData.has("title")) {
-                if (platform.equalsIgnoreCase("JAVA")) {
-                    doc.set("menuName", structuredData.get("title").getAsString());
-                } else {
-                    doc.set("title", structuredData.get("title").getAsString());
-                }
-            }
-
-            if (structuredData.has("size")) {
-                doc.set("menuSize", structuredData.get("size").getAsInt());
-            }
-
-            if (structuredData.has("type")) {
-                doc.set("type", structuredData.get("type").getAsString());
-            }
-
-            // Items section (Java menus)
-            if (structuredData.has("items") && platform.equalsIgnoreCase("JAVA")) {
-                JsonObject items = structuredData.getAsJsonObject("items");
-                updateItemsSection(doc, items);
-            }
-
-            // Animations section (Java menus)
-            if (structuredData.has("animations") && platform.equalsIgnoreCase("JAVA")) {
-                JsonObject animations = structuredData.getAsJsonObject("animations");
-                updateAnimationsSection(doc, animations);
-            }
-
-            // Bedrock-specific fields
-            if (platform.equalsIgnoreCase("BEDROCK")) {
-                if (structuredData.has("content")) {
-                    doc.set("content", structuredData.get("content").getAsString());
-                }
-                if (structuredData.has("buttons")) {
-                    // Convert buttons from JSON to map
-                    doc.set("buttons", gson.fromJson(structuredData.get("buttons"), Object.class));
-                }
-                if (structuredData.has("components")) {
-                    doc.set("components", gson.fromJson(structuredData.get("components"), Object.class));
-                }
-            }
-
-            // Save the updated document (preserves comments and formatting)
-            doc.save(menuFile);
-
-            logger.fine("Menu file updated from structured data preserving comments: " + menuFile.getPath());
-            return true;
-        } catch (Exception e) {
-            logger.severe("Error saving menu from structured data: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * Update items section in YAML document from JSON data
-     */
-    private void updateItemsSection(YamlDocument doc, JsonObject itemsJson) {
-        // Clear existing items section
-        doc.remove("items");
-
-        // Create items section and populate from JSON
-        int itemCounter = 1;
-        for (String slotKey : itemsJson.keySet()) {
-            JsonObject itemData = itemsJson.getAsJsonObject(slotKey);
-            if (itemData != null && !itemData.has("_isAnimation")) {
-                String itemKey = "items.item" + itemCounter;
-
-                // Set slot first
-                if (itemData.has("slot")) {
-                    doc.set(itemKey + ".slot", itemData.get("slot").getAsInt());
-                } else {
-                    doc.set(itemKey + ".slot", Integer.parseInt(slotKey));
-                }
-
-                // Set name
-                if (itemData.has("name")) {
-                    doc.set(itemKey + ".name", itemData.get("name").getAsString());
-                }
-
-                // Set itemStack
-                if (itemData.has("material")) {
-                    doc.set(itemKey + ".itemStack.material", itemData.get("material").getAsString());
-                }
-                if (itemData.has("amount")) {
-                    doc.set(itemKey + ".itemStack.amount", itemData.get("amount").getAsInt());
-                }
-                if (itemData.has("value")) {
-                    doc.set(itemKey + ".itemStack.value", itemData.get("value").getAsString());
-                }
-
-                // Set lore
-                if (itemData.has("lore")) {
-                    doc.set(itemKey + ".lore", gson.fromJson(itemData.get("lore"), java.util.List.class));
-                }
-
-                // Set actions
-                if (itemData.has("actions")) {
-                    doc.set(itemKey + ".actions", gson.fromJson(itemData.get("actions"), java.util.List.class));
-                }
-
-                // Set display_conditions
-                if (itemData.has("display_conditions")) {
-                    doc.set(itemKey + ".display_conditions", gson.fromJson(itemData.get("display_conditions"), Object.class));
-                }
-
-                itemCounter++;
-            }
-        }
-    }
-
-    /**
-     * Update animations section in YAML document from JSON data
-     */
-    private void updateAnimationsSection(YamlDocument doc, JsonObject animationsJson) {
-        // Clear existing animations section
-        doc.remove("animations");
-
-        // Create animations section from JSON
-        for (String animKey : animationsJson.keySet()) {
-            JsonObject animData = animationsJson.getAsJsonObject(animKey);
-            if (animData != null) {
-                String basePath = "animations." + animKey;
-
-                // Set interval
-                if (animData.has("interval")) {
-                    doc.set(basePath + ".interval", animData.get("interval").getAsInt());
-                }
-
-                // Set frames
-                if (animData.has("frames")) {
-                    doc.set(basePath + ".frames", gson.fromJson(animData.get("frames"), Object.class));
-                }
-            }
         }
     }
 
