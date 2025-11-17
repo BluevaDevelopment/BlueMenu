@@ -181,7 +181,7 @@ public class WebEditorClient extends WebSocketClient {
             return;
         }
 
-        // Save menu to disk (content validated by frontend with 'yaml' library)
+        // Save menu to disk
         boolean success = saveMenuToDisk(fileName, platform, content);
 
         if (success) {
