@@ -46,6 +46,10 @@ public class ItemManager {
         // Set custom head value
         if (material == Material.PLAYER_HEAD) {
             String value = itemSection.getString("itemStack.value");
+            // Process placeholders in value (important for {player_name} or %player_name%)
+            if (value != null && !value.isEmpty()) {
+                value = MessagesUtil.format(player, value);
+            }
             itemStack = setCustomHeadValue(itemStack, value);
         }
 
@@ -123,8 +127,9 @@ public class ItemManager {
             // Check if it's a player name (short, alphanumeric with underscores)
             // Player names are 3-16 characters and contain only letters, numbers, and underscores
             if (value.length() >= 3 && value.length() <= 16 && value.matches("^[a-zA-Z0-9_]+$")) {
-                // Set by player name (works for real players and supports placeholders like {player_name})
-                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(value));
+                // Set by player name using setOwner() - works for real players
+                // This method is more reliable than setOwningPlayer() for player names
+                skullMeta.setOwner(value);
             } else {
                 // Handle texture values (base64, URL, or hash)
                 try {
