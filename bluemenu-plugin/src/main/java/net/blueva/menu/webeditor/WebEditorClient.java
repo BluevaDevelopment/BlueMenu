@@ -397,8 +397,6 @@ public class WebEditorClient extends WebSocketClient {
 
     /**
      * Save menu content to disk
-     * Note: This writes the content directly, which means comments may be lost
-     * when saving from the visual editor. Use YAML mode to preserve comments.
      */
     private boolean saveMenuToDisk(String fileName, String platform, String content) {
         try {
@@ -415,12 +413,12 @@ public class WebEditorClient extends WebSocketClient {
             // Create parent directories if they don't exist
             menuFile.getParentFile().mkdirs();
 
-            // Write content directly to file
+            // Write content to file
             try (FileWriter writer = new FileWriter(menuFile, StandardCharsets.UTF_8)) {
                 writer.write(content);
             }
 
-            logger.fine("Menu file saved: " + menuFile.getPath());
+            logger.fine("Menu file written to disk: " + menuFile.getPath());
             return true;
         } catch (Exception e) {
             logger.severe("Error writing menu file: " + e.getMessage());
