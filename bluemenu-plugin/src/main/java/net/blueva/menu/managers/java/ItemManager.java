@@ -118,37 +118,45 @@ public class ItemManager {
         } catch (NumberFormatException e) {
             // Use the new Bukkit PlayerProfile API instead of com.mojang.authlib
             SkullMeta skullMeta = (SkullMeta) itemMeta;
+            assert skullMeta != null;
 
-            try {
-                assert skullMeta != null;
-                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-                PlayerTextures textures = profile.getTextures();
+            // Check if it's a player name (short, alphanumeric with underscores)
+            // Player names are 3-16 characters and contain only letters, numbers, and underscores
+            if (value.length() >= 3 && value.length() <= 16 && value.matches("^[a-zA-Z0-9_]+$")) {
+                // Set by player name (works for real players and supports placeholders like {player_name})
+                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(value));
+            } else {
+                // Handle texture values (base64, URL, or hash)
+                try {
+                    PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+                    PlayerTextures textures = profile.getTextures();
 
-                String textureUrl;
+                    String textureUrl;
 
-                if (value.startsWith("http://") || value.startsWith("https://")) {
-                    // Direct URL
-                    textureUrl = value;
-                } else {
-                    // Decode base64 texture value
-                    try {
-                        String decoded = new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
-                        JsonObject jsonObject = JsonParser.parseString(decoded).getAsJsonObject();
-                        textureUrl = jsonObject.getAsJsonObject("textures")
-                                               .getAsJsonObject("SKIN")
-                                               .get("url")
-                                               .getAsString();
-                    } catch (Exception decodeEx) {
-                        // If decoding fails, assume it's a texture hash
-                        textureUrl = "http://textures.minecraft.net/texture/" + value;
+                    if (value.startsWith("http://") || value.startsWith("https://")) {
+                        // Direct URL
+                        textureUrl = value;
+                    } else {
+                        // Decode base64 texture value
+                        try {
+                            String decoded = new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
+                            JsonObject jsonObject = JsonParser.parseString(decoded).getAsJsonObject();
+                            textureUrl = jsonObject.getAsJsonObject("textures")
+                                                   .getAsJsonObject("SKIN")
+                                                   .get("url")
+                                                   .getAsString();
+                        } catch (Exception decodeEx) {
+                            // If decoding fails, assume it's a texture hash
+                            textureUrl = "http://textures.minecraft.net/texture/" + value;
+                        }
                     }
-                }
 
-                textures.setSkin(new URL(textureUrl));
-                profile.setTextures(textures);
-                skullMeta.setOwnerProfile(profile);
-            } catch (MalformedURLException ex) {
-                ex.printStackTrace();
+                    textures.setSkin(new URL(textureUrl));
+                    profile.setTextures(textures);
+                    skullMeta.setOwnerProfile(profile);
+                } catch (MalformedURLException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
