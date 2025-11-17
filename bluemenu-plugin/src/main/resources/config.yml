@@ -35,7 +35,7 @@ language: 'en_UK'
 webeditor:
   # Enable/disable web editor functionality
   # When enabled, connects automatically to the official BlueMenu server
-  enabled: false
+  enabled: true
 
   # Auto-save changes made in the web editor
   auto-save: true
