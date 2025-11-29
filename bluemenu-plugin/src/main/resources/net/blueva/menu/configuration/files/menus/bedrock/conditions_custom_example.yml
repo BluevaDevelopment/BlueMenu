@@ -22,7 +22,7 @@
 
 file_version: 1
 
-menuName: "&b&lConditional Custom Form"
+menuName: "<aqua><bold>Conditional Custom Form"
 type: CUSTOM
 openCommand: /customconditional
 
@@ -32,30 +32,30 @@ components:
   # This label is always visible to all players
   header:
     type: LABEL
-    text: "&7Fill out the form below"
+    text: "<gray>Fill out the form below"
 
   # EXAMPLE 2: Another always-visible label with placeholders
   stats_label:
     type: LABEL
-    text: "&eLevel: {player_level} | Health: {player_health}"
+    text: "<yellow>Level: {player_level} | Health: {player_health}"
 
   # EXAMPLE 3: INPUT with simple condition
   # This input field only appears if player level is 10 or higher
   level_input:
     type: INPUT
-    text: "&6Message (Level 10+ only)"
+    text: "<gold>Message (Level 10+ only)"
     placeholder: "Enter your message..."
     default: ""
     display_conditions:
       - "{player_level} >= 10"  # Single condition check
     actions:
-      - "MESSAGE;&aYour message: {level_input}"
+      - "MESSAGE;<green>Your message: {level_input}"
 
   # EXAMPLE 4: DROPDOWN with simple condition
   # This dropdown only appears if player level is 5 or higher
   options_dropdown:
     type: DROPDOWN
-    text: "&eSelect Option (Level 5+)"
+    text: "<yellow>Select Option (Level 5+)"
     options:
       - "Option 1"
       - "Option 2"
@@ -64,24 +64,24 @@ components:
     display_conditions:
       - "{player_level} >= 5"  # Requires level 5+
     actions:
-      - "MESSAGE;&aYou selected: {options_dropdown_text}"
+      - "MESSAGE;<green>You selected: {options_dropdown_text}"
 
   # EXAMPLE 5: TOGGLE with simple condition
   # This toggle only appears if player has more than 10 health
   health_toggle:
     type: TOGGLE
-    text: "&cHealthy Feature (Health > 10)"
+    text: "<red>Healthy Feature (Health > 10)"
     default: false
     display_conditions:
       - "{player_health} > 10"  # Health check
     actions:
-      - "MESSAGE;&cHealthy feature: {health_toggle}"
+      - "MESSAGE;<red>Healthy feature: {health_toggle}"
 
   # EXAMPLE 6: SLIDER with multiple conditions (AND logic)
   # All conditions in the list must be true for this slider to appear
   power_slider:
     type: SLIDER
-    text: "&dPower Level (Lvl 5+ & HP 8+)"
+    text: "<light_purple>Power Level (Lvl 5+ & HP 8+)"
     min: 0
     max: 100
     step: 10
@@ -90,13 +90,13 @@ components:
       - "{player_level} >= 5"    # Condition 1
       - "{player_health} >= 8"   # Condition 2
     actions:
-      - "MESSAGE;&dPower set to: {power_slider}"
+      - "MESSAGE;<light_purple>Power set to: {power_slider}"
 
   # EXAMPLE 7: STEPSLIDER with boolean operators
   # Using && (AND) in a single expression
   difficulty_steps:
     type: STEPSLIDER
-    text: "&6Difficulty"
+    text: "<gold>Difficulty"
     steps:
       - "Easy"
       - "Normal"
@@ -105,13 +105,13 @@ components:
     display_conditions:
       - "({player_level} >= 10) && ({player_health} > 5)"  # Combined with AND
     actions:
-      - "MESSAGE;&6Difficulty: {difficulty_steps_text}"
+      - "MESSAGE;<gold>Difficulty: {difficulty_steps_text}"
 
   # EXAMPLE 8: SLIDER with advanced all/any/none logic
   # Demonstrates complex conditional logic with multiple groups
   advanced_slider:
     type: SLIDER
-    text: "&5Advanced Slider"
+    text: "<dark_purple>Advanced Slider"
     min: 0
     max: 50
     step: 5
@@ -126,13 +126,13 @@ components:
       none:    # None of these must be true
         - "{player_level} == 1"
     actions:
-      - "MESSAGE;&5Advanced value: {advanced_slider}"
+      - "MESSAGE;<dark_purple>Advanced value: {advanced_slider}"
 
   # EXAMPLE 9: TOGGLE without conditions
   # This toggle is always visible to all players
   accept:
     type: TOGGLE
-    text: "&aAccept Terms"
+    text: "<green>Accept Terms"
     default: false
     actions:
-      - "MESSAGE;&aAccepted: {accept}"
+      - "MESSAGE;<green>Accepted: {accept}"

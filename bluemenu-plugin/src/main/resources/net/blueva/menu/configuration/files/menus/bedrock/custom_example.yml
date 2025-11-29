@@ -6,7 +6,7 @@
 
 file_version: 1
 
-menuName: "<gradient:#00d4ff:#0099ff><bold>Custom Form Example</gradient>"
+menuName: "<aqua><bold>Custom Form Example"
 type: CUSTOM
 openCommand: /custommenu
 
@@ -105,7 +105,7 @@ components:
   # Final LABEL - Shows summary using all component values
   final_label:
     type: LABEL
-    text: "<gradient:#ff0000:#ffaa00>Thank you for completing the form!</gradient>"
+    text: "<gold>Thank you for completing the form!"
 
 # ====================================
 # IMPORTANT NOTES:

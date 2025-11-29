@@ -21,63 +21,63 @@
 
 file_version: 1
 
-menuName: "&b&lConditional Simple Form"
+menuName: "<aqua><bold>Conditional Simple Form"
 type: SIMPLE
 openCommand: /simpleconditional
 
 # Content displayed in the form
 # You can use placeholders like {player_level}, {player_health}, etc.
 content:
-  - "&7Welcome to the conditional menu!"
-  - "&7Buttons shown depend on your stats"
+  - "<gray>Welcome to the conditional menu!"
+  - "<gray>Buttons shown depend on your stats"
   - ""
-  - "&eYour level: {player_level}"
-  - "&eYour health: {player_health}"
+  - "<yellow>Your level: {player_level}"
+  - "<yellow>Your health: {player_health}"
 
 # Button definitions with various condition examples
 buttons:
   # EXAMPLE 1: Simple single condition
   # This button only appears if the player's level is 10 or higher
   level_button:
-    text: "&6Level 10+ Options"
+    text: "<gold>Level 10+ Options"
     image: "https://example.com/diamond.png"
     display_conditions:
       - "{player_level} >= 10"  # Single condition check
     actions:
-      - "MESSAGE;&aYou clicked the level 10+ button!"
+      - "MESSAGE;<green>You clicked the level 10+ button!"
 
   # EXAMPLE 2: Another simple condition
   # This button only appears if the player has more than 10 health
   health_button:
-    text: "&cHealthy Options"
+    text: "<red>Healthy Options"
     display_conditions:
       - "{player_health} > 10"  # Health check
     actions:
-      - "MESSAGE;&aYou're healthy!"
+      - "MESSAGE;<green>You're healthy!"
 
   # EXAMPLE 3: Multiple conditions (AND logic)
   # All conditions in the list must be true for the button to appear
   advanced_button:
-    text: "&eAdvanced Options"
+    text: "<yellow>Advanced Options"
     display_conditions:
       - "{player_level} >= 5"    # Condition 1
       - "{player_health} >= 8"   # Condition 2
     actions:
-      - "MESSAGE;&eYou have advanced access!"
+      - "MESSAGE;<yellow>You have advanced access!"
 
   # EXAMPLE 4: Boolean operators
   # Using && (AND), || (OR), ! (NOT) in a single expression
   boolean_button:
-    text: "&dBoolean Test"
+    text: "<light_purple>Boolean Test"
     display_conditions:
       - "({player_level} >= 10) && ({player_health} > 5)"  # Combined with AND
     actions:
-      - "MESSAGE;&dBoolean condition passed!"
+      - "MESSAGE;<light_purple>Boolean condition passed!"
 
   # EXAMPLE 5: Advanced all/any/none logic
   # Demonstrates complex conditional logic with multiple groups
   complex_button:
-    text: "&5Complex Conditions"
+    text: "<dark_purple>Complex Conditions"
     display_conditions:
       all:     # All of these must be true
         - "{player_level} >= 5"
@@ -88,11 +88,11 @@ buttons:
       none:    # None of these must be true
         - "{player_level} == 99"
     actions:
-      - "MESSAGE;&5Complex conditions passed!"
+      - "MESSAGE;<dark_purple>Complex conditions passed!"
 
   # EXAMPLE 6: Button without conditions
   # This button is always visible to all players
   close_button:
-    text: "&cClose"
+    text: "<red>Close"
     actions:
-      - "MESSAGE;&7Menu closed"
+      - "MESSAGE;<gray>Menu closed"
