@@ -11,7 +11,6 @@ public class SessionDTO {
     private long expiresAt;
     private boolean active;
     private boolean consumed;
-    private boolean pendingWebBind;
 
     public SessionDTO() {
         this.sessionId = UUID.randomUUID().toString();
@@ -19,7 +18,6 @@ public class SessionDTO {
         this.expiresAt = this.createdAt + (3600 * 1000); // 1 hour
         this.active = true;
         this.consumed = false;
-        this.pendingWebBind = false;
     }
 
     public SessionDTO(String sessionId) {
@@ -28,7 +26,6 @@ public class SessionDTO {
         this.expiresAt = this.createdAt + (3600 * 1000);
         this.active = true;
         this.consumed = false;
-        this.pendingWebBind = false;
     }
 
     public String getSessionId() {
@@ -73,13 +70,5 @@ public class SessionDTO {
 
     public void setConsumed(boolean consumed) {
         this.consumed = consumed;
-    }
-
-    public boolean isPendingWebBind() {
-        return pendingWebBind;
-    }
-
-    public void setPendingWebBind(boolean pendingWebBind) {
-        this.pendingWebBind = pendingWebBind;
     }
 }
