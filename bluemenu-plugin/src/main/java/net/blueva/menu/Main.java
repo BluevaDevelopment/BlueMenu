@@ -5,6 +5,7 @@ import fr.mrmicky.fastinv.FastInvManager;
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
 import net.blueva.menu.commands.main.subcommands.EditorSubCommand;
+import net.blueva.menu.commands.main.subcommands.ConfirmSubCommand;
 import net.blueva.menu.commands.main.subcommands.HelpSubCommand;
 import net.blueva.menu.commands.main.subcommands.ListSubCommand;
 import net.blueva.menu.commands.main.subcommands.OpenSubCommand;
@@ -121,7 +122,8 @@ public class Main extends JavaPlugin implements Listener {
 
         // Initialize web editor if enabled
         boolean webEditorEnabled = getConfig().getBoolean("webeditor.enabled", true);
-        webEditorManager = new WebEditorManager(this, webEditorEnabled);
+        boolean webEditorRequireConfirmation = getConfig().getBoolean("webeditor.require-confirmation", true);
+        webEditorManager = new WebEditorManager(this, webEditorEnabled, webEditorRequireConfirmation);
 
         if (webEditorEnabled) {
             webEditorManager.connect();
@@ -162,6 +164,7 @@ public class Main extends JavaPlugin implements Listener {
         handler.register("list", new ListSubCommand(this));
         handler.register("reload", new ReloadSubCommand(this));
         handler.register("editor", new EditorSubCommand(this));
+        handler.register("confirm", new ConfirmSubCommand(this));
 
         Objects.requireNonNull(getCommand("bluemenu")).setExecutor(handler);
         Objects.requireNonNull(getCommand("bluemenu")).setTabCompleter(new BlueMenuTabComplete());

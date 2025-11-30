@@ -23,6 +23,7 @@ public class BlueMenuTabComplete implements TabCompleter {
             }
             if(sender.hasPermission("bluemenu.editor")) {
                 subCommands.add("editor");
+                subCommands.add("confirm");
             }
             return subCommands;
         }

@@ -1,6 +1,7 @@
 package net.blueva.menu.webeditor;
 
 import org.bukkit.plugin.Plugin;
+import org.bukkit.entity.Player;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -17,12 +18,14 @@ public class WebEditorManager {
     private final Plugin plugin;
     private final Logger logger;
     private final boolean enabled;
+    private final boolean requireSessionConfirmation;
     private WebEditorClient client;
 
-    public WebEditorManager(Plugin plugin, boolean enabled) {
+    public WebEditorManager(Plugin plugin, boolean enabled, boolean requireSessionConfirmation) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.enabled = enabled;
+        this.requireSessionConfirmation = requireSessionConfirmation;
     }
 
     /**
@@ -36,7 +39,7 @@ public class WebEditorManager {
 
         try {
             URI serverUri = new URI(WEBSOCKET_URL);
-            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin);
+            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin, requireSessionConfirmation);
             client.connect();
             logger.info("Connecting to official BlueMenu web editor at " + WEBSOCKET_URL);
         } catch (Exception e) {
@@ -108,6 +111,25 @@ public class WebEditorManager {
      */
     public String getEditorUrl(String sessionId) {
         return String.format("%s/editor/%s", EDITOR_BASE_URL, sessionId);
+    }
+
+    /**
+     * Confirm a session id for a specific player
+     */
+    public CompletableFuture<Boolean> confirmSession(String sessionId, Player player) {
+        if (!enabled) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeExceptionally(new RuntimeException("Web editor is disabled"));
+            return future;
+        }
+
+        if (client == null || !client.isOpen()) {
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeExceptionally(new RuntimeException("Web editor connection is not open"));
+            return future;
+        }
+
+        return client.confirmSession(sessionId, player.getUniqueId());
     }
 
 }

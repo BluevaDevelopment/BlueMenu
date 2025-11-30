@@ -6,6 +6,7 @@ package net.blueva.menu.common.protocol;
 public enum MessageType {
     // Plugin -> WebServer
     SESSION_CREATE,
+    SESSION_CONFIRM,
     MENU_UPDATE,
     MENU_LIST,
     MENU_SAVED,
@@ -13,6 +14,7 @@ public enum MessageType {
 
     // WebServer -> Plugin
     SESSION_VALIDATE,
+    SESSION_CONFIRMED,
     MENU_LIST_REQUEST,
     MENU_GET,
     MENU_SAVE,

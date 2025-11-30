@@ -28,11 +28,14 @@ public class WebEditorClient extends WebSocketClient {
     private static final Logger logger = Logger.getLogger(WebEditorClient.class.getName());
     private final Gson gson = new Gson();
     private final Main plugin;
+    private final boolean requireSessionConfirmation;
     private CompletableFuture<String> sessionCreationFuture;
+    private CompletableFuture<Boolean> sessionConfirmationFuture;
 
-    public WebEditorClient(URI serverUri, Main plugin) {
+    public WebEditorClient(URI serverUri, Main plugin, boolean requireSessionConfirmation) {
         super(serverUri);
         this.plugin = plugin;
+        this.requireSessionConfirmation = requireSessionConfirmation;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class WebEditorClient extends WebSocketClient {
 
             switch (msg.getType()) {
                 case SESSION_VALID -> handleSessionValid(msg);
+                case SESSION_CONFIRMED -> handleSessionConfirmed(msg);
                 case MENU_LIST_REQUEST -> handleMenuListRequest(msg);
                 case MENU_GET -> handleMenuGet(msg);
                 case MENU_SAVE -> handleMenuSave(msg);
@@ -89,12 +93,31 @@ public class WebEditorClient extends WebSocketClient {
         if (sessionId != null && !sessionId.isEmpty()) {
             data.addProperty("sessionId", sessionId);
         }
+        data.addProperty("requireConfirmation", requireSessionConfirmation);
         msg.setData(data);
 
         send(gson.toJson(msg));
         logger.info("Session creation requested");
 
         return sessionCreationFuture;
+    }
+
+    /**
+     * Confirm a session for a specific player
+     */
+    public CompletableFuture<Boolean> confirmSession(String sessionId, java.util.UUID confirmedBy) {
+        sessionConfirmationFuture = new CompletableFuture<>();
+
+        WebSocketMessage msg = new WebSocketMessage(MessageType.SESSION_CONFIRM);
+        JsonObject data = new JsonObject();
+        data.addProperty("sessionId", sessionId);
+        data.addProperty("confirmedBy", confirmedBy.toString());
+        msg.setData(data);
+
+        send(gson.toJson(msg));
+        logger.info("Session confirmation requested: " + sessionId);
+
+        return sessionConfirmationFuture;
     }
 
     /**
@@ -116,6 +139,26 @@ public class WebEditorClient extends WebSocketClient {
         }
     }
 
+    private void handleSessionConfirmed(WebSocketMessage msg) {
+        JsonObject data = msg.getData();
+        String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : "";
+        boolean confirmed = data.has("confirmed") && data.get("confirmed").getAsBoolean();
+        String message = data.has("message") ? data.get("message").getAsString() : "";
+
+        if (confirmed) {
+            logger.info("Session confirmed: " + sessionId);
+            if (sessionConfirmationFuture != null && !sessionConfirmationFuture.isDone()) {
+                sessionConfirmationFuture.complete(true);
+            }
+            return;
+        }
+
+        if (sessionConfirmationFuture != null && !sessionConfirmationFuture.isDone()) {
+            sessionConfirmationFuture.completeExceptionally(new RuntimeException(message.isEmpty() ? "Session confirmation failed" : message));
+        }
+        logger.warning("Session confirmation failed for " + sessionId + (message.isEmpty() ? "" : ": " + message));
+    }
+
     private void handleError(WebSocketMessage msg) {
         JsonObject data = msg.getData();
         String errorMessage = data.get("message").getAsString();
@@ -123,6 +166,10 @@ public class WebEditorClient extends WebSocketClient {
 
         if (sessionCreationFuture != null && !sessionCreationFuture.isDone()) {
             sessionCreationFuture.completeExceptionally(new RuntimeException(errorMessage));
+        }
+
+        if (sessionConfirmationFuture != null && !sessionConfirmationFuture.isDone()) {
+            sessionConfirmationFuture.completeExceptionally(new RuntimeException(errorMessage));
         }
     }
 

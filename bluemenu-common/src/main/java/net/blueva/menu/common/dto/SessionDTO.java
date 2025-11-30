@@ -11,6 +11,10 @@ public class SessionDTO {
     private long expiresAt;
     private boolean active;
     private boolean consumed;
+    private boolean pendingWebBind;
+    private boolean confirmed;
+    private UUID confirmedBy;
+    private boolean requireConfirmation;
 
     public SessionDTO() {
         this.sessionId = UUID.randomUUID().toString();
@@ -18,6 +22,10 @@ public class SessionDTO {
         this.expiresAt = this.createdAt + (3600 * 1000); // 1 hour
         this.active = true;
         this.consumed = false;
+        this.pendingWebBind = false;
+        this.confirmed = false;
+        this.confirmedBy = null;
+        this.requireConfirmation = true;
     }
 
     public SessionDTO(String sessionId) {
@@ -26,6 +34,10 @@ public class SessionDTO {
         this.expiresAt = this.createdAt + (3600 * 1000);
         this.active = true;
         this.consumed = false;
+        this.pendingWebBind = false;
+        this.confirmed = false;
+        this.confirmedBy = null;
+        this.requireConfirmation = true;
     }
 
     public String getSessionId() {
@@ -70,5 +82,37 @@ public class SessionDTO {
 
     public void setConsumed(boolean consumed) {
         this.consumed = consumed;
+    }
+
+    public boolean isPendingWebBind() {
+        return pendingWebBind;
+    }
+
+    public void setPendingWebBind(boolean pendingWebBind) {
+        this.pendingWebBind = pendingWebBind;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+    public UUID getConfirmedBy() {
+        return confirmedBy;
+    }
+
+    public void setConfirmedBy(UUID confirmedBy) {
+        this.confirmedBy = confirmedBy;
+    }
+
+    public boolean isRequireConfirmation() {
+        return requireConfirmation;
+    }
+
+    public void setRequireConfirmation(boolean requireConfirmation) {
+        this.requireConfirmation = requireConfirmation;
     }
 }
