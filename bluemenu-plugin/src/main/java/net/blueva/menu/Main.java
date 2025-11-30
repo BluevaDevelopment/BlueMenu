@@ -122,7 +122,8 @@ public class Main extends JavaPlugin implements Listener {
 
         // Initialize web editor if enabled
         boolean webEditorEnabled = getConfig().getBoolean("webeditor.enabled", true);
-        webEditorManager = new WebEditorManager(this, webEditorEnabled);
+        boolean webEditorRequireConfirmation = getConfig().getBoolean("webeditor.require-confirmation", true);
+        webEditorManager = new WebEditorManager(this, webEditorEnabled, webEditorRequireConfirmation);
 
         if (webEditorEnabled) {
             webEditorManager.connect();

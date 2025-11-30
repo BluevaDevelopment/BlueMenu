@@ -18,12 +18,14 @@ public class WebEditorManager {
     private final Plugin plugin;
     private final Logger logger;
     private final boolean enabled;
+    private final boolean requireSessionConfirmation;
     private WebEditorClient client;
 
-    public WebEditorManager(Plugin plugin, boolean enabled) {
+    public WebEditorManager(Plugin plugin, boolean enabled, boolean requireSessionConfirmation) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.enabled = enabled;
+        this.requireSessionConfirmation = requireSessionConfirmation;
     }
 
     /**
@@ -37,7 +39,7 @@ public class WebEditorManager {
 
         try {
             URI serverUri = new URI(WEBSOCKET_URL);
-            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin);
+            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin, requireSessionConfirmation);
             client.connect();
             logger.info("Connecting to official BlueMenu web editor at " + WEBSOCKET_URL);
         } catch (Exception e) {
