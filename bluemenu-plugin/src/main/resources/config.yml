@@ -37,9 +37,6 @@ webeditor:
   # When enabled, connects automatically to the official BlueMenu server
   enabled: true
 
-  # Require players to confirm sessions in-game before using the web editor
-  require-confirmation: true
-
   # Auto-save changes made in the web editor
   auto-save: true
 

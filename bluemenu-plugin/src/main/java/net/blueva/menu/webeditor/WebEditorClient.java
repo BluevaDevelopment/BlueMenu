@@ -28,14 +28,12 @@ public class WebEditorClient extends WebSocketClient {
     private static final Logger logger = Logger.getLogger(WebEditorClient.class.getName());
     private final Gson gson = new Gson();
     private final Main plugin;
-    private final boolean requireSessionConfirmation;
     private CompletableFuture<String> sessionCreationFuture;
     private CompletableFuture<Boolean> sessionConfirmationFuture;
 
-    public WebEditorClient(URI serverUri, Main plugin, boolean requireSessionConfirmation) {
+    public WebEditorClient(URI serverUri, Main plugin) {
         super(serverUri);
         this.plugin = plugin;
-        this.requireSessionConfirmation = requireSessionConfirmation;
     }
 
     @Override
@@ -93,7 +91,6 @@ public class WebEditorClient extends WebSocketClient {
         if (sessionId != null && !sessionId.isEmpty()) {
             data.addProperty("sessionId", sessionId);
         }
-        data.addProperty("requireConfirmation", requireSessionConfirmation);
         msg.setData(data);
 
         send(gson.toJson(msg));
