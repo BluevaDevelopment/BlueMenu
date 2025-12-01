@@ -25,7 +25,6 @@ public enum MessageType {
     MENU_DATA,
 
     // Generic
-    SESSION_CONFIRM,
     PING,
     PONG,
     ERROR
