@@ -27,6 +27,7 @@ public enum MessageType {
     MENU_DATA,
 
     // Generic
+    PLUGIN_STATUS,
     PING,
     PONG,
     ERROR
