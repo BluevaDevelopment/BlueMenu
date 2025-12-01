@@ -32,7 +32,7 @@ public class ConfirmSubCommand implements CommandInterface {
         }
 
         if (args.length < 2) {
-            MessagesUtil.sendMessage(player, "&cUsage: /bluemenu confirm <sessionId>");
+            MessagesUtil.sendMessage(player, "&cUsage: /bluemenu confirm <verificationId>");
             return true;
         }
 
@@ -41,14 +41,14 @@ public class ConfirmSubCommand implements CommandInterface {
             return true;
         }
 
-        String sessionId = args[1];
+        String verificationId = args[1];
         MessagesUtil.sendMessage(player, "&eConfirming editor session...");
 
-        main.getWebEditorManager().confirmSession(sessionId, player).thenAccept(confirmed ->
+        main.getWebEditorManager().confirmSession(verificationId, player).thenAccept(confirmed ->
             main.getServer().getScheduler().runTask(main, () -> {
                 if (confirmed) {
                     MessagesUtil.sendMessage(player, "&aSession confirmed! You can open the web editor now.");
-                    main.getLogger().info("Session " + sessionId + " confirmed by " + player.getName());
+                    main.getLogger().info("Verification " + verificationId + " confirmed by " + player.getName());
                 } else {
                     MessagesUtil.sendMessage(player, "&cFailed to confirm session. Please try again.");
                 }
@@ -56,7 +56,7 @@ public class ConfirmSubCommand implements CommandInterface {
         ).exceptionally(ex -> {
             main.getServer().getScheduler().runTask(main, () -> {
                 MessagesUtil.sendMessage(player, "&cFailed to confirm session: " + ex.getMessage());
-                main.getLogger().warning("Failed to confirm session " + sessionId + " for " + player.getName() + ": " + ex.getMessage());
+                main.getLogger().warning("Failed to confirm verification " + verificationId + " for " + player.getName() + ": " + ex.getMessage());
             });
             return null;
         });

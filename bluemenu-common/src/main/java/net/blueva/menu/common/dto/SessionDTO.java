@@ -1,6 +1,8 @@
 package net.blueva.menu.common.dto;
 
 import java.util.UUID;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Data Transfer Object for editor sessions
@@ -15,6 +17,8 @@ public class SessionDTO {
     private boolean confirmed;
     private UUID confirmedBy;
     private boolean requireConfirmation;
+    private Set<String> verificationIds;
+    private String confirmedVerificationId;
 
     public SessionDTO() {
         this.sessionId = UUID.randomUUID().toString();
@@ -26,6 +30,8 @@ public class SessionDTO {
         this.confirmed = false;
         this.confirmedBy = null;
         this.requireConfirmation = true;
+        this.verificationIds = ConcurrentHashMap.newKeySet();
+        this.confirmedVerificationId = null;
     }
 
     public SessionDTO(String sessionId) {
@@ -38,6 +44,8 @@ public class SessionDTO {
         this.confirmed = false;
         this.confirmedBy = null;
         this.requireConfirmation = true;
+        this.verificationIds = ConcurrentHashMap.newKeySet();
+        this.confirmedVerificationId = null;
     }
 
     public String getSessionId() {
@@ -114,5 +122,17 @@ public class SessionDTO {
 
     public void setRequireConfirmation(boolean requireConfirmation) {
         this.requireConfirmation = requireConfirmation;
+    }
+
+    public Set<String> getVerificationIds() {
+        return verificationIds;
+    }
+
+    public String getConfirmedVerificationId() {
+        return confirmedVerificationId;
+    }
+
+    public void setConfirmedVerificationId(String confirmedVerificationId) {
+        this.confirmedVerificationId = confirmedVerificationId;
     }
 }

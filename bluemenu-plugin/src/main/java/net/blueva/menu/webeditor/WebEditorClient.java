@@ -105,17 +105,17 @@ public class WebEditorClient extends WebSocketClient {
     /**
      * Confirm a session for a specific player
      */
-    public CompletableFuture<Boolean> confirmSession(String sessionId, java.util.UUID confirmedBy) {
+    public CompletableFuture<Boolean> confirmSession(String verificationId, java.util.UUID confirmedBy) {
         sessionConfirmationFuture = new CompletableFuture<>();
 
         WebSocketMessage msg = new WebSocketMessage(MessageType.SESSION_CONFIRM);
         JsonObject data = new JsonObject();
-        data.addProperty("sessionId", sessionId);
+        data.addProperty("verificationId", verificationId);
         data.addProperty("confirmedBy", confirmedBy.toString());
         msg.setData(data);
 
         send(gson.toJson(msg));
-        logger.info("Session confirmation requested: " + sessionId);
+        logger.info("Session confirmation requested with verification: " + verificationId);
 
         return sessionConfirmationFuture;
     }
@@ -142,11 +142,12 @@ public class WebEditorClient extends WebSocketClient {
     private void handleSessionConfirmed(WebSocketMessage msg) {
         JsonObject data = msg.getData();
         String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : "";
+        String verificationId = data.has("verificationId") ? data.get("verificationId").getAsString() : "";
         boolean confirmed = data.has("confirmed") && data.get("confirmed").getAsBoolean();
         String message = data.has("message") ? data.get("message").getAsString() : "";
 
         if (confirmed) {
-            logger.info("Session confirmed: " + sessionId);
+            logger.info("Session confirmed: " + sessionId + " with verification " + verificationId);
             if (sessionConfirmationFuture != null && !sessionConfirmationFuture.isDone()) {
                 sessionConfirmationFuture.complete(true);
             }

@@ -114,9 +114,9 @@ public class WebEditorManager {
     }
 
     /**
-     * Confirm a session id for a specific player
+     * Confirm a verification id for a specific player
      */
-    public CompletableFuture<Boolean> confirmSession(String sessionId, Player player) {
+    public CompletableFuture<Boolean> confirmSession(String verificationId, Player player) {
         if (!enabled) {
             CompletableFuture<Boolean> future = new CompletableFuture<>();
             future.completeExceptionally(new RuntimeException("Web editor is disabled"));
@@ -129,7 +129,7 @@ public class WebEditorManager {
             return future;
         }
 
-        return client.confirmSession(sessionId, player.getUniqueId());
+        return client.confirmSession(verificationId, player.getUniqueId());
     }
 
 }
