@@ -29,7 +29,7 @@ public class ListSubCommand implements CommandInterface
                 if (arg.equalsIgnoreCase("bedrock")) {
                     String menuList = String.join(", ", main.bedrockMenuManager.menuNames);
 
-                    List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.list");
+                    List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.list.messages");
                     for (String message : list) {
                         message = message.replace("{type}", "BEDROCK");
                         message = message.replace("{number_menus}", String.valueOf(main.javaMenuManager.menuNames.size()));
@@ -40,7 +40,7 @@ public class ListSubCommand implements CommandInterface
                 } else if (arg.equalsIgnoreCase("java")) {
                     String menuList = String.join(", ", main.javaMenuManager.menuNames);
 
-                    List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.list");
+                    List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.list.messages");
                     for (String message : list) {
                         message = message.replace("{type}", "JAVA");
                         message = message.replace("{number_menus}", String.valueOf(main.javaMenuManager.menuNames.size()));
@@ -49,13 +49,13 @@ public class ListSubCommand implements CommandInterface
                         MessagesUtil.sendMessage(sender, message);
                     }
                 } else {
-                    MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.other.use_list_subcommand"));
+                    MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.list.usage"));
                 }
             } else {
-                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.other.use_list_subcommand"));
+                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.list.usage"));
             }
         } else {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.insufficient_permissions"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.list.insufficient_permissions"));
         }
         return true;
     }

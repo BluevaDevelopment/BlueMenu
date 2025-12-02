@@ -7,21 +7,6 @@
 file_version: 1
 language: "English (UK)"
 prefix: "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>»</dark_gray>"
-global:
-  success:
-    configuration_reloaded: "{prefix} <green>Configuration successfully reloaded."
-  error:
-    player_offline: "{prefix} <red>The specified player is not online."
-    insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
-    invalid_menu: "{prefix} <red>The specified menu was not found. Did you spell the name correctly?"
-    invalid_platform: "{prefix} <red>Invalid platform. Use 'java', 'bedrock' or 'auto'."
-    invalid_attribute: "{prefix} <red>Invalid attribute type: <yellow>{type}"
-    invalid_menu_file: "{prefix} <red>Menu file {name} specified in config.yml not found!"
-    invalid_menu_entry: "{prefix} <red>Invalid menu configuration entry: {entry}"
-    bedrock_disabled: "{prefix} <red>Bedrock menus are disabled on this server."
-  other:
-    use_open_subcommand: "{prefix} <red>Use: /bluemenu open <java/bedrock/auto> <menu> [player]"
-    use_list_subcommand: "{prefix} <red>Use: /bluemenu list <java/bedrock>"
 commands:
   bluemenu:
     info:
@@ -33,15 +18,54 @@ commands:
       - "<gray>Use <aqua>/bm help <gray>to get help."
       - ""
       - "<dark_gray><strikethrough>--------------------------"
-    list:
-      - "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>- <gray>List of menus <white>{type}"
-      - "<gray>Menus <dark_gray>(<white>{number_menus}<dark_gray>)<gray>: <green>{list_menus}"
     help:
-      - "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>- <gray>Help Command"
-      - "<yellow>[] Required <gray>- <green>() Optional"
-      - ""
-      - "<aqua>/bm open [java/bedrock/auto] [menu] (player) <dark_gray>- <gray>Open a menu"
-      - "<aqua>/bm list [java/bedrock] <dark_gray>- <gray>List of available menus."
-      - "<aqua>/bm reload <dark_gray>- <gray>Reload the configuration"
-      - "<red>(SOON) <aqua>/bm create [java/bedrock] [menu_name] <dark_gray>- <gray>Create menus inside the game"
-      - "<red>(SOON) <aqua>/bm migrate [plugin] [menu/all] <dark_gray>- <gray>Migrate menus from another plugin to BlueMenu"
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      messages:
+        - "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>- <gray>Help Command"
+        - "<yellow>[] Required <gray>- <green>() Optional"
+        - ""
+        - "<aqua>/bm open [java/bedrock/auto] [menu] (player) <dark_gray>- <gray>Open a menu"
+        - "<aqua>/bm list [java/bedrock] <dark_gray>- <gray>List of available menus."
+        - "<aqua>/bm reload <dark_gray>- <gray>Reload the configuration"
+        - "<red>(SOON) <aqua>/bm create [java/bedrock] [menu_name] <dark_gray>- <gray>Create menus inside the game"
+        - "<red>(SOON) <aqua>/bm migrate [plugin] [menu/all] <dark_gray>- <gray>Migrate menus from another plugin to BlueMenu"
+    list:
+      usage: "{prefix} <red>Use: /bluemenu list <java/bedrock>"
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      messages:
+        - "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>- <gray>List of menus <white>{type}"
+        - "<gray>Menus <dark_gray>(<white>{number_menus}<dark_gray>)<gray>: <green>{list_menus}"
+    editor:
+      players_only: "{prefix} <red>This command can only be used by players."
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      disabled: "{prefix} <red>Web editor is disabled in config.yml."
+      creating_session: "{prefix} <yellow>Creating editor session..."
+      session_created:
+        - "{prefix} <green>✓ <yellow>Editor session created!"
+        - "<gray>Click here to open: <click:open_url:{editor_url}><aqua><underlined>{editor_url}</underlined></aqua></click>"
+        - "<dark_gray><italic>Session expires in {expires_in}</italic>"
+      creation_failed_with_reason: "{prefix} <red>Failed to create editor session: <gray>{error}</gray>"
+    confirm:
+      players_only: "{prefix} <red>This command can only be used by players."
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      usage: "{prefix} <red>Use: /bluemenu confirm <verificationId>"
+      disabled: "{prefix} <red>Web editor is disabled in config.yml."
+      starting: "{prefix} <yellow>Confirming editor session..."
+      success: "{prefix} <green>Session confirmed! You can open the web editor now."
+      failed: "{prefix} <red>Failed to confirm session. Please try again."
+      failed_with_reason: "{prefix} <red>Failed to confirm session: <gray>{error}</gray>"
+    open:
+      usage: "{prefix} <red>Use: /bluemenu open <java/bedrock/auto> <menu> [player]"
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      target_offline: "{prefix} <red>The specified player is not online."
+      bedrock_disabled: "{prefix} <red>Bedrock menus are disabled on this server."
+      invalid_platform: "{prefix} <red>Invalid platform. Use 'java', 'bedrock' or 'auto'."
+    reload:
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      success: "{prefix} <green>Configuration successfully reloaded."
+    menu:
+      invalid_menu: "{prefix} <red>The specified menu was not found. Did you spell the name correctly?"
+    manager:
+      invalid_menu_file: "{prefix} <red>Menu file {name} specified in config.yml not found!"
+      invalid_menu_entry: "{prefix} <red>Invalid menu configuration entry: {entry}"
+      invalid_attribute: "{prefix} <red>Invalid attribute type: <yellow>{type}"

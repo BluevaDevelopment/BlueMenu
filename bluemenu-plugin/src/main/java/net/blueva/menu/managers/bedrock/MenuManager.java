@@ -50,10 +50,10 @@ public class MenuManager {
                         e.printStackTrace();
                     }
                 } else {
-                    getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu_file")).replace("{name}", menuFileName));
+                    getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("commands.bluemenu.manager.invalid_menu_file")).replace("{name}", menuFileName));
                 }
             } else {
-                getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_menu_entry")).replace("{entry}", menuEntry));
+                getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("commands.bluemenu.manager.invalid_menu_entry")).replace("{entry}", menuEntry));
             }
         }
     }

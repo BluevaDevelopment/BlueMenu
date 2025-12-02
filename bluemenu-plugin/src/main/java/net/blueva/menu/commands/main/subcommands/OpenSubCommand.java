@@ -22,7 +22,7 @@ public class OpenSubCommand implements CommandInterface {
                              String commandLabel, String @NotNull [] args) {
 
         if (args.length < 3) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.other.use_open_subcommand"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.open.usage"));
             return true;
         }
 
@@ -34,7 +34,7 @@ public class OpenSubCommand implements CommandInterface {
             if (player.hasPermission("bluemenu.open")) {
                 targetPlayer = player;
             } else {
-                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.insufficient_permissions"));
+                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.open.insufficient_permissions"));
                 return true;
             }
         }
@@ -43,11 +43,11 @@ public class OpenSubCommand implements CommandInterface {
             String targetPlayerName = args[3];
             targetPlayer = main.getServer().getPlayer(targetPlayerName);
             if (targetPlayer == null) {
-                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.player_offline"));
+                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.open.target_offline"));
                 return true;
             }
         } else if (targetPlayer == null) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.insufficient_permissions"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.open.insufficient_permissions"));
             return true;
         }
 
@@ -67,10 +67,10 @@ public class OpenSubCommand implements CommandInterface {
             if(Main.isUsingFloodgate) {
                 main.bedrockMenuManager.openMenu(targetPlayer, menuName);
             } else {
-                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.bedrock_disabled"));
+                MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.open.bedrock_disabled"));
             }
         } else {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.invalid_platform"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.open.invalid_platform"));
             return true;
         }
 

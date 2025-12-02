@@ -20,42 +20,43 @@ public class ConfirmSubCommand implements CommandInterface {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws IOException {
         if (!(sender instanceof Player player)) {
-            MessagesUtil.sendMessage(sender, "&cThis command can only be used by players.");
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.players_only"));
             return true;
         }
 
         if (!player.hasPermission("bluemenu.editor")) {
             MessagesUtil.sendMessage(player,
-                main.configManager.getLang().getString("global.error.insufficient_permissions")
+                main.configManager.getLang().getString("commands.bluemenu.confirm.insufficient_permissions")
             );
             return true;
         }
 
         if (args.length < 2) {
-            MessagesUtil.sendMessage(player, "&cUsage: /bluemenu confirm <verificationId>");
+            MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.usage"));
             return true;
         }
 
         if (!main.getWebEditorManager().isEnabled()) {
-            MessagesUtil.sendMessage(player, "&cWeb editor is disabled in config.yml");
+            MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.disabled"));
             return true;
         }
 
         String verificationId = args[1];
-        MessagesUtil.sendMessage(player, "&eConfirming editor session...");
+        MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.starting"));
 
         main.getWebEditorManager().confirmSession(verificationId, player).thenAccept(confirmed ->
             main.getServer().getScheduler().runTask(main, () -> {
                 if (confirmed) {
-                    MessagesUtil.sendMessage(player, "&aSession confirmed! You can open the web editor now.");
+                    MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.success"));
                     main.getLogger().info("Verification " + verificationId + " confirmed by " + player.getName());
                 } else {
-                    MessagesUtil.sendMessage(player, "&cFailed to confirm session. Please try again.");
+                    MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.failed"));
                 }
             })
         ).exceptionally(ex -> {
             main.getServer().getScheduler().runTask(main, () -> {
-                MessagesUtil.sendMessage(player, "&cFailed to confirm session: " + ex.getMessage());
+                String errorMessage = main.configManager.getLang().getString("commands.bluemenu.confirm.failed_with_reason");
+                MessagesUtil.sendMessage(player, errorMessage != null ? errorMessage.replace("{error}", ex.getMessage()) : "");
                 main.getLogger().warning("Failed to confirm verification " + verificationId + " for " + player.getName() + ": " + ex.getMessage());
             });
             return null;

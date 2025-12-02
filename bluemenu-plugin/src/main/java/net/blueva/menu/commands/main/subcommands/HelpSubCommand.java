@@ -24,12 +24,12 @@ public class HelpSubCommand implements CommandInterface
     public boolean onCommand(@NotNull CommandSender sender, Command cmd,
                              String commandLabel, String @NotNull [] args) {
         if(sender.hasPermission("bluemenu.help")) {
-            List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.help");
+            List<String> list = main.configManager.getLang().getStringList("commands.bluemenu.help.messages");
             for (String message : list) {
                 MessagesUtil.sendMessage(sender, message.replace("{plugin_version}", main.pluginversion));
             }
         } else {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("global.error.insufficient_permissions"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.help.insufficient_permissions"));
         }
 
         return true;

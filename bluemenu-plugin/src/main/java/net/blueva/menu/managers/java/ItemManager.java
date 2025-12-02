@@ -73,7 +73,7 @@ public class ItemManager {
                 case "BOOLEAN" -> applyBooleanAttribute(itemMeta, attributeValue);
 
                 // Add more attribute types here as needed
-                default -> getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("global.error.invalid_attribute")).replace("{type}", attributeType));
+                default -> getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("commands.bluemenu.manager.invalid_attribute")).replace("{type}", attributeType));
             }
         }
 
