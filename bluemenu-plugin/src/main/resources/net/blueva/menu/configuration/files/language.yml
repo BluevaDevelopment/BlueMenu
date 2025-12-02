@@ -5,7 +5,6 @@
 # |____/|_|\__,_|\___|_|  |_|\___|_| |_|\__,_|
 
 file_version: 1
-language: "English (UK)"
 prefix: "<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <dark_gray>»</dark_gray>"
 commands:
   bluemenu:
@@ -27,7 +26,7 @@ commands:
         - "<aqua>/bm open [java/bedrock/auto] [menu] (player) <dark_gray>- <gray>Open a menu"
         - "<aqua>/bm list [java/bedrock] <dark_gray>- <gray>List of available menus."
         - "<aqua>/bm reload <dark_gray>- <gray>Reload the configuration"
-        - "<red>(SOON) <aqua>/bm create [java/bedrock] [menu_name] <dark_gray>- <gray>Create menus inside the game"
+        - "<aqua>/bm editor <dark_gray>- <gray>Open the web editor"
         - "<red>(SOON) <aqua>/bm migrate [plugin] [menu/all] <dark_gray>- <gray>Migrate menus from another plugin to BlueMenu"
     list:
       usage: "{prefix} <red>Use: /bluemenu list <java/bedrock>"

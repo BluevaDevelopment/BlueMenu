@@ -99,11 +99,11 @@ public class ConfigManager {
     public void reloadLang(){
         try {
             if(main.language == null){
-                main.languageFile = new File(main.getDataFolder()+"/language/",main.actualLang+".yml");
+                main.languageFile = new File(main.getDataFolder(), "language.yml");
             }
             main.language = YamlDocument.create(
                 main.languageFile,
-                Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files/language/" + main.actualLang + ".yml")),
+                Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files/language.yml")),
                 GeneralSettings.DEFAULT,
                 LoaderSettings.builder().setAutoUpdate(true).build(),
                 DumperSettings.DEFAULT,
@@ -126,7 +126,7 @@ public class ConfigManager {
     }
 
     public void registerLang(){
-        main.languageFile = new File(main.getDataFolder()+"/language/",main.actualLang+".yml");
+        main.languageFile = new File(main.getDataFolder(),"language.yml");
         if(!main.languageFile.exists()){
             reloadLang();
             saveLang();

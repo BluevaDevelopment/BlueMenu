@@ -20,15 +20,6 @@ file_version: 1
 #      The Metrics version
 metrics: true
 
-# Language:
-# Sets the language of all plugin messages
-# It is necessary to restart the server for it to take effect.
-#
-# Available languages:
-# English (UK): en_UK
-# Spanish (ES): es_ES
-language: 'en_UK'
-
 # Web Editor:
 # Enable the web-based menu editor for real-time menu editing from a browser
 # Connects to the official BlueMenu Web Editor at https://menu.blueva.net

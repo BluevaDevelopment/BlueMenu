@@ -36,12 +36,9 @@ public class Main extends JavaPlugin implements Listener {
     // Adventure
     private BukkitAudiences adventure;
 
-
     // Lang File
     public YamlDocument language = null;
     public File languageFile = null;
-    public String actualLang;
-    public String langPath;
 
     // Other Things
     public String pluginversion = getDescription().getVersion();
@@ -112,8 +109,6 @@ public class Main extends JavaPlugin implements Listener {
 
         configManager.generateFolders();
         saveDefaultConfig();
-
-        actualLang = getConfig().getString("language");
 
         configManager.registerLang();
         javaMenuManager.loadJavaMenus();
