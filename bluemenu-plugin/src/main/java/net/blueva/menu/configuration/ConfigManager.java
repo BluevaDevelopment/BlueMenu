@@ -25,18 +25,6 @@ public class ConfigManager {
             main.getDataFolder().mkdirs();
         }
 
-        // Language folder
-        File languagef = new File(main.getDataFolder()+ "/language");
-        if(!languagef.exists()) {
-            languagef.mkdirs();
-
-            try {
-                generateFile("en_UK", "/language");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         // menusf folder
         File menusf = new File(main.getDataFolder()+ "/menus");
         if(!menusf.exists()) {
