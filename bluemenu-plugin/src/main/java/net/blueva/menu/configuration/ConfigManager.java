@@ -11,10 +11,13 @@ import net.blueva.menu.utils.MessagesUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class ConfigManager {
     private final Main main;
+    private YamlDocument settings;
+    private File settingsFile;
 
     public ConfigManager(Main main) {
         this.main = main;
@@ -76,6 +79,96 @@ public class ConfigManager {
     }
 
     //Config Files
+    // Settings Manager
+    public YamlDocument getSettings() {
+        if (settings == null) {
+            reloadSettings();
+        }
+        return settings;
+    }
+
+    public void reloadSettings() {
+        try {
+            if (settingsFile == null) {
+                settingsFile = new File(main.getDataFolder(), "settings.yml");
+            }
+
+            settings = YamlDocument.create(
+                settingsFile,
+                Objects.requireNonNull(main.getResource("settings.yml")),
+                GeneralSettings.DEFAULT,
+                LoaderSettings.builder().setAutoUpdate(true).build(),
+                DumperSettings.DEFAULT,
+                UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load settings.yml", e);
+        }
+    }
+
+    public void saveSettings() {
+        try {
+            if (settings != null) {
+                settings.save();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save settings.yml", e);
+        }
+    }
+
+    public void registerSettings() {
+        settingsFile = new File(main.getDataFolder(), "settings.yml");
+        reloadSettings();
+
+        boolean migrated = migrateLegacyConfig();
+        if (!settingsFile.exists() || migrated) {
+            saveSettings();
+        }
+    }
+
+    private boolean migrateLegacyConfig() {
+        File legacyConfig = new File(main.getDataFolder(), "config.yml");
+        if (!legacyConfig.exists()) {
+            return false;
+        }
+
+        try {
+            YamlDocument legacy = YamlDocument.create(
+                legacyConfig,
+                GeneralSettings.DEFAULT,
+                LoaderSettings.DEFAULT,
+                DumperSettings.DEFAULT,
+                UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+            );
+
+            boolean migrated = false;
+            for (String key : Arrays.asList(
+                "metrics",
+                "java_menus",
+                "bedrock_menus",
+                "webeditor.enabled",
+                "webeditor.require-confirmation",
+                "webeditor.auto-save",
+                "webeditor.auto-reload",
+                "webeditor.environment"
+            )) {
+                if (legacy.contains(key)) {
+                    settings.set(key, legacy.get(key));
+                    migrated = true;
+                }
+            }
+
+            if (migrated) {
+                main.getLogger().info("Detected legacy config.yml, migrated values to settings.yml.");
+            }
+
+            return migrated;
+        } catch (IOException e) {
+            main.getLogger().warning("Failed to migrate legacy config.yml: " + e.getMessage());
+            return false;
+        }
+    }
+
     // Language Manager
     public YamlDocument getLang() {
         if(main.language == null) {

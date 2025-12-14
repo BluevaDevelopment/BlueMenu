@@ -33,7 +33,7 @@ public class MenuManager {
     public void loadJavaMenus() {
         menuConfigs.clear();
         menuNames.clear();
-        List<String> menuList = main.getConfig().getStringList("java_menus");
+        List<String> menuList = main.getConfigManager().getSettings().getStringList("java_menus");
         for (String menuEntry : menuList) {
             String[] menuData = menuEntry.split(";");
             if (menuData.length == 2) {

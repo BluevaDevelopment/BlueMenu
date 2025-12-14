@@ -37,7 +37,7 @@ commands:
     editor:
       players_only: "{prefix} <red>This command can only be used by players."
       insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
-      disabled: "{prefix} <red>Web editor is disabled in config.yml."
+      disabled: "{prefix} <red>Web editor is disabled in settings.yml."
       creating_session: "{prefix} <yellow>Creating editor session..."
       session_created:
         - "{prefix} <green>✓ <yellow>Editor session created!"
@@ -48,7 +48,7 @@ commands:
       players_only: "{prefix} <red>This command can only be used by players."
       insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
       usage: "{prefix} <red>Use: /bluemenu confirm <verificationId>"
-      disabled: "{prefix} <red>Web editor is disabled in config.yml."
+      disabled: "{prefix} <red>Web editor is disabled in settings.yml."
       starting: "{prefix} <yellow>Confirming editor session..."
       success: "{prefix} <green>Session confirmed! You can open the web editor now."
       failed: "{prefix} <red>Failed to confirm session. Please try again."
@@ -65,6 +65,6 @@ commands:
     menu:
       invalid_menu: "{prefix} <red>The specified menu was not found. Did you spell the name correctly?"
     manager:
-      invalid_menu_file: "{prefix} <red>Menu file {name} specified in config.yml not found!"
+      invalid_menu_file: "{prefix} <red>Menu file {name} specified in settings.yml not found!"
       invalid_menu_entry: "{prefix} <red>Invalid menu configuration entry: {entry}"
       invalid_attribute: "{prefix} <red>Invalid attribute type: <yellow>{type}"

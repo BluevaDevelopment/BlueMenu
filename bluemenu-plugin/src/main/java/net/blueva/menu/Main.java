@@ -78,9 +78,14 @@ public class Main extends JavaPlugin implements Listener {
         // Register FastInv first
         FastInvManager.register(this);
 
+        configManager = new ConfigManager(this);
+
+        configManager.generateFolders();
+        configManager.registerSettings();
+        configManager.registerLang();
+
         javaMenuManager = new MenuManager(this);
         bedrockMenuManager = new net.blueva.menu.managers.bedrock.MenuManager(this);
-        configManager = new ConfigManager(this);
 
         registerEvents();
 
@@ -91,7 +96,7 @@ public class Main extends JavaPlugin implements Listener {
             isUsingFloodgate = true;
         }
 
-        if(getConfig().getBoolean("metrics")) {
+        if(configManager.getSettings().getBoolean("metrics")) {
             int pluginId = 19060;
             Metrics metrics = new Metrics(this, pluginId);
         }
@@ -108,19 +113,15 @@ public class Main extends JavaPlugin implements Listener {
             Bukkit.getConsoleSender().sendMessage("[BlueMenu] No Floodgate detected. Bedrock menus have been disabled.");
         }
 
-        configManager.generateFolders();
-        saveDefaultConfig();
-
-        configManager.registerLang();
         javaMenuManager.loadJavaMenus();
         bedrockMenuManager.loadBedrockMenus();
         registerCommands();
 
         // Initialize web editor if enabled
-        boolean webEditorEnabled = getConfig().getBoolean("webeditor.enabled", true);
-        boolean webEditorRequireConfirmation = getConfig().getBoolean("webeditor.require-confirmation", true);
+        boolean webEditorEnabled = configManager.getSettings().getBoolean("webeditor.enabled", true);
+        boolean webEditorRequireConfirmation = configManager.getSettings().getBoolean("webeditor.require-confirmation", true);
         WebEditorEnvironment webEditorEnvironment = WebEditorEnvironment.fromConfig(
-            getConfig().getString("webeditor.environment", "production"));
+            configManager.getSettings().getString("webeditor.environment", "production"));
         webEditorManager = new WebEditorManager(this, webEditorEnabled, webEditorRequireConfirmation, webEditorEnvironment);
 
         if (webEditorEnabled) {

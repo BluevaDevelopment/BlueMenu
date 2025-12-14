@@ -26,7 +26,7 @@ public class MenuManager {
     public void loadBedrockMenus() {
         menuConfigs.clear();
         menuNames.clear();
-        List<String> menuList = main.getConfig().getStringList("bedrock_menus");
+        List<String> menuList = main.getConfigManager().getSettings().getStringList("bedrock_menus");
         for (String menuEntry : menuList) {
             String[] menuData = menuEntry.split(";");
             if (menuData.length == 2) {

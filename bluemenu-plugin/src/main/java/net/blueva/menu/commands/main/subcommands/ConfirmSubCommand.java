@@ -8,9 +8,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class ConfirmSubCommand implements CommandInterface {
 
+    private static final UUID CONSOLE_CONFIRMATION_UUID =
+        UUID.nameUUIDFromBytes("BLUEMENU_CONSOLE".getBytes(StandardCharsets.UTF_8));
     private final Main main;
 
     public ConfirmSubCommand(Main main) {
@@ -19,45 +23,45 @@ public class ConfirmSubCommand implements CommandInterface {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) throws IOException {
-        if (!(sender instanceof Player player)) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.players_only"));
-            return true;
-        }
-
-        if (!player.hasPermission("bluemenu.editor")) {
-            MessagesUtil.sendMessage(player,
+        if (!sender.hasPermission("bluemenu.editor")) {
+            MessagesUtil.sendMessage(sender,
                 main.configManager.getLang().getString("commands.bluemenu.confirm.insufficient_permissions")
             );
             return true;
         }
 
         if (args.length < 2) {
-            MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.usage"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.usage"));
             return true;
         }
 
         if (!main.getWebEditorManager().isEnabled()) {
-            MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.disabled"));
+            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.disabled"));
             return true;
         }
 
         String verificationId = args[1];
-        MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.starting"));
+        MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.starting"));
 
-        main.getWebEditorManager().confirmSession(verificationId, player).thenAccept(confirmed ->
+        UUID confirmerId = sender instanceof Player player
+            ? player.getUniqueId()
+            : CONSOLE_CONFIRMATION_UUID;
+        String confirmerName = sender.getName();
+
+        main.getWebEditorManager().confirmSession(verificationId, confirmerId).thenAccept(confirmed ->
             main.getServer().getScheduler().runTask(main, () -> {
                 if (confirmed) {
-                    MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.success"));
-                    main.getLogger().info("Verification " + verificationId + " confirmed by " + player.getName());
+                    MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.success"));
+                    main.getLogger().info("Verification " + verificationId + " confirmed by " + confirmerName);
                 } else {
-                    MessagesUtil.sendMessage(player, main.configManager.getLang().getString("commands.bluemenu.confirm.failed"));
+                    MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.confirm.failed"));
                 }
             })
         ).exceptionally(ex -> {
             main.getServer().getScheduler().runTask(main, () -> {
                 String errorMessage = main.configManager.getLang().getString("commands.bluemenu.confirm.failed_with_reason");
-                MessagesUtil.sendMessage(player, errorMessage != null ? errorMessage.replace("{error}", ex.getMessage()) : "");
-                main.getLogger().warning("Failed to confirm verification " + verificationId + " for " + player.getName() + ": " + ex.getMessage());
+                MessagesUtil.sendMessage(sender, errorMessage != null ? errorMessage.replace("{error}", ex.getMessage()) : "");
+                main.getLogger().warning("Failed to confirm verification " + verificationId + " for " + confirmerName + ": " + ex.getMessage());
             });
             return null;
         });

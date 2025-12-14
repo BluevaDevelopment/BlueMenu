@@ -26,6 +26,7 @@ import java.util.logging.Logger;
  */
 public class WebEditorClient extends WebSocketClient {
     private static final Logger logger = Logger.getLogger(WebEditorClient.class.getName());
+    private static final String SETTINGS_FILE_NAME = "settings.yml";
     private final Gson gson = new Gson();
     private final Main plugin;
     private final boolean requireSessionConfirmation;
@@ -204,12 +205,14 @@ public class WebEditorClient extends WebSocketClient {
             return;
         }
 
+        String resolvedFileName = platform.equalsIgnoreCase("CONFIG") ? SETTINGS_FILE_NAME : fileName;
+
         // Get menu content and send it back
-        String menuContent = getMenuContent(fileName, platform);
+        String menuContent = getMenuContent(resolvedFileName, platform);
         if (menuContent != null) {
-            sendMenuData(fileName, platform, menuContent, sessionId);
+            sendMenuData(resolvedFileName, platform, menuContent, sessionId);
         } else {
-            logger.warning("Menu not found: " + fileName);
+            logger.warning("Menu not found: " + resolvedFileName);
         }
     }
 
@@ -230,24 +233,26 @@ public class WebEditorClient extends WebSocketClient {
         }
 
         // Save menu to disk
-        boolean success = saveMenuToDisk(fileName, platform, content);
+        String targetFileName = platform.equalsIgnoreCase("CONFIG") ? SETTINGS_FILE_NAME : fileName;
+
+        boolean success = saveMenuToDisk(targetFileName, platform, content);
 
         if (success) {
-            // Special handling for config.yml - reload entire plugin
+            // Special handling for settings.yml - reload entire plugin
             if (platform.equalsIgnoreCase("CONFIG")) {
                 reloadPlugin();
-                logger.info("Config saved - plugin reloaded");
+                logger.info("Settings saved - plugin reloaded");
             } else {
                 // Auto-reload menus if enabled
-                boolean autoReload = plugin.getConfig().getBoolean("webeditor.auto-reload", true);
+                boolean autoReload = plugin.getConfigManager().getSettings().getBoolean("webeditor.auto-reload", true);
                 if (autoReload) {
                     reloadMenus(platform, fileName);
                 }
             }
 
             // Send success confirmation
-            sendMenuSaved(fileName, platform, sessionId);
-            logger.info("Menu saved: " + fileName);
+            sendMenuSaved(targetFileName, platform, sessionId);
+            logger.info("Menu saved: " + targetFileName);
         } else {
             sendError("Failed to save menu to disk", sessionId);
         }
@@ -268,10 +273,10 @@ public class WebEditorClient extends WebSocketClient {
             return;
         }
 
-        // Prevent deletion of config.yml
+        // Prevent deletion of settings.yml
         if (platform.equalsIgnoreCase("CONFIG")) {
-            logger.warning("Attempt to delete config.yml blocked");
-            sendError("Cannot delete config.yml", sessionId);
+            logger.warning("Attempt to delete settings.yml blocked");
+            sendError("Cannot delete settings.yml", sessionId);
             return;
         }
 
@@ -364,7 +369,7 @@ public class WebEditorClient extends WebSocketClient {
      */
     private String getFileNameForMenu(String menuName, String platform) {
         String configKey = platform.equals("java") ? "java_menus" : "bedrock_menus";
-        List<String> menuList = plugin.getConfig().getStringList(configKey);
+        List<String> menuList = plugin.getConfigManager().getSettings().getStringList(configKey);
 
         for (String entry : menuList) {
             String[] parts = entry.split(";");
@@ -401,9 +406,9 @@ public class WebEditorClient extends WebSocketClient {
         try {
             File menuFile;
 
-            // Special handling for config.yml
+            // Special handling for settings.yml
             if (platform.equalsIgnoreCase("CONFIG")) {
-                menuFile = new File(plugin.getDataFolder(), fileName);
+                menuFile = new File(plugin.getDataFolder(), SETTINGS_FILE_NAME);
             } else {
                 String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
                 menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
@@ -450,9 +455,9 @@ public class WebEditorClient extends WebSocketClient {
         try {
             File menuFile;
 
-            // Special handling for config.yml
+            // Special handling for settings.yml
             if (platform.equalsIgnoreCase("CONFIG")) {
-                menuFile = new File(plugin.getDataFolder(), fileName);
+                menuFile = new File(plugin.getDataFolder(), SETTINGS_FILE_NAME);
             } else {
                 String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
                 menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
@@ -563,15 +568,14 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Reload entire plugin (used when config.yml is saved)
+     * Reload entire plugin (used when settings.yml is saved)
      */
     private void reloadPlugin() {
         try {
             // Run on main thread
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 try {
-                    // Reload config.yml
-                    plugin.reloadConfig();
+                    plugin.getConfigManager().reloadSettings();
 
                     // Reload all menus
                     plugin.javaMenuManager.loadJavaMenus();
@@ -594,7 +598,7 @@ public class WebEditorClient extends WebSocketClient {
      */
     private String getMenuNameFromFileName(String fileName, String platform) {
         String configKey = platform.equals("java") ? "java_menus" : "bedrock_menus";
-        List<String> menuList = plugin.getConfig().getStringList(configKey);
+        List<String> menuList = plugin.getConfigManager().getSettings().getStringList(configKey);
 
         for (String entry : menuList) {
             String[] parts = entry.split(";");

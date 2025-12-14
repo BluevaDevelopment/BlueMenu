@@ -6,6 +6,7 @@ import org.bukkit.plugin.Plugin;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
+import java.util.UUID;
 
 /**
  * Manages the web editor connection
@@ -120,7 +121,7 @@ public class WebEditorManager {
     /**
      * Confirm a verification id for a specific player
      */
-    public CompletableFuture<Boolean> confirmSession(String verificationId, Player player) {
+    public CompletableFuture<Boolean> confirmSession(String verificationId, UUID confirmedBy) {
         if (!enabled) {
             CompletableFuture<Boolean> future = new CompletableFuture<>();
             future.completeExceptionally(new RuntimeException("Web editor is disabled"));
@@ -133,7 +134,11 @@ public class WebEditorManager {
             return future;
         }
 
-        return client.confirmSession(verificationId, player.getUniqueId());
+        return client.confirmSession(verificationId, confirmedBy);
+    }
+
+    public CompletableFuture<Boolean> confirmSession(String verificationId, Player player) {
+        return confirmSession(verificationId, player.getUniqueId());
     }
 
     public enum WebEditorEnvironment {

@@ -24,7 +24,7 @@ public class ReloadSubCommand implements CommandInterface
     public boolean onCommand(@NotNull CommandSender sender, Command cmd,
                              String commandLabel, String @NotNull [] args) {
         if(sender.hasPermission("bluemenu.reload")) {
-            main.reloadConfig();
+            main.getConfigManager().reloadSettings();
             main.configManager.reloadLang();
             main.javaMenuManager.loadJavaMenus();
             if(Main.isUsingFloodgate) {
