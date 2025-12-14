@@ -37,6 +37,13 @@ webeditor:
   # Auto-reload menus when changes are saved
   auto-reload: true
 
+  # Environment for the official web editor server.
+  # Options:
+  #   PRODUCTION  - Default. Connects to https://menu.blueva.net and wss://menu.blueva.net/ws
+  #   DEVELOPMENT - Only for BlueMenu contributors. Uses https://menu.blueva.net/dev and wss://menu.blueva.net/dev/ws.
+  #                 NOT recommended for public servers; this endpoint may be unstable.
+  environment: PRODUCTION
+
 # Menus located in /plugins/BlueMenu/menus/java
 # Directory path where Java menus are located.
 java_menus:

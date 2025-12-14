@@ -16,6 +16,7 @@ import net.blueva.menu.libraries.bstats.Metrics;
 import net.blueva.menu.listeners.*;
 import net.blueva.menu.managers.java.MenuManager;
 import net.blueva.menu.webeditor.WebEditorManager;
+import net.blueva.menu.webeditor.WebEditorManager.WebEditorEnvironment;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -118,7 +119,9 @@ public class Main extends JavaPlugin implements Listener {
         // Initialize web editor if enabled
         boolean webEditorEnabled = getConfig().getBoolean("webeditor.enabled", true);
         boolean webEditorRequireConfirmation = getConfig().getBoolean("webeditor.require-confirmation", true);
-        webEditorManager = new WebEditorManager(this, webEditorEnabled, webEditorRequireConfirmation);
+        WebEditorEnvironment webEditorEnvironment = WebEditorEnvironment.fromConfig(
+            getConfig().getString("webeditor.environment", "production"));
+        webEditorManager = new WebEditorManager(this, webEditorEnabled, webEditorRequireConfirmation, webEditorEnvironment);
 
         if (webEditorEnabled) {
             webEditorManager.connect();

@@ -1,7 +1,7 @@
 package net.blueva.menu.webeditor;
 
-import org.bukkit.plugin.Plugin;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -11,21 +11,20 @@ import java.util.logging.Logger;
  * Manages the web editor connection
  */
 public class WebEditorManager {
-    // Official BlueMenu Web Editor URLs - hardcoded for all users
-    private static final String WEBSOCKET_URL = "wss://menu.blueva.net/ws";
-    private static final String EDITOR_BASE_URL = "https://menu.blueva.net";
-
     private final Plugin plugin;
     private final Logger logger;
     private final boolean enabled;
     private final boolean requireSessionConfirmation;
+    private final WebEditorEnvironment environment;
     private WebEditorClient client;
 
-    public WebEditorManager(Plugin plugin, boolean enabled, boolean requireSessionConfirmation) {
+    public WebEditorManager(Plugin plugin, boolean enabled, boolean requireSessionConfirmation,
+                            WebEditorEnvironment environment) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.enabled = enabled;
         this.requireSessionConfirmation = requireSessionConfirmation;
+        this.environment = environment;
     }
 
     /**
@@ -38,10 +37,15 @@ public class WebEditorManager {
         }
 
         try {
-            URI serverUri = new URI(WEBSOCKET_URL);
+            URI serverUri = new URI(environment.websocketUrl());
             client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin, requireSessionConfirmation);
             client.connect();
-            logger.info("Connecting to official BlueMenu web editor at " + WEBSOCKET_URL);
+            logger.info("Connecting to " + environment.displayName() + " BlueMenu web editor at "
+                + environment.websocketUrl());
+            if (environment == WebEditorEnvironment.DEVELOPMENT) {
+                logger.warning("Development environment is intended for plugin contributors only."
+                    + " Do not use on production servers.");
+            }
         } catch (Exception e) {
             logger.severe("Failed to connect to web editor server: " + e.getMessage());
         }
@@ -110,7 +114,7 @@ public class WebEditorManager {
      * Get the editor URL for a session
      */
     public String getEditorUrl(String sessionId) {
-        return String.format("%s/editor/%s", EDITOR_BASE_URL, sessionId);
+        return String.format("%s/editor/%s", environment.editorBaseUrl(), sessionId);
     }
 
     /**
@@ -132,4 +136,47 @@ public class WebEditorManager {
         return client.confirmSession(verificationId, player.getUniqueId());
     }
 
+    public enum WebEditorEnvironment {
+        PRODUCTION("production", "Official", "https://menu.blueva.net", "wss://menu.blueva.net/ws"),
+        DEVELOPMENT("development", "Development", "https://menu.blueva.net/dev", "wss://menu.blueva.net/dev/ws");
+
+        private final String configKey;
+        private final String displayName;
+        private final String editorBaseUrl;
+        private final String websocketUrl;
+
+        WebEditorEnvironment(String configKey, String displayName, String editorBaseUrl, String websocketUrl) {
+            this.configKey = configKey;
+            this.displayName = displayName;
+            this.editorBaseUrl = editorBaseUrl;
+            this.websocketUrl = websocketUrl;
+        }
+
+        public String editorBaseUrl() {
+            return editorBaseUrl;
+        }
+
+        public String websocketUrl() {
+            return websocketUrl;
+        }
+
+        public String displayName() {
+            return displayName;
+        }
+
+        public static WebEditorEnvironment fromConfig(String value) {
+            if (value == null) {
+                return PRODUCTION;
+            }
+
+            String normalized = value.trim().toLowerCase();
+            for (WebEditorEnvironment environment : values()) {
+                if (environment.configKey.equalsIgnoreCase(normalized)) {
+                    return environment;
+                }
+            }
+
+            return PRODUCTION;
+        }
+    }
 }

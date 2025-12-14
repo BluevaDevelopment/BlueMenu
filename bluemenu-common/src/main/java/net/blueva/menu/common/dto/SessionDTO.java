@@ -21,23 +21,21 @@ public class SessionDTO {
     private String confirmedVerificationId;
 
     public SessionDTO() {
-        this.sessionId = UUID.randomUUID().toString();
-        this.createdAt = System.currentTimeMillis();
-        this.expiresAt = this.createdAt + (3600 * 1000); // 1 hour
-        this.active = true;
-        this.consumed = false;
-        this.pendingWebBind = false;
-        this.confirmed = false;
-        this.confirmedBy = null;
-        this.requireConfirmation = true;
-        this.verificationIds = ConcurrentHashMap.newKeySet();
-        this.confirmedVerificationId = null;
+        this(UUID.randomUUID().toString(), 3600 * 1000L);
     }
 
     public SessionDTO(String sessionId) {
+        this(sessionId, 3600 * 1000L);
+    }
+
+    public SessionDTO(long sessionTimeoutMillis) {
+        this(UUID.randomUUID().toString(), sessionTimeoutMillis);
+    }
+
+    public SessionDTO(String sessionId, long sessionTimeoutMillis) {
         this.sessionId = sessionId;
         this.createdAt = System.currentTimeMillis();
-        this.expiresAt = this.createdAt + (3600 * 1000);
+        this.expiresAt = this.createdAt + sessionTimeoutMillis;
         this.active = true;
         this.consumed = false;
         this.pendingWebBind = false;
