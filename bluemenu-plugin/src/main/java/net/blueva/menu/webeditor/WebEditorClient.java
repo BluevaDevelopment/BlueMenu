@@ -25,10 +25,10 @@ import java.util.logging.Logger;
  * WebSocket client for connecting to the web editor server
  */
 public class WebEditorClient extends WebSocketClient {
-    private static final Logger logger = Logger.getLogger(WebEditorClient.class.getName());
     private static final String SETTINGS_FILE_NAME = "settings.yml";
     private final Gson gson = new Gson();
     private final Main plugin;
+    private final Logger logger;
     private final boolean requireSessionConfirmation;
     private CompletableFuture<String> sessionCreationFuture;
     private CompletableFuture<Boolean> sessionConfirmationFuture;
@@ -36,6 +36,7 @@ public class WebEditorClient extends WebSocketClient {
     public WebEditorClient(URI serverUri, Main plugin, boolean requireSessionConfirmation) {
         super(serverUri);
         this.plugin = plugin;
+        this.logger = plugin.getLogger();
         this.requireSessionConfirmation = requireSessionConfirmation;
     }
 
