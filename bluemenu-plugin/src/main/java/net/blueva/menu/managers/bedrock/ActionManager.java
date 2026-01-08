@@ -6,8 +6,10 @@ import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -15,6 +17,9 @@ import java.util.Locale;
 import static org.bukkit.Bukkit.getLogger;
 
 public class ActionManager {
+    private static final String BUNGEE_CHANNEL = "BungeeCord";
+    private static final String VELOCITY_CHANNEL = "velocity:player_info";
+
     public static void executeActions(Player player, List<String> actions) {
         for (String action : actions) {
             executeAction(player, action);
@@ -41,8 +46,9 @@ public class ActionManager {
                 case "BROADCAST" -> broadcastMessage(actionCommand);
                 case "SOUND" -> playSound(player, params);
                 case "OPEN_MENU" -> openBedrockMenu(player, actionCommand);
-                case "CONNECT_BUNGEE" -> connectToServer(player, actionCommand, "BungeeCord");
-                case "CONNECT_VELOCITY" -> connectToServer(player, actionCommand, "velocity:player_info");
+                case "CONNECT" -> connectToServer(player, actionCommand);
+                case "CONNECT_BUNGEE" -> connectToServer(player, actionCommand, BUNGEE_CHANNEL);
+                case "CONNECT_VELOCITY" -> connectToServer(player, actionCommand, VELOCITY_CHANNEL);
                 default -> getLogger().warning("Invalid action target: " + actionTarget);
             }
         } else if (actionParts.length == 1) {
@@ -126,5 +132,52 @@ public class ActionManager {
         out.writeUTF("Connect");
         out.writeUTF(serverName.trim());
         player.sendPluginMessage(Main.getPlugin(), channel, out.toByteArray());
+    }
+
+    private static void connectToServer(Player player, String serverName) {
+        String channel = resolveProxyChannel();
+        if (channel == null) {
+            getLogger().warning("Connect action failed: proxy support is not enabled (BungeeCord or Velocity).");
+            return;
+        }
+        connectToServer(player, serverName, channel);
+    }
+
+    private static String resolveProxyChannel() {
+        if (isBungeeEnabled()) {
+            return BUNGEE_CHANNEL;
+        }
+        if (isVelocityEnabled()) {
+            return VELOCITY_CHANNEL;
+        }
+        return null;
+    }
+
+    private static boolean isBungeeEnabled() {
+        try {
+            return Bukkit.spigot().getConfig().getBoolean("settings.bungeecord");
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private static boolean isVelocityEnabled() {
+        File paperGlobal = new File("paper-global.yml");
+        if (paperGlobal.isFile()) {
+            YamlConfiguration config = YamlConfiguration.loadConfiguration(paperGlobal);
+            if (config.getBoolean("proxies.velocity.enabled", false)) {
+                return true;
+            }
+        }
+
+        File paperConfig = new File("paper.yml");
+        if (paperConfig.isFile()) {
+            YamlConfiguration config = YamlConfiguration.loadConfiguration(paperConfig);
+            if (config.getBoolean("settings.velocity-support.enabled", false)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
