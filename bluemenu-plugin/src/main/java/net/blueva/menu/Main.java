@@ -107,11 +107,14 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " | |_) | | |_| |  __| |  | |  __| | | | |_| |");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " |____/|_|\\__,_|\\___|_|  |_|\\___|_| |_|\\__,_|");
         Bukkit.getConsoleSender().sendMessage("");
-        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "V. 1.0.0 | Plugin enabled successfully | blueva.net");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "V. " + pluginversion + " | Plugin enabled successfully | blueva.net");
 
         if(!isUsingFloodgate) {
             Bukkit.getConsoleSender().sendMessage("[BlueMenu] No Floodgate detected. Bedrock menus have been disabled.");
         }
+
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "velocity:player_info");
 
         javaMenuManager.loadJavaMenus();
         bedrockMenuManager.loadBedrockMenus();
@@ -148,7 +151,7 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " | |_) | | |_| |  __| |  | |  __| | | | |_| |");
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " |____/|_|\\__,_|\\___|_|  |_|\\___|_| |_|\\__,_|");
         Bukkit.getConsoleSender().sendMessage("");
-        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "V. 1.0.0 | Plugin disabled successfully | blueva.net");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "V. " + pluginversion + " | Plugin disabled successfully | blueva.net");
     }
 
     public void registerCommands() {

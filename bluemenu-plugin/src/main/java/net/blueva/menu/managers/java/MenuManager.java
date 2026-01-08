@@ -126,7 +126,7 @@ public class MenuManager {
             // Open the menu
             menu.open(player);
 
-            PlayerManager.openMenu(player, menuConfig.getString("menuName"));
+            PlayerManager.openMenu(player, menuConfig.getString("menuName"), menuName);
 
             // Start animations if configured
             if (menuConfig.contains("animations")) {

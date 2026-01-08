@@ -17,6 +17,7 @@ import static org.bukkit.Bukkit.getLogger;
 public class MenuManager {
     public final Map<String, YamlDocument> menuConfigs = new HashMap<>();
     public final List<String> menuNames = new ArrayList<>();
+    private final Map<UUID, String> lastOpenedMenus = new HashMap<>();
 
     private final Main main;
 
@@ -61,6 +62,7 @@ public class MenuManager {
     public void openMenu(Player player, String menuName) {
         YamlDocument menuConfig = menuConfigs.get(menuName);
         if(menuConfig != null) {
+            lastOpenedMenus.put(player.getUniqueId(), menuName);
             String menuType = menuConfig.getString("type");
             if(menuType != null) {
                 if(menuType.equalsIgnoreCase("SIMPLE")) {
@@ -74,5 +76,9 @@ public class MenuManager {
                 }
             }
         }
+    }
+
+    public String getLastOpenedMenu(Player player) {
+        return lastOpenedMenus.get(player.getUniqueId());
     }
 }

@@ -12,6 +12,7 @@ public class PlayerJoinListener implements Listener {
         if(!PlayerManager.playerInMenu.containsKey(e.getPlayer())) {
             PlayerManager.playerInMenu.put(e.getPlayer(), false);
             PlayerManager.playerMenuTitle.put(e.getPlayer(), "None");
+            PlayerManager.playerMenuName.put(e.getPlayer(), null);
         }
     }
 }

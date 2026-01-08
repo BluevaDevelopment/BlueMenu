@@ -9,6 +9,7 @@ import java.util.Map;
 public class PlayerManager {
     public final static Map<Player, Boolean> playerInMenu = new HashMap<>();
     public final static Map<Player, String> playerMenuTitle = new HashMap<>();
+    public final static Map<Player, String> playerMenuName = new HashMap<>();
 
     public static boolean isPlayerInMenu(Player player) {
         if(!playerInMenu.isEmpty() && playerInMenu.containsKey(player)) {
@@ -17,10 +18,11 @@ public class PlayerManager {
         return false;
     }
 
-    public static void openMenu(Player player, String title) {
+    public static void openMenu(Player player, String title, String menuName) {
         if(!playerInMenu.isEmpty() && playerInMenu.containsKey(player) && playerInMenu.get(player).equals(false)) {
             playerInMenu.replace(player, true);
             PlayerManager.playerMenuTitle.replace(player, MessagesUtil.format(player, title));
+            PlayerManager.playerMenuName.replace(player, menuName);
         }
     }
 
@@ -28,6 +30,11 @@ public class PlayerManager {
         if(!playerInMenu.isEmpty() && playerInMenu.containsKey(player) && playerInMenu.get(player).equals(true)) {
             playerInMenu.replace(player, false);
             PlayerManager.playerMenuTitle.replace(player, "None");
+            PlayerManager.playerMenuName.remove(player);
         }
+    }
+
+    public static String getMenuName(Player player) {
+        return playerMenuName.get(player);
     }
 }
