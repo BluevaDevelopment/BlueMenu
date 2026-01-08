@@ -118,26 +118,26 @@ public class ItemManager {
         }
 
         try {
-            // Primero, intentar parsear como customModelData (integer)
+            // First, try parsing as customModelData (integer)
             int customModelData = Integer.parseInt(value);
             itemMeta.setCustomModelData(customModelData);
             itemStack.setItemMeta(itemMeta);
             return itemStack;
         } catch (NumberFormatException ignored) {
-            // No es un número, seguimos con el manejo de cabezas
+            // Not a number, continue with head handling
         }
 
         if (!(itemMeta instanceof SkullMeta skullMeta)) {
             return itemStack;
         }
 
-        // ¿Es un nombre de jugador?
+        // Is this a player name?
         if (value.length() >= 3 && value.length() <= 16 && value.matches("^[a-zA-Z0-9_]+$")) {
-            // API nueva: crear un PlayerProfile por nombre
+            // New API: create a PlayerProfile by name
             PlayerProfile profile = Bukkit.createPlayerProfile(value);
             skullMeta.setOwnerProfile(profile);
         } else {
-            // Manejar texturas (base64, URL directa o hash de textura)
+            // Handle textures (base64, direct URL, or texture hash)
             try {
                 PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
                 PlayerTextures textures = profile.getTextures();
@@ -145,10 +145,10 @@ public class ItemManager {
                 String textureUrl;
 
                 if (value.startsWith("http://") || value.startsWith("https://")) {
-                    // URL directa
+                    // Direct URL
                     textureUrl = value;
                 } else {
-                    // Intentar decodificar base64
+                    // Try decoding base64
                     try {
                         String decoded = new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
                         JsonObject jsonObject = JsonParser.parseString(decoded).getAsJsonObject();
@@ -157,7 +157,7 @@ public class ItemManager {
                                 .get("url")
                                 .getAsString();
                     } catch (Exception decodeEx) {
-                        // Si falla, asumir que es un hash de textures.minecraft.net
+                        // If it fails, assume it's a textures.minecraft.net hash
                         textureUrl = "http://textures.minecraft.net/texture/" + value;
                     }
                 }

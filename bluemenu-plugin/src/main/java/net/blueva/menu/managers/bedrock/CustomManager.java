@@ -19,10 +19,10 @@ public class CustomManager {
         CustomForm.Builder formBuilder = CustomForm.builder()
                 .title(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("menuName"))));
 
-        // Storage para mantener el orden de los componentes y sus acciones
+        // Storage to preserve component order and their actions
         List<ComponentData> componentsOrder = new ArrayList<>();
 
-        // Procesar componentes
+        // Process components
         Section componentsConfig = menuConfig.getSection("components");
         if (componentsConfig != null) {
             for (Object componentKeyObj : componentsConfig.getKeys()) {
@@ -128,10 +128,10 @@ public class CustomManager {
     private static void handleResponse(Player player, CustomFormResponse response, List<ComponentData> componentsOrder) {
         response.reset();
 
-        // Map para almacenar todos los valores de los componentes
+        // Map to store all component values
         Map<String, String> componentValues = new HashMap<>();
 
-        // Primera pasada: recolectar todos los valores
+        // First pass: collect all values
         for (ComponentData componentData : componentsOrder) {
             if (!response.hasNext()) {
                 break;
@@ -143,7 +143,7 @@ public class CustomManager {
                 case "DROPDOWN":
                     int dropdownIndex = response.asDropdown();
                     value = String.valueOf(dropdownIndex);
-                    // También guardar el texto de la opción seleccionada si está disponible
+                    // Also store the selected option text if available
                     if (componentData.getOptions() != null && dropdownIndex < componentData.getOptions().size()) {
                         componentValues.put(componentData.getKey() + "_text", componentData.getOptions().get(dropdownIndex));
                     }
@@ -161,7 +161,7 @@ public class CustomManager {
 
                 case "SLIDER":
                     float sliderValue = response.asSlider();
-                    // Si el valor es un número entero, usar formato int para evitar ".0"
+                    // If the value is an integer, use int formatting to avoid ".0"
                     value = (sliderValue == (int) sliderValue)
                         ? String.valueOf((int) sliderValue)
                         : String.valueOf(sliderValue);
@@ -170,14 +170,14 @@ public class CustomManager {
                 case "STEPSLIDER":
                     int stepSliderIndex = response.asStepSlider();
                     value = String.valueOf(stepSliderIndex);
-                    // También guardar el texto del step seleccionado si está disponible
+                    // Also store the selected step text if available
                     if (componentData.getOptions() != null && stepSliderIndex < componentData.getOptions().size()) {
                         componentValues.put(componentData.getKey() + "_text", componentData.getOptions().get(stepSliderIndex));
                     }
                     break;
 
                 case "LABEL":
-                    response.skip(); // Los labels no tienen valor
+                    response.skip(); // Labels have no value
                     continue;
 
                 default:
@@ -190,7 +190,7 @@ public class CustomManager {
             }
         }
 
-        // Segunda pasada: ejecutar las acciones con todos los valores disponibles
+        // Second pass: run actions with all available values
         for (ComponentData componentData : componentsOrder) {
             List<String> actions = componentData.getActions();
             if (actions != null && !actions.isEmpty()) {
@@ -204,13 +204,13 @@ public class CustomManager {
             return;
         }
 
-        // Procesar cada acción reemplazando SOLO los placeholders de componentes
-        // Dejar que ActionManager procese el resto (formato, placeholders estándar, etc.)
+        // Process each action by replacing ONLY component placeholders
+        // Let ActionManager process the rest (formatting, standard placeholders, etc.)
         List<String> processedActions = new ArrayList<>();
         for (String action : actions) {
             String processedAction = action;
 
-            // Reemplazar solo los placeholders {component_key} con sus valores
+            // Replace only {component_key} placeholders with their values
             for (Map.Entry<String, String> entry : componentValues.entrySet()) {
                 processedAction = processedAction.replace("{" + entry.getKey() + "}", entry.getValue());
             }
@@ -221,12 +221,12 @@ public class CustomManager {
         ActionManager.executeActions(player, processedActions);
     }
 
-    // Clase interna para almacenar datos de componentes
+    // Inner class for storing component data
     private static class ComponentData {
         private final String key;
         private final String type;
         private final List<String> actions;
-        private final List<String> options; // Para dropdown y stepslider
+        private final List<String> options; // For dropdown and stepslider
 
         public ComponentData(String key, String type, List<String> actions, List<String> options) {
             this.key = key;
