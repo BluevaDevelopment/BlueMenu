@@ -23,7 +23,7 @@ public class MySqlMenuRepository implements MenuRepository {
         + "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
         + "PRIMARY KEY (menu_type, menu_key),"
         + "INDEX idx_updated_at (updated_at)"
-        + ") DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        + ")";
 
     private final HikariDataSource dataSource;
 
@@ -140,8 +140,7 @@ public class MySqlMenuRepository implements MenuRepository {
         String sslFlag = config.useSsl() ? "true" : "false";
         return "jdbc:mysql://" + config.host() + ":" + config.port() + "/" + config.database()
             + "?useSSL=" + sslFlag
-            + "&characterEncoding=utf8mb4"
-            + "&useUnicode=true"
-            + "&connectionCollation=utf8mb4_unicode_ci";
+            + "&characterEncoding=utf8"
+            + "&useUnicode=true";
     }
 }
