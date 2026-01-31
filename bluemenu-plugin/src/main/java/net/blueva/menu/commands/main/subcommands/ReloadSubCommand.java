@@ -26,6 +26,7 @@ public class ReloadSubCommand implements CommandInterface
         if(sender.hasPermission("bluemenu.reload")) {
             main.getConfigManager().reloadSettings();
             main.configManager.reloadLang();
+            main.getMenuSyncService().reload();
             main.javaMenuManager.loadJavaMenus();
             if(Main.isUsingFloodgate) {
                 main.bedrockMenuManager.loadBedrockMenus();

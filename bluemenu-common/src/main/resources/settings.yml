@@ -73,3 +73,42 @@ bedrock_menus:
 
   - 'custom_conditions;conditions_custom_example.yml'  # CUSTOM form with conditional components.
   # Note: Demonstrates display_conditions for form components with all/any/none logic.
+
+# Multi-server sync:
+# Configure which menu files should be synchronized across your network.
+# This list is read by the core plugin and used to decide which menus to sync.
+sync-menus:
+  # Enable/disable menu synchronization
+  enabled: false
+
+  # How often receiver menus check for updates from MySQL
+  poll-interval-seconds: 3
+
+  # Menus that this server publishes to MySQL.
+  # Entries MUST match entries present in java_menus/bedrock_menus (same 'menuKey;file.yml').
+  send:
+    java: []
+    bedrock: []
+
+  # Menus that this server consumes from MySQL.
+  # Entries MUST match entries present in java_menus/bedrock_menus (same 'menuKey;file.yml').
+  receive:
+    java: []
+    bedrock: []
+
+  # If a send menu conflicts with a newer DB version, choose behavior:
+  # SKIP = do not overwrite newer DB version (default, safest)
+  # OVERWRITE = this server overwrites DB on reload/start
+  send-conflict-policy: SKIP
+
+  # MySQL/MariaDB connection settings for menu synchronization.
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "bluemenu"
+    username: "root"
+    password: "password"
+    use-ssl: false
+    pool-size: 10
+    connection-timeout-ms: 10000
+    max-lifetime-ms: 1800000

@@ -1,18 +1,15 @@
 package net.blueva.menu.managers.bedrock;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
-import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
-import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
-import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
-import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import net.blueva.menu.Main;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static org.bukkit.Bukkit.getLogger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class MenuManager {
     public final Map<String, YamlDocument> menuConfigs = new HashMap<>();
@@ -25,37 +22,20 @@ public class MenuManager {
         this.main = main;
     }
     public void loadBedrockMenus() {
-        menuConfigs.clear();
-        menuNames.clear();
         List<String> menuList = main.getConfigManager().getSettings().getStringList("bedrock_menus");
-        for (String menuEntry : menuList) {
-            String[] menuData = menuEntry.split(";");
-            if (menuData.length == 2) {
-                String menuName = menuData[0].trim();
-                String menuFileName = menuData[1].trim();
-                File menuConfigFile = new File(main.getDataFolder()+"/menus/bedrock", menuFileName);
-                if (menuConfigFile.exists()) {
-                    try {
-                        // Menus are user-created content, so no auto-update or versioning
-                        YamlDocument menuConfig = YamlDocument.create(
-                            menuConfigFile,
-                            GeneralSettings.DEFAULT,
-                            LoaderSettings.DEFAULT,
-                            DumperSettings.DEFAULT,
-                            UpdaterSettings.DEFAULT
-                        );
-                        menuConfigs.put(menuName, menuConfig);
-                        menuNames.add(menuName);
-                    } catch (IOException e) {
-                        getLogger().warning("Failed to load menu file: " + menuFileName);
-                        e.printStackTrace();
-                    }
-                } else {
-                    getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("commands.bluemenu.manager.invalid_menu_file")).replace("{name}", menuFileName));
-                }
-            } else {
-                getLogger().warning(Objects.requireNonNull(Main.getPlugin().configManager.getLang().getString("commands.bluemenu.manager.invalid_menu_entry")).replace("{entry}", menuEntry));
-            }
+        main.getMenuSyncService().loadMenus(
+            net.blueva.menu.sync.MenuType.BEDROCK,
+            menuList,
+            new File(main.getDataFolder(), "menus/bedrock"),
+            menuConfigs,
+            menuNames
+        );
+    }
+
+    public void updateMenuConfig(String menuName, YamlDocument menuConfig) {
+        menuConfigs.put(menuName, menuConfig);
+        if (!menuNames.contains(menuName)) {
+            menuNames.add(menuName);
         }
     }
 

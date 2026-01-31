@@ -15,6 +15,7 @@ import net.blueva.menu.configuration.ConfigManager;
 import net.blueva.menu.libraries.bstats.Metrics;
 import net.blueva.menu.listeners.*;
 import net.blueva.menu.managers.java.MenuManager;
+import net.blueva.menu.sync.MenuSyncService;
 import net.blueva.menu.webeditor.WebEditorManager;
 import net.blueva.menu.webeditor.WebEditorManager.WebEditorEnvironment;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -32,6 +33,7 @@ public class Main extends JavaPlugin implements Listener {
     public MenuManager javaMenuManager;
     public net.blueva.menu.managers.bedrock.MenuManager bedrockMenuManager;
     public ConfigManager configManager;
+    private MenuSyncService menuSyncService;
     private WebEditorManager webEditorManager;
 
     // Adventure
@@ -66,6 +68,10 @@ public class Main extends JavaPlugin implements Listener {
         return webEditorManager;
     }
 
+    public MenuSyncService getMenuSyncService() {
+        return menuSyncService;
+    }
+
 
 
     @Override
@@ -83,6 +89,9 @@ public class Main extends JavaPlugin implements Listener {
         configManager.generateFolders();
         configManager.registerSettings();
         configManager.registerLang();
+
+        menuSyncService = new MenuSyncService(this);
+        menuSyncService.reload();
 
         javaMenuManager = new MenuManager(this);
         bedrockMenuManager = new net.blueva.menu.managers.bedrock.MenuManager(this);
@@ -134,6 +143,9 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (menuSyncService != null) {
+            menuSyncService.shutdown();
+        }
         // Disconnect web editor
         if (webEditorManager != null) {
             webEditorManager.disconnect();
