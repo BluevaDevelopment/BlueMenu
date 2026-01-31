@@ -140,7 +140,7 @@ public class MySqlMenuRepository implements MenuRepository {
         String sslFlag = config.useSsl() ? "true" : "false";
         return "jdbc:mysql://" + config.host() + ":" + config.port() + "/" + config.database()
             + "?useSSL=" + sslFlag
-            + "&characterEncoding=UTF-8"
+            + "&characterEncoding=utf8mb4"
             + "&useUnicode=true"
             + "&connectionCollation=utf8mb4_unicode_ci";
     }
