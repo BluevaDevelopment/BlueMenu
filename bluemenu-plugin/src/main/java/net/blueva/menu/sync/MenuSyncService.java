@@ -288,6 +288,11 @@ public class MenuSyncService {
         
         if (hasWildcard) {
             // If wildcard is present, include all menus from registry
+            // Note: Any other entries in the list alongside the wildcard are ignored
+            if (entries.size() > 1) {
+                main.getLogger().warning("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
+                    + " menus. All other entries in the list will be ignored.");
+            }
             normalized.addAll(registry.keySet());
             main.getLogger().info("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
                 + " menus. Including all " + registry.size() + " registered menu(s).");
