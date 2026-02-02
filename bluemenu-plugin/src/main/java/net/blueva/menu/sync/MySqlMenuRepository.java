@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public class MySqlMenuRepository implements MenuRepository {
@@ -83,6 +84,27 @@ public class MySqlMenuRepository implements MenuRepository {
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<MenuMetadata> fetchAllMetadata(MenuType type) throws SQLException {
+        String sql = "SELECT menu_key, version, updated_at, file_name FROM " + TABLE_NAME
+            + " WHERE menu_type = ?";
+        java.util.List<MenuMetadata> results = new java.util.ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, type.getConfigKey());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String menuKey = resultSet.getString("menu_key");
+                    long version = resultSet.getLong("version");
+                    Timestamp updatedAt = resultSet.getTimestamp("updated_at");
+                    String fileName = resultSet.getString("file_name");
+                    results.add(new MenuMetadata(menuKey, version, toInstant(updatedAt), fileName));
+                }
+            }
+        }
+        return results;
     }
 
     @Override

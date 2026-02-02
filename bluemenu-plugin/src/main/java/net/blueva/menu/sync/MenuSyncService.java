@@ -73,24 +73,54 @@ public class MenuSyncService {
         Map<String, MenuEntry> registry = parseRegistry(type, registryEntries);
         SyncTargets targets = resolveSyncTargets(type, registry);
 
-        for (MenuEntry entry : registry.values()) {
-            if (targets.receive().contains(entry.normalizedEntry())) {
-                boolean loaded = loadMenuFromDatabase(entry, menuConfigs, menuNames);
-                if (!loaded) {
-                    YamlDocument cachedConfig = previousConfigs.get(entry.menuKey());
-                    if (cachedConfig != null) {
-                        menuConfigs.put(entry.menuKey(), cachedConfig);
-                        menuNames.add(entry.menuKey());
-                        ReceiverState cachedState = previousReceivers.get(entry.menuKey());
-                        if (cachedState != null) {
-                            receiverStates.get(type).put(entry.menuKey(), cachedState);
+        // Handle receive wildcard: fetch all menus from database
+        if (targets.receiveWildcard() && isRepositoryAvailable()) {
+            try {
+                List<MenuMetadata> allMenus = repository.fetchAllMetadata(type);
+                main.getLogger().info("Receive wildcard found " + allMenus.size() + " menu(s) in database for " + type.getConfigKey());
+                
+                for (MenuMetadata metadata : allMenus) {
+                    String menuKey = metadata.menuKey();
+                    String fileName = metadata.fileName();
+                    MenuEntry entry = new MenuEntry(type, menuKey, fileName, menuKey + ";" + fileName);
+                    
+                    boolean loaded = loadMenuFromDatabase(entry, menuConfigs, menuNames);
+                    if (!loaded) {
+                        YamlDocument cachedConfig = previousConfigs.get(menuKey);
+                        if (cachedConfig != null) {
+                            menuConfigs.put(menuKey, cachedConfig);
+                            menuNames.add(menuKey);
+                            ReceiverState cachedState = previousReceivers.get(menuKey);
+                            if (cachedState != null) {
+                                receiverStates.get(type).put(menuKey, cachedState);
+                            }
                         }
                     }
                 }
-            } else {
-                loadMenuFromDisk(entry, baseFolder, menuConfigs, menuNames);
-                if (targets.send().contains(entry.normalizedEntry())) {
-                    publishMenu(entry, menuConfigs.get(entry.menuKey()));
+            } catch (SQLException e) {
+                main.getLogger().warning("Failed to fetch all menus from database for wildcard receive: " + e.getMessage());
+            }
+        } else {
+            // Normal processing for non-wildcard or when wildcard but no repository
+            for (MenuEntry entry : registry.values()) {
+                if (targets.receive().contains(entry.normalizedEntry())) {
+                    boolean loaded = loadMenuFromDatabase(entry, menuConfigs, menuNames);
+                    if (!loaded) {
+                        YamlDocument cachedConfig = previousConfigs.get(entry.menuKey());
+                        if (cachedConfig != null) {
+                            menuConfigs.put(entry.menuKey(), cachedConfig);
+                            menuNames.add(entry.menuKey());
+                            ReceiverState cachedState = previousReceivers.get(entry.menuKey());
+                            if (cachedState != null) {
+                                receiverStates.get(type).put(entry.menuKey(), cachedState);
+                            }
+                        }
+                    }
+                } else {
+                    loadMenuFromDisk(entry, baseFolder, menuConfigs, menuNames);
+                    if (targets.send().contains(entry.normalizedEntry())) {
+                        publishMenu(entry, menuConfigs.get(entry.menuKey()));
+                    }
                 }
             }
         }
@@ -261,13 +291,21 @@ public class MenuSyncService {
 
     private SyncTargets resolveSyncTargets(MenuType type, Map<String, MenuEntry> registry) {
         if (!isEnabled()) {
-            return new SyncTargets(Set.of(), Set.of());
+            return new SyncTargets(Set.of(), Set.of(), false);
         }
-        Set<String> sendList = normalizeSyncList(type, syncConfig.getSendList(type), registry, "send");
-        Set<String> receiveList = normalizeSyncList(type, syncConfig.getReceiveList(type), registry, "receive");
+        
+        List<String> sendEntries = syncConfig.getSendList(type);
+        List<String> receiveEntries = syncConfig.getReceiveList(type);
+        
+        boolean receiveWildcard = receiveEntries.stream().anyMatch(entry -> "*".equals(entry.trim()));
+        
+        Set<String> sendList = normalizeSyncList(type, sendEntries, registry, "send", false);
+        Set<String> receiveList = normalizeSyncList(type, receiveEntries, registry, "receive", receiveWildcard);
 
         validateSyncEntries(type, registry, sendList, "send");
-        validateSyncEntries(type, registry, receiveList, "receive");
+        if (!receiveWildcard) {
+            validateSyncEntries(type, registry, receiveList, "receive");
+        }
 
         Set<String> conflicts = new HashSet<>(sendList);
         conflicts.retainAll(receiveList);
@@ -277,25 +315,33 @@ public class MenuSyncService {
             sendList.remove(conflict);
         }
 
-        return new SyncTargets(sendList, receiveList);
+        return new SyncTargets(sendList, receiveList, receiveWildcard);
     }
 
-    private Set<String> normalizeSyncList(MenuType type, List<String> entries, Map<String, MenuEntry> registry, String listName) {
+    private Set<String> normalizeSyncList(MenuType type, List<String> entries, Map<String, MenuEntry> registry, String listName, boolean isReceiveWildcard) {
         Set<String> normalized = new HashSet<>();
         
         // Check if the list contains a wildcard "*" entry
         boolean hasWildcard = entries.stream().anyMatch(entry -> "*".equals(entry.trim()));
         
         if (hasWildcard) {
-            // If wildcard is present, include all menus from registry
             // Note: Any other entries in the list alongside the wildcard are ignored
             if (entries.size() > 1) {
                 main.getLogger().warning("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
                     + " menus. All other entries in the list will be ignored.");
             }
-            normalized.addAll(registry.keySet());
-            main.getLogger().info("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
-                + " menus. Including all " + registry.size() + " registered menu(s).");
+            
+            if (isReceiveWildcard) {
+                // For receive wildcard, we'll handle this specially in loadMenus
+                main.getLogger().info("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
+                    + " menus. All menus from the database will be fetched and loaded.");
+                return normalized; // Return empty set, will be populated from database
+            } else {
+                // For send wildcard, include all menus from registry
+                normalized.addAll(registry.keySet());
+                main.getLogger().info("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
+                    + " menus. Including all " + registry.size() + " registered menu(s).");
+            }
             return normalized;
         }
         
@@ -366,7 +412,7 @@ public class MenuSyncService {
     private record ReceiverState(MenuEntry entry, long version) {
     }
 
-    private record SyncTargets(Set<String> send, Set<String> receive) {
+    private record SyncTargets(Set<String> send, Set<String> receive, boolean receiveWildcard) {
     }
 
     private enum SendConflictPolicy {

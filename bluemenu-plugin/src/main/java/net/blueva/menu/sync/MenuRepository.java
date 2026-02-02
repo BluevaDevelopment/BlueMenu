@@ -1,6 +1,7 @@
 package net.blueva.menu.sync;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 public interface MenuRepository {
@@ -9,6 +10,8 @@ public interface MenuRepository {
     Optional<MenuRecord> fetchMenu(MenuType type, String menuKey) throws SQLException;
 
     Optional<MenuMetadata> fetchMetadata(MenuType type, String menuKey) throws SQLException;
+
+    List<MenuMetadata> fetchAllMetadata(MenuType type) throws SQLException;
 
     long insertMenu(MenuType type, String menuKey, String fileName, String yaml) throws SQLException;
 

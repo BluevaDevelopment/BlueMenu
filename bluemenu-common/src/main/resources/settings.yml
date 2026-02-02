@@ -92,8 +92,11 @@ sync-menus:
     bedrock: []
 
   # Menus that this server consumes from MySQL.
-  # Entries MUST match entries present in java_menus/bedrock_menus (same 'menuKey;file.yml').
-  # Special: Use a single entry ["*"] to receive ALL menus registered in java_menus/bedrock_menus.
+  # List specific entries matching java_menus/bedrock_menus format (e.g., 'menuKey;file.yml').
+  # Special: Use a single entry ["*"] to receive ALL menus from the database.
+  #   - Wildcard mode automatically fetches all menus from MySQL, even if not in java_menus/bedrock_menus.
+  #   - This allows a central server to create/update menus and have them sync to all other servers.
+  #   - Menus are loaded directly from database, no local registration needed.
   receive:
     java: []
     bedrock: []
