@@ -263,8 +263,8 @@ public class MenuSyncService {
         if (!isEnabled()) {
             return new SyncTargets(Set.of(), Set.of());
         }
-        Set<String> sendList = normalizeSyncList(type, syncConfig.getSendList(type), "send");
-        Set<String> receiveList = normalizeSyncList(type, syncConfig.getReceiveList(type), "receive");
+        Set<String> sendList = normalizeSyncList(type, syncConfig.getSendList(type), registry, "send");
+        Set<String> receiveList = normalizeSyncList(type, syncConfig.getReceiveList(type), registry, "receive");
 
         validateSyncEntries(type, registry, sendList, "send");
         validateSyncEntries(type, registry, receiveList, "receive");
@@ -280,8 +280,21 @@ public class MenuSyncService {
         return new SyncTargets(sendList, receiveList);
     }
 
-    private Set<String> normalizeSyncList(MenuType type, List<String> entries, String listName) {
+    private Set<String> normalizeSyncList(MenuType type, List<String> entries, Map<String, MenuEntry> registry, String listName) {
         Set<String> normalized = new HashSet<>();
+        
+        // Check if the list contains a wildcard "*" entry
+        boolean hasWildcard = entries.stream().anyMatch(entry -> "*".equals(entry.trim()));
+        
+        if (hasWildcard) {
+            // If wildcard is present, include all menus from registry
+            normalized.addAll(registry.keySet());
+            main.getLogger().info("Wildcard '*' detected in " + listName + " list for " + type.getConfigKey() 
+                + " menus. Including all " + registry.size() + " registered menu(s).");
+            return normalized;
+        }
+        
+        // Normal processing for specific entries
         for (String entry : entries) {
             MenuEntry menuEntry = parseMenuEntry(type, entry);
             if (menuEntry == null) {
