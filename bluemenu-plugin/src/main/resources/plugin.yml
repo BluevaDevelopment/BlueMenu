@@ -4,6 +4,9 @@ version: 1.3.0
 api-version: 1.21
 softdepend:
   - PlaceholderAPI
+  - ItemsAdder
+  - Oraxen
+  - Nexo
 
 libraries:
   - "dev.dejvokep:boosted-yaml:1.3.7"

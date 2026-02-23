@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.blueva.menu.Main;
 import net.blueva.menu.utils.MessagesUtil;
+import net.blueva.menu.managers.java.customitems.CustomItemProviderResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -30,10 +31,19 @@ import static org.bukkit.Bukkit.getLogger;
 public class ItemManager {
     public static ItemStack createItemStackFromConfig(Section itemSection, Player player) {
         String itemName = MessagesUtil.format(player, itemSection.getString("name"));
-        Material material = Material.valueOf(itemSection.getString("itemStack.material"));
-        int amount = itemSection.getInt("itemStack.amount");
+        String materialName = itemSection.getString("itemStack.material");
+        ItemStack itemStack = createCustomPluginItem(itemSection, player, materialName);
+        Material material;
 
-        ItemStack itemStack = new ItemStack(material, amount);
+        if (itemStack != null) {
+            material = itemStack.getType();
+        } else {
+            material = Material.valueOf(materialName);
+            itemStack = new ItemStack(material);
+        }
+
+        int amount = itemSection.getInt("itemStack.amount");
+        itemStack.setAmount(Math.max(1, amount));
         ItemMeta itemMeta = itemStack.getItemMeta();
         assert itemMeta != null;
         itemMeta.setDisplayName(itemName);
@@ -59,6 +69,41 @@ public class ItemManager {
         }
 
         return itemStack;
+    }
+
+    private static ItemStack createCustomPluginItem(Section itemSection, Player player, String materialName) {
+        String provider = MessagesUtil.format(player, itemSection.getString("itemStack.provider", ""));
+        String id = MessagesUtil.format(player, itemSection.getString("itemStack.id", ""));
+
+        if (!provider.isBlank() && !id.isBlank()) {
+            ItemStack providerItem = createCustomPluginItemByProvider(provider, id);
+            if (providerItem != null) {
+                return providerItem;
+            }
+        }
+
+        if (materialName == null || materialName.isBlank()) {
+            return null;
+        }
+
+        return createCustomPluginItemByPrefixedMaterial(MessagesUtil.format(player, materialName));
+    }
+
+    private static ItemStack createCustomPluginItemByPrefixedMaterial(String materialName) {
+        if (materialName == null || !materialName.contains(":")) {
+            return null;
+        }
+
+        String[] materialParts = materialName.split(":", 2);
+        if (materialParts.length != 2) {
+            return null;
+        }
+
+        return createCustomPluginItemByProvider(materialParts[0], materialParts[1]);
+    }
+
+    private static ItemStack createCustomPluginItemByProvider(String provider, String itemId) {
+        return CustomItemProviderResolver.createItem(provider, itemId);
     }
 
     static ItemStack applyAttributes(ItemStack itemStack, List<String> attributes) {

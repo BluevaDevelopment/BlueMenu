@@ -94,6 +94,23 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Custom item plugins (optional integrations) -->
+        <dependency>
+            <groupId>dev.lone</groupId>
+            <artifactId>api-itemsadder</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.th0rgal</groupId>
+            <artifactId>oraxen</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.nexomc</groupId>
+            <artifactId>nexo</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
