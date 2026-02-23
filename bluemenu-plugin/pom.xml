@@ -104,6 +104,7 @@
         <dependency>
             <groupId>io.th0rgal</groupId>
             <artifactId>oraxen</artifactId>
+            <classifier>dev</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
