@@ -111,8 +111,11 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         if(configManager.getSettings().getBoolean("metrics")) {
-            int pluginId = 19060;
+            int pluginId = 30827;
             Metrics metrics = new Metrics(this, pluginId);
+            metrics.addCustomChart(
+                new Metrics.SimplePie("edition", () -> pluginEdition.equalsIgnoreCase("plus") ? "Plus" : "Free")
+            );
         }
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "  ____  _            __  __");
@@ -142,6 +145,10 @@ public class Main extends JavaPlugin implements Listener {
                 pluginEdition = props.getProperty("edition", "plus").toLowerCase();
             }
         } catch (Exception ignored) {}
+
+        if (pluginEdition.equalsIgnoreCase("free")) {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[BlueMenu] Running Free edition. Upgrade to BlueMenu+ for an ad-free web editor and priority support: https://builtbybit.com/resources/blue-menu-web-editor-java-bedrock.85000/");
+        }
 
         // Initialize web editor if enabled
         boolean webEditorEnabled = configManager.getSettings().getBoolean("webeditor.enabled", true);
