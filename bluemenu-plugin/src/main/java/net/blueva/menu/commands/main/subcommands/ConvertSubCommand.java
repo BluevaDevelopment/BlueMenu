@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,6 +19,10 @@ import java.util.Map;
 
 public class ConvertSubCommand implements CommandInterface {
 
+    private static final String YAML_EXTENSION = ".yml";
+    private static final int YAML_EXTENSION_LENGTH = YAML_EXTENSION.length();
+    private static final FilenameFilter YAML_FILE_FILTER =
+        (dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(YAML_EXTENSION);
     private final Main main;
 
     public ConvertSubCommand(Main main) {
@@ -29,23 +34,23 @@ public class ConvertSubCommand implements CommandInterface {
         if (!sender.hasPermission("bluemenu.convert")
             && !sender.hasPermission("bluemenu.admin")
             && !sender.isOp()) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.convert.insufficient_permissions"));
+            MessagesUtil.sendMessage(sender, main.getConfigManager().getLang().getString("commands.bluemenu.convert.insufficient_permissions"));
             return true;
         }
 
         File deluxeMenusFolder = new File(main.getDataFolder().getParentFile(), "DeluxeMenus/gui_menus");
         if (!deluxeMenusFolder.isDirectory()) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.convert.source_not_found"));
+            MessagesUtil.sendMessage(sender, main.getConfigManager().getLang().getString("commands.bluemenu.convert.source_not_found"));
             return true;
         }
 
-        File[] sourceFiles = deluxeMenusFolder.listFiles((dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".yml"));
+        File[] sourceFiles = deluxeMenusFolder.listFiles(YAML_FILE_FILTER);
         if (sourceFiles == null || sourceFiles.length == 0) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.convert.no_menus_found"));
+            MessagesUtil.sendMessage(sender, main.getConfigManager().getLang().getString("commands.bluemenu.convert.no_menus_found"));
             return true;
         }
 
-        MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.convert.started"));
+        MessagesUtil.sendMessage(sender, main.getConfigManager().getLang().getString("commands.bluemenu.convert.started"));
 
         File javaMenusFolder = new File(main.getDataFolder(), "menus/java");
         if (!javaMenusFolder.exists()) {
@@ -77,7 +82,7 @@ public class ConvertSubCommand implements CommandInterface {
         }
 
         if (convertedCount == 0) {
-            MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.convert.no_valid_menus"));
+            MessagesUtil.sendMessage(sender, main.getConfigManager().getLang().getString("commands.bluemenu.convert.no_valid_menus"));
             return true;
         }
 
@@ -88,7 +93,7 @@ public class ConvertSubCommand implements CommandInterface {
 
         main.javaMenuManager.loadJavaMenus();
 
-        String summary = main.configManager.getLang().getString("commands.bluemenu.convert.success");
+        String summary = main.getConfigManager().getLang().getString("commands.bluemenu.convert.success");
         if (summary != null) {
             summary = summary
                 .replace("{converted}", String.valueOf(convertedCount))
@@ -163,12 +168,12 @@ public class ConvertSubCommand implements CommandInterface {
             return new ConversionResult(false, "");
         }
 
-        String baseName = sourceFile.getName().substring(0, sourceFile.getName().length() - 4);
-        String initialFileName = sanitizeFileName(baseName) + ".yml";
+        String baseName = sourceFile.getName().substring(0, sourceFile.getName().length() - YAML_EXTENSION_LENGTH);
+        String initialFileName = sanitizeFileName(baseName) + YAML_EXTENSION;
         File targetFile = resolveUniqueTargetFile(javaMenusFolder, initialFileName);
         blue.save(targetFile);
 
-        String menuKey = sanitizeMenuKey(targetFile.getName().substring(0, targetFile.getName().length() - 4));
+        String menuKey = sanitizeMenuKey(targetFile.getName().substring(0, targetFile.getName().length() - YAML_EXTENSION_LENGTH));
         return new ConversionResult(true, menuKey + ";" + targetFile.getName());
     }
 
@@ -196,7 +201,7 @@ public class ConvertSubCommand implements CommandInterface {
             }
         }
 
-        String fallback = fallbackFileName.toLowerCase(Locale.ROOT).replace(".yml", "");
+        String fallback = fallbackFileName.toLowerCase(Locale.ROOT).replace(YAML_EXTENSION, "");
         return "/" + sanitizeMenuKey(fallback);
     }
 
@@ -316,10 +321,10 @@ public class ConvertSubCommand implements CommandInterface {
             return target;
         }
 
-        String baseName = initialFileName.substring(0, initialFileName.length() - 4);
+        String baseName = initialFileName.substring(0, initialFileName.length() - YAML_EXTENSION_LENGTH);
         int counter = 1;
         while (target.exists()) {
-            target = new File(folder, baseName + "_converted" + counter + ".yml");
+            target = new File(folder, baseName + "_converted" + counter + YAML_EXTENSION);
             counter++;
         }
         return target;
