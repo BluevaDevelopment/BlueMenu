@@ -48,9 +48,14 @@ public class Main extends JavaPlugin implements Listener {
     public static boolean isUsingPAPI = false;
     public static boolean isUsingFloodgate = false;
     private static Main plugin;
+    private static String pluginEdition = "plus";
 
     public static Main getPlugin() {
         return plugin;
+    }
+
+    public static String getPluginEdition() {
+        return pluginEdition;
     }
 
     public BukkitAudiences adventure() {
@@ -128,6 +133,15 @@ public class Main extends JavaPlugin implements Listener {
         javaMenuManager.loadJavaMenus();
         bedrockMenuManager.loadBedrockMenus();
         registerCommands();
+
+        // Load plugin edition from filtered resource
+        try (var stream = getClass().getClassLoader().getResourceAsStream("edition.properties")) {
+            if (stream != null) {
+                var props = new java.util.Properties();
+                props.load(stream);
+                pluginEdition = props.getProperty("edition", "plus").toLowerCase();
+            }
+        } catch (Exception ignored) {}
 
         // Initialize web editor if enabled
         boolean webEditorEnabled = configManager.getSettings().getBoolean("webeditor.enabled", true);

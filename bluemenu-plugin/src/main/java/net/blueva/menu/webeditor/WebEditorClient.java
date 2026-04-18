@@ -85,9 +85,10 @@ public class WebEditorClient extends WebSocketClient {
     /**
      * Request a new session from the server
      * @param sessionId Optional custom session ID, or null for auto-generated
+     * @param edition Plugin edition ("free" or "plus")
      * @return CompletableFuture that completes with the session ID
      */
-    public CompletableFuture<String> requestSession(String sessionId) {
+    public CompletableFuture<String> requestSession(String sessionId, String edition) {
         sessionCreationFuture = new CompletableFuture<>();
 
         WebSocketMessage msg = new WebSocketMessage(MessageType.SESSION_CREATE);
@@ -96,6 +97,7 @@ public class WebEditorClient extends WebSocketClient {
             data.addProperty("sessionId", sessionId);
         }
         data.addProperty("requireConfirmation", requireSessionConfirmation);
+        data.addProperty("edition", edition != null ? edition : "plus");
         msg.setData(data);
 
         send(gson.toJson(msg));

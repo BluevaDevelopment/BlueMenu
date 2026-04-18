@@ -51,18 +51,21 @@
             <artifactId>boosted-yaml</artifactId>
         </dependency>
 
-        <!-- Adventure API -->
+        <!-- Adventure API (shaded into jar — adventure-api/minimessage don't exist on Maven Central at this version) -->
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
+            <!-- provided: Paper already ships this bridge at runtime -->
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!-- AnvilGUI -->
@@ -115,7 +118,7 @@
     </dependencies>
 
     <build>
-        <finalName>BlueMenu-${project.version}</finalName>
+        <finalName>BlueMenu-Plus-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -128,6 +131,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>plugin.yml</include>
+                    <include>edition.properties</include>
                 </includes>
                 <filtering>true</filtering>
             </resource>
@@ -160,6 +164,10 @@
                                     <include>org.java-websocket:Java-WebSocket</include>
                                     <include>com.zaxxer:HikariCP</include>
                                     <include>com.mysql:mysql-connector-j</include>
+                                    <include>net.kyori:adventure-api</include>
+                                    <include>net.kyori:adventure-text-minimessage</include>
+                                    <include>net.kyori:examination-api</include>
+                                    <include>net.kyori:examination-string</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -198,7 +206,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
+                    <!-- Strip META-INF from Plus jar -->
                     <execution>
+                        <id>strip-meta-inf</id>
                         <phase>package</phase>
                         <configuration>
                             <target>
@@ -209,6 +219,25 @@
                                 <delete dir="${stripped.dir}/META-INF"/>
                                 <zip destfile="${project.build.directory}/${project.build.finalName}.jar" basedir="${stripped.dir}"/>
                                 <delete dir="${stripped.dir}"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <!-- Derive Free jar from Plus jar, replacing edition=plus with edition=free -->
+                    <execution>
+                        <id>build-free-edition</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <property name="free.dir" value="${project.build.directory}/free-edition"/>
+                                <delete dir="${free.dir}"/>
+                                <mkdir dir="${free.dir}"/>
+                                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${free.dir}"/>
+                                <replace file="${free.dir}/edition.properties" token="edition=plus" value="edition=free"/>
+                                <zip destfile="${project.build.directory}/BlueMenu-Free-${project.version}.jar" basedir="${free.dir}"/>
+                                <delete dir="${free.dir}"/>
                             </target>
                         </configuration>
                         <goals>

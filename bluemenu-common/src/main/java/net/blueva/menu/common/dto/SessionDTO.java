@@ -19,6 +19,7 @@ public class SessionDTO {
     private boolean requireConfirmation;
     private Set<String> verificationIds;
     private String confirmedVerificationId;
+    private String edition;
 
     public SessionDTO() {
         this(UUID.randomUUID().toString(), 3600 * 1000L);
@@ -44,6 +45,7 @@ public class SessionDTO {
         this.requireConfirmation = true;
         this.verificationIds = ConcurrentHashMap.newKeySet();
         this.confirmedVerificationId = null;
+        this.edition = "plus";
     }
 
     public String getSessionId() {
@@ -132,5 +134,13 @@ public class SessionDTO {
 
     public void setConfirmedVerificationId(String confirmedVerificationId) {
         this.confirmedVerificationId = confirmedVerificationId;
+    }
+
+    public String getEdition() {
+        return edition != null ? edition : "plus";
+    }
+
+    public void setEdition(String edition) {
+        this.edition = edition;
     }
 }

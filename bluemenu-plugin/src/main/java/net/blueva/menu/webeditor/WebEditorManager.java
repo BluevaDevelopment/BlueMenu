@@ -81,7 +81,7 @@ public class WebEditorManager {
             CompletableFuture<String> future = new CompletableFuture<>();
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 if (client != null && client.isOpen()) {
-                    client.requestSession(null).thenAccept(future::complete)
+                    client.requestSession(null, net.blueva.menu.Main.getPluginEdition()).thenAccept(future::complete)
                         .exceptionally(ex -> {
                             future.completeExceptionally(ex);
                             return null;
@@ -94,7 +94,7 @@ public class WebEditorManager {
             return future;
         }
 
-        return client.requestSession(null);
+        return client.requestSession(null, net.blueva.menu.Main.getPluginEdition());
     }
 
     /**

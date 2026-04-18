@@ -10,9 +10,7 @@ softdepend:
 
 libraries:
   - "dev.dejvokep:boosted-yaml:${boosted-yaml.version}"
-  - "net.kyori:adventure-api:${adventure.version}"
   - "net.kyori:adventure-platform-bukkit:${adventure-platform.version}"
-  - "net.kyori:adventure-text-minimessage:${adventure.version}"
   - "com.zaxxer:HikariCP:${hikaricp.version}"
   - "com.mysql:mysql-connector-j:${mysql-connector.version}"
 
