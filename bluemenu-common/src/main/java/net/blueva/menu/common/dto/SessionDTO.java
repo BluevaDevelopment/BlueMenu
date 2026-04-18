@@ -20,6 +20,7 @@ public class SessionDTO {
     private Set<String> verificationIds;
     private String confirmedVerificationId;
     private String edition;
+    private String serverVersion;
 
     public SessionDTO() {
         this(UUID.randomUUID().toString(), 3600 * 1000L);
@@ -46,6 +47,7 @@ public class SessionDTO {
         this.verificationIds = ConcurrentHashMap.newKeySet();
         this.confirmedVerificationId = null;
         this.edition = "plus";
+        this.serverVersion = null;
     }
 
     public String getSessionId() {
@@ -142,5 +144,13 @@ public class SessionDTO {
 
     public void setEdition(String edition) {
         this.edition = edition;
+    }
+
+    public String getServerVersion() {
+        return serverVersion;
+    }
+
+    public void setServerVersion(String serverVersion) {
+        this.serverVersion = serverVersion;
     }
 }

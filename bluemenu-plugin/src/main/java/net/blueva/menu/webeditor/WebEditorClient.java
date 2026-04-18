@@ -6,6 +6,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.blueva.menu.Main;
 import net.blueva.menu.common.dto.MenuMetadataDTO;
+import org.bukkit.Bukkit;
 import net.blueva.menu.common.protocol.MessageType;
 import net.blueva.menu.common.protocol.WebSocketMessage;
 import org.java_websocket.client.WebSocketClient;
@@ -98,6 +99,7 @@ public class WebEditorClient extends WebSocketClient {
         }
         data.addProperty("requireConfirmation", requireSessionConfirmation);
         data.addProperty("edition", edition != null ? edition : "plus");
+        data.addProperty("serverVersion", Bukkit.getBukkitVersion().split("-")[0]);
         msg.setData(data);
 
         send(gson.toJson(msg));
