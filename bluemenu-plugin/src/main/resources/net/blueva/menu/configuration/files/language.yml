@@ -26,8 +26,8 @@ commands:
         - "<aqua>/bm open [java/bedrock/auto] [menu] (player) <dark_gray>- <gray>Open a menu"
         - "<aqua>/bm list [java/bedrock] <dark_gray>- <gray>List of available menus."
         - "<aqua>/bm reload <dark_gray>- <gray>Reload the configuration"
+        - "<aqua>/bm convert <dark_gray>- <gray>Convert DeluxeMenus menus to BlueMenu"
         - "<aqua>/bm editor <dark_gray>- <gray>Open the web editor"
-        - "<red>(SOON) <aqua>/bm migrate [plugin] [menu/all] <dark_gray>- <gray>Migrate menus from another plugin to BlueMenu"
     list:
       usage: "{prefix} <red>Use: /bluemenu list <java/bedrock>"
       insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
@@ -62,6 +62,13 @@ commands:
     reload:
       insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
       success: "{prefix} <green>Configuration successfully reloaded."
+    convert:
+      insufficient_permissions: "{prefix} <red>You do not have permission to execute this command."
+      source_not_found: "{prefix} <red>DeluxeMenus folder not found. Expected: <gray>plugins/DeluxeMenus/gui_menus</gray>"
+      no_menus_found: "{prefix} <yellow>No DeluxeMenus YAML files were found to convert."
+      no_valid_menus: "{prefix} <red>No valid DeluxeMenus menu files were converted."
+      started: "{prefix} <yellow>Converting DeluxeMenus menus to BlueMenu..."
+      success: "{prefix} <green>Conversion completed. Converted: <white>{converted}</white>, skipped: <white>{skipped}</white>, registered in settings: <white>{registered}</white>."
     menu:
       invalid_menu: "{prefix} <red>The specified menu was not found. Did you spell the name correctly?"
     manager:

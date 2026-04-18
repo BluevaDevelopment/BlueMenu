@@ -20,6 +20,10 @@ public class BlueMenuTabComplete implements TabCompleter {
                 subCommands.add("list");
                 subCommands.add("open");
                 subCommands.add("reload");
+                subCommands.add("convert");
+            }
+            if(sender.hasPermission("bluemenu.convert") && !subCommands.contains("convert")) {
+                subCommands.add("convert");
             }
             if(sender.hasPermission("bluemenu.editor")) {
                 subCommands.add("editor");

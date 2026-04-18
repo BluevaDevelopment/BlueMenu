@@ -29,6 +29,9 @@ permissions:
   bluemenu.editor:
     description: Access to the web editor
     default: op
+  bluemenu.convert:
+    description: Convert DeluxeMenus menus to BlueMenu
+    default: op
   bluemenu.open:
     description: Open menus for self or others
     default: true

@@ -4,6 +4,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import fr.mrmicky.fastinv.FastInvManager;
 import net.blueva.menu.commands.main.CommandHandler;
 import net.blueva.menu.commands.main.command.BlueMenuCommand;
+import net.blueva.menu.commands.main.subcommands.ConvertSubCommand;
 import net.blueva.menu.commands.main.subcommands.EditorSubCommand;
 import net.blueva.menu.commands.main.subcommands.ConfirmSubCommand;
 import net.blueva.menu.commands.main.subcommands.HelpSubCommand;
@@ -200,6 +201,7 @@ public class Main extends JavaPlugin implements Listener {
         handler.register("reload", new ReloadSubCommand(this));
         handler.register("editor", new EditorSubCommand(this));
         handler.register("confirm", new ConfirmSubCommand(this));
+        handler.register("convert", new ConvertSubCommand(this));
 
         Objects.requireNonNull(getCommand("bluemenu")).setExecutor(handler);
         Objects.requireNonNull(getCommand("bluemenu")).setTabCompleter(new BlueMenuTabComplete());
