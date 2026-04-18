@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.blueva.menu</groupId>
         <artifactId>BlueMenu-Parent</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>bluemenu-common</artifactId>
@@ -23,5 +23,42 @@
             <artifactId>gson</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <property name="stripped.dir" value="${project.build.directory}/stripped-jar"/>
+                                <delete dir="${stripped.dir}"/>
+                                <mkdir dir="${stripped.dir}"/>
+                                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${stripped.dir}"/>
+                                <delete dir="${stripped.dir}/META-INF"/>
+                                <zip destfile="${project.build.directory}/${project.build.finalName}.jar" basedir="${stripped.dir}"/>
+                                <delete dir="${stripped.dir}"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
