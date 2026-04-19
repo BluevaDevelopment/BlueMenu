@@ -55,16 +55,8 @@ items:
     - '<gray>Download the plugin here:'
     - '<gray>blueva.net/resources/resource/4'
     actions:
-    - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
-    - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
-    - '[SHIFT_LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
-    - '[SHIFT_RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
-    - '[MIDDLE_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
-    - '[LEFT_CLICK] CLOSE'
-    - '[RIGHT_CLICK] CLOSE'
-    - '[SHIFT_LEFT_CLICK] CLOSE'
-    - '[SHIFT_RIGHT_CLICK] CLOSE'
-    - '[MIDDLE_CLICK] CLOSE'
+    - '[BOTH] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
+    - '[BOTH] CLOSE'
   item3:
     name: '<aqua>Wiki'
     slot: 31
@@ -76,16 +68,8 @@ items:
     - '<gray>Visit the wiki here:'
     - '<gray>blueva.net/wiki/bluemenu'
     actions:
-    - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
-    - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
-    - '[SHIFT_LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
-    - '[SHIFT_RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
-    - '[MIDDLE_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
-    - '[LEFT_CLICK] CLOSE'
-    - '[RIGHT_CLICK] CLOSE'
-    - '[SHIFT_LEFT_CLICK] CLOSE'
-    - '[SHIFT_RIGHT_CLICK] CLOSE'
-    - '[MIDDLE_CLICK] CLOSE'
+    - '[BOTH] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
+    - '[BOTH] CLOSE'
   item4:
     name: '<aqua>Support'
     slot: 33
@@ -97,16 +81,8 @@ items:
     - '<gray>Receive support on Discord:'
     - '<gray>discord.gg/kgxBr8pwpU'
     actions:
-    - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
-    - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
-    - '[SHIFT_LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
-    - '[SHIFT_RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
-    - '[MIDDLE_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
-    - '[LEFT_CLICK] CLOSE'
-    - '[RIGHT_CLICK] CLOSE'
-    - '[SHIFT_LEFT_CLICK] CLOSE'
-    - '[SHIFT_RIGHT_CLICK] CLOSE'
-    - '[MIDDLE_CLICK] CLOSE'
+    - '[BOTH] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
+    - '[BOTH] CLOSE'
 
 # ====================================
 # ANIMATIONS

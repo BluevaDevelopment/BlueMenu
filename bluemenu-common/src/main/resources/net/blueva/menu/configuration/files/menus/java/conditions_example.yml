@@ -57,8 +57,7 @@ items:
     display_conditions:
       - "{player_level} >= 10"  # Single condition check
     actions:
-      - "[LEFT_CLICK] MESSAGE;&aYou have level 10 or higher!"
-      - "[RIGHT_CLICK] MESSAGE;&aYou have level 10 or higher!"
+      - "[BOTH] MESSAGE;&aYou have level 10 or higher!"
 
   # EXAMPLE 1b: Priority fallback
   # This item occupies the same slot as level_item but has lower priority.
@@ -74,8 +73,7 @@ items:
       - "&7Reach level 10 to unlock the diamond item"
       - "&7Your level: {player_level}"
     actions:
-      - "[LEFT_CLICK] MESSAGE;&7You need level 10 or higher!"
-      - "[RIGHT_CLICK] MESSAGE;&7You need level 10 or higher!"
+      - "[BOTH] MESSAGE;&7You need level 10 or higher!"
 
   # EXAMPLE 2: Another simple condition
   # This item only appears if the player has more than 10 health
@@ -91,8 +89,7 @@ items:
     display_conditions:
       - "{player_health} > 10"  # Health check
     actions:
-      - "[LEFT_CLICK] MESSAGE;&aYou're healthy!"
-      - "[RIGHT_CLICK] MESSAGE;&aYou're healthy!"
+      - "[BOTH] MESSAGE;&aYou're healthy!"
 
   # EXAMPLE 3: Multiple conditions (AND logic)
   # All conditions in the list must be true for the item to appear
@@ -110,8 +107,7 @@ items:
       - "{player_level} >= 5"    # Condition 1
       - "{player_health} >= 8"   # Condition 2
     actions:
-      - "[LEFT_CLICK] MESSAGE;&aYou meet both requirements!"
-      - "[RIGHT_CLICK] MESSAGE;&aYou meet both requirements!"
+      - "[BOTH] MESSAGE;&aYou meet both requirements!"
 
   # EXAMPLE 4: Boolean operators
   # Using && (AND), || (OR), ! (NOT) in a single expression
@@ -126,8 +122,7 @@ items:
     display_conditions:
       - "({player_level} >= 10) && ({player_health} > 5)"  # Combined with AND
     actions:
-      - "[LEFT_CLICK] MESSAGE;&dYou passed the boolean check!"
-      - "[RIGHT_CLICK] MESSAGE;&dYou passed the boolean check!"
+      - "[BOTH] MESSAGE;&dYou passed the boolean check!"
 
   # EXAMPLE 5: Negation operator
   # Using ! (NOT) to invert a condition
@@ -142,7 +137,7 @@ items:
     display_conditions:
       - "! ({player_level} == 50)"  # NOT operator
     actions:
-      - "[LEFT_CLICK] MESSAGE;&7You're not level 50!"
+      - "[BOTH] MESSAGE;&7You're not level 50!"
 
   # EXAMPLE 6: Math operators in conditions
   # You can use math operations: +, -, *, /, %
@@ -158,8 +153,7 @@ items:
     display_conditions:
       - "{player_level} * 2 >= 20"  # Math operation
     actions:
-      - "[LEFT_CLICK] MESSAGE;&aMath condition passed!"
-      - "[RIGHT_CLICK] MESSAGE;&aMath condition passed!"
+      - "[BOTH] MESSAGE;&aMath condition passed!"
 
   # EXAMPLE 7: String comparison
   # Supports: startsWith, endsWith, contains, equals
@@ -174,8 +168,7 @@ items:
     display_conditions:
       - "{player_name} startsWith 'A'"  # String comparison
     actions:
-      - "[LEFT_CLICK] MESSAGE;&bYour name starts with A!"
-      - "[RIGHT_CLICK] MESSAGE;&bYour name starts with A!"
+      - "[BOTH] MESSAGE;&bYour name starts with A!"
 
   # EXAMPLE 8: Advanced all/any/none logic
   # Demonstrates complex conditional logic with multiple groups
@@ -200,8 +193,7 @@ items:
       none:    # None of these must be true
         - "{player_level} == 99"
     actions:
-      - "[LEFT_CLICK] MESSAGE;&5Complex conditions passed!"
-      - "[RIGHT_CLICK] MESSAGE;&5Complex conditions passed!"
+      - "[BOTH] MESSAGE;&5Complex conditions passed!"
 
   # EXAMPLE 9: Another all/any/none example with string conditions
   vip_item:
@@ -225,8 +217,7 @@ items:
       none:
         - "{player_level} == 1"
     actions:
-      - "[LEFT_CLICK] MESSAGE;&6VIP access granted!"
-      - "[RIGHT_CLICK] MESSAGE;&6VIP access granted!"
+      - "[BOTH] MESSAGE;&6VIP access granted!"
 
   # EXAMPLE 10: Item without conditions
   # This item is always visible to all players
@@ -240,5 +231,4 @@ items:
       - "&7This item has no conditions"
       - "&7So it's always visible"
     actions:
-      - "[LEFT_CLICK] CLOSE"
-      - "[RIGHT_CLICK] CLOSE"
+      - "[BOTH] CLOSE"
