@@ -31,7 +31,11 @@ public class ActionManager {
                 String actionType = actionParts[0].toUpperCase();
                 String actionData = actionParts[1];
 
-                if (actionType.equals("[" + clickTypeString + "]") || actionType.equals("[BOTH]")) {
+                boolean matches = actionType.equals("[" + clickTypeString + "]")
+                    || actionType.equals("[ALL]")
+                    || (actionType.equals("[BOTH]") && (clickType == ClickType.LEFT || clickType == ClickType.RIGHT))
+                    || (actionType.equals("[BOTH_SHIFT]") && (clickType == ClickType.SHIFT_LEFT || clickType == ClickType.SHIFT_RIGHT));
+                if (matches) {
                     executeClickAction(player, actionData);
                 }
             }
