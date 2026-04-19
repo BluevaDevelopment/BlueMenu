@@ -9,7 +9,8 @@ file_version: 1
 # ====================================
 # CONDITIONAL CHEST MENU EXAMPLE (Java Edition)
 # ====================================
-# This example demonstrates how to use display_conditions with CHEST menus.
+# This example demonstrates display_conditions, open_conditions, open_actions,
+# and item priority in CHEST menus.
 # Items are shown or hidden based on conditions using placeholders.
 #
 # Available condition syntaxes:
@@ -30,13 +31,23 @@ menuSize: 54               # Menu size (must be multiple of 9, max 54)
 type: CHEST                # Menu type: CHEST displays a standard inventory GUI
 openCommand: /conditionalmenu
 
+# Menu only opens if the player has reached at least level 5
+open_conditions:
+  - "{player_level} >= 5"
+
+# Actions fired immediately when the menu opens
+open_actions:
+  - "MESSAGE;&aConditional Menu opened!"
+
 # Item definitions with various condition examples
 items:
-  # EXAMPLE 1: Simple single condition
-  # This item only appears if the player's level is 10 or higher
+  # EXAMPLE 1: Simple single condition + priority
+  # This item only appears if the player's level is 10 or higher.
+  # Priority 1 means it wins over the fallback item below when its condition passes.
   level_item:
     name: "&6Level 10+ Item"
     slot: 10
+    priority: 1             # Higher priority — takes the slot when conditions pass
     itemStack:
       material: DIAMOND
       amount: 1
@@ -48,6 +59,23 @@ items:
     actions:
       - "[LEFT_CLICK] MESSAGE;&aYou have level 10 or higher!"
       - "[RIGHT_CLICK] MESSAGE;&aYou have level 10 or higher!"
+
+  # EXAMPLE 1b: Priority fallback
+  # This item occupies the same slot as level_item but has lower priority.
+  # It is shown only when level_item's display_conditions fail (i.e. level < 10).
+  level_item_fallback:
+    name: "&7Not Yet..."
+    slot: 10
+    priority: 0             # Lower priority — shown when level_item's conditions fail
+    itemStack:
+      material: STONE_SWORD
+      amount: 1
+    lore:
+      - "&7Reach level 10 to unlock the diamond item"
+      - "&7Your level: {player_level}"
+    actions:
+      - "[LEFT_CLICK] MESSAGE;&7You need level 10 or higher!"
+      - "[RIGHT_CLICK] MESSAGE;&7You need level 10 or higher!"
 
   # EXAMPLE 2: Another simple condition
   # This item only appears if the player has more than 10 health

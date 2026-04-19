@@ -14,9 +14,10 @@ file_version: 1
 # It demonstrates:
 # - Basic menu structure with items
 # - Player head items with custom textures (base64 values)
-# - Click actions (LEFT_CLICK, RIGHT_CLICK)
+# - Click actions (LEFT_CLICK, RIGHT_CLICK, SHIFT_LEFT_CLICK, SHIFT_RIGHT_CLICK, MIDDLE_CLICK)
 # - Animated items using frames
 # - Using gradients and colors in names/lore
+# - open_actions fired when the menu is opened
 #
 # Menu size options: 9, 18, 27, 36, 45, 54 (multiples of 9)
 
@@ -24,6 +25,10 @@ menuName: '      <bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gra
 menuSize: 54           # 6 rows (54 slots)
 type: CHEST            # Standard inventory menu type
 openCommand: /menu     # Command to open this menu
+
+# Actions fired immediately when the menu opens
+open_actions:
+  - "MESSAGE;&b&lBlueMenu &r&7— Thanks for checking out the example menu!"
 
 # Static menu items
 items:
@@ -52,8 +57,14 @@ items:
     actions:
     - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
     - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
+    - '[SHIFT_LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
+    - '[SHIFT_RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
+    - '[MIDDLE_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Download the plugin here: blueva.net/resources/resource/4'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
+    - '[SHIFT_LEFT_CLICK] CLOSE'
+    - '[SHIFT_RIGHT_CLICK] CLOSE'
+    - '[MIDDLE_CLICK] CLOSE'
   item3:
     name: '<aqua>Wiki'
     slot: 31
@@ -67,8 +78,14 @@ items:
     actions:
     - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
     - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
+    - '[SHIFT_LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
+    - '[SHIFT_RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
+    - '[MIDDLE_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Visit the wiki here: blueva.net/wiki/bluemenu'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
+    - '[SHIFT_LEFT_CLICK] CLOSE'
+    - '[SHIFT_RIGHT_CLICK] CLOSE'
+    - '[MIDDLE_CLICK] CLOSE'
   item4:
     name: '<aqua>Support'
     slot: 33
@@ -82,8 +99,14 @@ items:
     actions:
     - '[LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
     - '[RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
+    - '[SHIFT_LEFT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
+    - '[SHIFT_RIGHT_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
+    - '[MIDDLE_CLICK] MESSAGE;<bold><gradient:#55FFFF:#5555FF>BlueMenu</gradient></bold> <gray><bold>» <white>Receive support on Discord: discord.gg/kgxBr8pwpU'
     - '[LEFT_CLICK] CLOSE'
     - '[RIGHT_CLICK] CLOSE'
+    - '[SHIFT_LEFT_CLICK] CLOSE'
+    - '[SHIFT_RIGHT_CLICK] CLOSE'
+    - '[MIDDLE_CLICK] CLOSE'
 
 # ====================================
 # ANIMATIONS
