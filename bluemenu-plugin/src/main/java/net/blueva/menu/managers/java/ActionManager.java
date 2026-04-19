@@ -22,12 +22,7 @@ public class ActionManager {
     private static final String VELOCITY_CHANNEL = "velocity:player_info";
 
     public static void executeActions(Player player, List<String> actions, ClickType clickType) {
-        String clickTypeString = "";
-        if (clickType == ClickType.LEFT) {
-            clickTypeString = "LEFT_CLICK";
-        } else if (clickType == ClickType.RIGHT) {
-            clickTypeString = "RIGHT_CLICK";
-        }
+        String clickTypeString = resolveClickType(clickType);
 
         for (String action : actions) {
             String[] actionParts = action.split(" ", 2);
@@ -41,6 +36,41 @@ public class ActionManager {
                 }
             }
         }
+    }
+
+    public static void executeActions(Player player, List<String> actions) {
+        if (actions == null || actions.isEmpty()) {
+            return;
+        }
+
+        for (String action : actions) {
+            if (action == null || action.isBlank()) {
+                continue;
+            }
+            executeClickAction(player, action.trim());
+        }
+    }
+
+    private static String resolveClickType(ClickType clickType) {
+        if (clickType == null) {
+            return "";
+        }
+        if (clickType == ClickType.LEFT) {
+            return "LEFT_CLICK";
+        }
+        if (clickType == ClickType.RIGHT) {
+            return "RIGHT_CLICK";
+        }
+        if (clickType == ClickType.SHIFT_LEFT) {
+            return "SHIFT_LEFT_CLICK";
+        }
+        if (clickType == ClickType.SHIFT_RIGHT) {
+            return "SHIFT_RIGHT_CLICK";
+        }
+        if (clickType == ClickType.MIDDLE) {
+            return "MIDDLE_CLICK";
+        }
+        return "";
     }
 
     private static void executeClickAction(Player player, String action) {

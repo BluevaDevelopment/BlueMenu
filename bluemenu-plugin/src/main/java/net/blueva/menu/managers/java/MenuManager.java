@@ -48,6 +48,15 @@ public class MenuManager {
     public void openMenu(Player player, String menuName) {
         YamlDocument menuConfig = menuConfigs.get(menuName);
         if (menuConfig != null) {
+            if (!canOpenMenu(player, menuConfig)) {
+                return;
+            }
+
+            List<String> openActions = menuConfig.getStringList("open_actions");
+            if (!openActions.isEmpty()) {
+                ActionManager.executeActions(player, openActions);
+            }
+
             int menuSize = menuConfig.getInt("menuSize");
             String menuTitle = MessagesUtil.format(player, menuConfig.getString("menuName"));
 
@@ -56,6 +65,8 @@ public class MenuManager {
 
             Section itemsSection = menuConfig.getSection("items");
             if (itemsSection != null) {
+                Map<Integer, PrioritizedMenuItem> prioritizedItems = new HashMap<>();
+
                 for (Object itemNameObj : itemsSection.getKeys()) {
                     String itemName = itemNameObj.toString();
                     Section itemSection = itemsSection.getSection(itemName);
@@ -83,14 +94,23 @@ public class MenuManager {
                             ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
                             int slot = itemSection.getInt("slot");
                             List<String> actions = itemSection.getStringList("actions");
+                            int priority = itemSection.getInt("priority", 0);
 
-                            // Add item with click handler
-                            menu.setItem(slot, itemStack, e -> {
-                                e.setCancelled(true);
-                                ActionManager.executeActions(player, actions, e.getClick());
-                            });
+                            PrioritizedMenuItem existing = prioritizedItems.get(slot);
+                            if (existing == null || priority > existing.priority()) {
+                                prioritizedItems.put(slot, new PrioritizedMenuItem(itemStack, actions, priority));
+                            }
                         }
                     }
+                }
+
+                for (Map.Entry<Integer, PrioritizedMenuItem> entry : prioritizedItems.entrySet()) {
+                    int slot = entry.getKey();
+                    PrioritizedMenuItem item = entry.getValue();
+                    menu.setItem(slot, item.itemStack(), e -> {
+                        e.setCancelled(true);
+                        ActionManager.executeActions(player, item.actions(), e.getClick());
+                    });
                 }
             }
 
@@ -126,11 +146,43 @@ public class MenuManager {
         }
     }
 
+    private boolean canOpenMenu(Player player, YamlDocument menuConfig) {
+        if (!menuConfig.contains("open_conditions")) {
+            return true;
+        }
+
+        Object openConditionsObj = menuConfig.get("open_conditions");
+        if (openConditionsObj instanceof Map<?, ?> rawMap) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> openConditionsMap = (Map<String, Object>) rawMap;
+            return ConditionManager.evaluateConditionsMap(player, openConditionsMap);
+        }
+
+        if (openConditionsObj instanceof List<?> rawList) {
+            List<String> conditions = new ArrayList<>();
+            for (Object condition : rawList) {
+                if (condition instanceof String conditionString) {
+                    conditions.add(conditionString);
+                }
+            }
+            return ConditionManager.evaluateConditions(player, conditions);
+        }
+
+        if (openConditionsObj instanceof String singleCondition) {
+            return ConditionManager.evaluateCondition(player, singleCondition);
+        }
+
+        return true;
+    }
+
     public FastInv getActiveMenu(Player player) {
         return activeMenus.get(player);
     }
 
     static boolean isMenuOpen(Player player) {
         return PlayerManager.isPlayerInMenu(player);
+    }
+
+    private record PrioritizedMenuItem(ItemStack itemStack, List<String> actions, int priority) {
     }
 }

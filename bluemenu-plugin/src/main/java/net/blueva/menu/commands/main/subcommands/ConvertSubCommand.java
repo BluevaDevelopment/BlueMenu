@@ -128,6 +128,17 @@ public class ConvertSubCommand implements CommandInterface {
         blue.set("menuSize", normalizeMenuSize(deluxe.getInt("size", 54)));
         blue.set("type", "CHEST");
         blue.set("openCommand", toBlueOpenCommand(deluxe.get("open_command"), sourceFile.getName()));
+        ConfigurationSection openReq = deluxe.getConfigurationSection("open_requirement");
+        if (openReq != null) {
+            List<String> openConditions = convertViewRequirement(openReq);
+            if (!openConditions.isEmpty()) {
+                blue.set("open_conditions", openConditions);
+            }
+        }
+        List<String> openActions = convertStandaloneCommands(deluxe.getStringList("open_commands"));
+        if (!openActions.isEmpty()) {
+            blue.set("open_actions", openActions);
+        }
 
         int itemIndex = 1;
         for (String originalItemKey : itemsSection.getKeys(false)) {
@@ -148,6 +159,9 @@ public class ConvertSubCommand implements CommandInterface {
                 // Basic fields
                 blue.set(basePath + ".name", itemSection.getString("display_name", "&fItem"));
                 blue.set(basePath + ".slot", slot);
+                if (itemSection.contains("priority")) {
+                    blue.set(basePath + ".priority", itemSection.getInt("priority", 0));
+                }
 
                 // Material (handles head-/basehead-/hdb-/regular)
                 MaterialResult mat = parseMaterial(itemSection.getString("material", "STONE"));
@@ -212,22 +226,14 @@ public class ConvertSubCommand implements CommandInterface {
                     }
                 }
 
-                // Actions: click_commands (BOTH), left+shift_left (LEFT_CLICK), right+shift_right (RIGHT_CLICK)
+                // Actions: preserve per-click mappings including shift/middle parity
                 List<String> actions = new ArrayList<>();
                 actions.addAll(convertCommands(itemSection.getStringList("click_commands"), "BOTH"));
-                // Merge left and shift_left → LEFT_CLICK
-                List<String> leftCmds = new ArrayList<>(itemSection.getStringList("left_click_commands"));
-                leftCmds.addAll(itemSection.getStringList("shift_left_click_commands"));
-                actions.addAll(convertCommands(leftCmds, "LEFT_CLICK"));
-                // Merge right and shift_right → RIGHT_CLICK
-                List<String> rightCmds = new ArrayList<>(itemSection.getStringList("right_click_commands"));
-                rightCmds.addAll(itemSection.getStringList("shift_right_click_commands"));
-                actions.addAll(convertCommands(rightCmds, "RIGHT_CLICK"));
-                // middle_click_commands → LEFT_CLICK as fallback
-                List<String> middleCmds = itemSection.getStringList("middle_click_commands");
-                if (!middleCmds.isEmpty()) {
-                    actions.addAll(convertCommands(middleCmds, "LEFT_CLICK"));
-                }
+                actions.addAll(convertCommands(itemSection.getStringList("left_click_commands"), "LEFT_CLICK"));
+                actions.addAll(convertCommands(itemSection.getStringList("right_click_commands"), "RIGHT_CLICK"));
+                actions.addAll(convertCommands(itemSection.getStringList("shift_left_click_commands"), "SHIFT_LEFT_CLICK"));
+                actions.addAll(convertCommands(itemSection.getStringList("shift_right_click_commands"), "SHIFT_RIGHT_CLICK"));
+                actions.addAll(convertCommands(itemSection.getStringList("middle_click_commands"), "MIDDLE_CLICK"));
 
                 if (!actions.isEmpty()) {
                     blue.set(basePath + ".actions", actions);
@@ -341,13 +347,19 @@ public class ConvertSubCommand implements CommandInterface {
                 String input  = req.getString("input",  "");
                 String output = req.getString("output", "");
                 if (input.isBlank()) return null;
-                return input + " equals '" + output + "'";
+                return input + " equalsIgnoreCase '" + output + "'";
             }
             case "string contains" -> {
                 String input  = req.getString("input",  "");
                 String output = req.getString("output", "");
                 if (input.isBlank()) return null;
                 return input + " contains '" + output + "'";
+            }
+            case "regex matches" -> {
+                String input = req.getString("input", "");
+                String output = req.getString("output", "");
+                if (input.isBlank() || output.isBlank()) return null;
+                return input + " matches '" + output + "'";
             }
             case ">", ">=", "<", "<=", "==" -> {
                 String input  = req.getString("input",  "");
@@ -375,6 +387,17 @@ public class ConvertSubCommand implements CommandInterface {
             String convertedAction = convertSingleCommand(deluxeCommand);
             if (convertedAction != null && !convertedAction.isBlank()) {
                 converted.add("[" + clickType + "] " + convertedAction);
+            }
+        }
+        return converted;
+    }
+
+    private List<String> convertStandaloneCommands(List<String> deluxeCommands) {
+        List<String> converted = new ArrayList<>();
+        for (String deluxeCommand : deluxeCommands) {
+            String convertedAction = convertSingleCommand(deluxeCommand);
+            if (convertedAction != null && !convertedAction.isBlank()) {
+                converted.add(convertedAction);
             }
         }
         return converted;
