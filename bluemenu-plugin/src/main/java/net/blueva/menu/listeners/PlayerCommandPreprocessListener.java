@@ -38,35 +38,32 @@ public class PlayerCommandPreprocessListener implements Listener {
     }
 
     private static void checkJavaMenu(Main main, PlayerCommandPreprocessEvent e) {
-        for (YamlDocument menuConfig : main.javaMenuManager.menuConfigs.values()) {
-            String openCommand = menuConfig.getString("openCommand");
-            if(e.getMessage().equalsIgnoreCase(openCommand)) {
-                e.setCancelled(true);
-                String menu = getKeyByValue(main.javaMenuManager.menuConfigs, menuConfig);
-                main.javaMenuManager.openMenu(e.getPlayer(), menu);
+        String message = e.getMessage().trim();
+        for (Map.Entry<String, YamlDocument> entry : main.javaMenuManager.menuConfigs.entrySet()) {
+            String openCommand = entry.getValue().getString("openCommand");
+            if (openCommand == null || openCommand.trim().isEmpty()) {
+                continue;
             }
-
+            if (message.equalsIgnoreCase(openCommand.trim())) {
+                e.setCancelled(true);
+                main.javaMenuManager.openMenu(e.getPlayer(), entry.getKey());
+                return; // first match wins, avoid opening several menus on a duplicate command
+            }
         }
     }
 
     private static void checkBedrockMenu(Main main, PlayerCommandPreprocessEvent e) {
-        for (YamlDocument menuConfig : main.bedrockMenuManager.menuConfigs.values()) {
-            String openCommand = menuConfig.getString("openCommand");
-            if(e.getMessage().equalsIgnoreCase(openCommand)) {
+        String message = e.getMessage().trim();
+        for (Map.Entry<String, YamlDocument> entry : main.bedrockMenuManager.menuConfigs.entrySet()) {
+            String openCommand = entry.getValue().getString("openCommand");
+            if (openCommand == null || openCommand.trim().isEmpty()) {
+                continue;
+            }
+            if (message.equalsIgnoreCase(openCommand.trim())) {
                 e.setCancelled(true);
-                String menu = getKeyByValue(main.bedrockMenuManager.menuConfigs, menuConfig);
-                main.bedrockMenuManager.openMenu(e.getPlayer(), menu);
-            }
-
-        }
-    }
-
-    private static <K, V> K getKeyByValue(Map<K, V> map, V value) {
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            if (entry.getValue().equals(value)) {
-                return entry.getKey();
+                main.bedrockMenuManager.openMenu(e.getPlayer(), entry.getKey());
+                return; // first match wins
             }
         }
-        return null;
     }
 }

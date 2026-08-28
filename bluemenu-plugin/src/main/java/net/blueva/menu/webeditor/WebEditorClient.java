@@ -248,11 +248,20 @@ public class WebEditorClient extends WebSocketClient {
                 reloadPlugin();
                 logger.info("Settings saved - plugin reloaded");
             } else {
-                // Auto-reload menus if enabled
-                boolean autoReload = plugin.getConfigManager().getSettings().getBoolean("webeditor.auto-reload", true);
-                if (autoReload) {
-                    reloadMenus(platform, fileName);
-                }
+                final String menuPlatform = platform;
+                final String menuFileName = fileName;
+                // Register + reload on the main thread so settings.yml is edited safely
+                plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    // Make sure new menus end up in java_menus/bedrock_menus, otherwise
+                    // the plugin never loads them (not even with /bm reload).
+                    registerMenuInSettings(menuPlatform, menuFileName);
+
+                    boolean autoReload = plugin.getConfigManager().getSettings()
+                        .getBoolean("webeditor.auto-reload", true);
+                    if (autoReload) {
+                        reloadMenusInternal(menuPlatform, menuFileName);
+                    }
+                });
             }
 
             // Send success confirmation
@@ -522,19 +531,11 @@ public class WebEditorClient extends WebSocketClient {
         try {
             // Run on main thread
             plugin.getServer().getScheduler().runTask(plugin, () -> {
-                String menuNameWithoutExtension = fileName.replace(".yml", "");
-
-                if (platform.equalsIgnoreCase("JAVA")) {
-                    // Unregister from Java menu manager
-                    plugin.javaMenuManager.menuNames.remove(menuNameWithoutExtension);
-                    plugin.javaMenuManager.menuConfigs.remove(menuNameWithoutExtension);
-                    logger.info("Unregistered Java menu: " + menuNameWithoutExtension);
-                } else if (platform.equalsIgnoreCase("BEDROCK")) {
-                    // Unregister from Bedrock menu manager
-                    plugin.bedrockMenuManager.menuNames.remove(menuNameWithoutExtension);
-                    plugin.bedrockMenuManager.menuConfigs.remove(menuNameWithoutExtension);
-                    logger.info("Unregistered Bedrock menu: " + menuNameWithoutExtension);
-                }
+                // Drop the entry from settings.yml, then rebuild the in-memory registry
+                // from the updated list so the menu is fully gone (key may differ from file name).
+                unregisterMenuFromSettings(platform, fileName);
+                reloadMenusInternal(platform, fileName);
+                logger.info("Unregistered menu: " + fileName);
             });
         } catch (Exception e) {
             logger.warning("Error unregistering menu: " + e.getMessage());
@@ -542,33 +543,95 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Reload menus in memory after saving and refresh open menus
+     * Reload menus in memory after saving and refresh open menus.
+     * MUST be called from the main server thread.
      */
-    private void reloadMenus(String platform, String fileName) {
+    private void reloadMenusInternal(String platform, String fileName) {
         try {
-            // Run on main thread
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                if (platform.equalsIgnoreCase("JAVA")) {
-                    // Get menu name from fileName
-                    String menuName = getMenuNameFromFileName(fileName, "java");
+            if (platform.equalsIgnoreCase("JAVA")) {
+                // Get menu name from fileName
+                String menuName = getMenuNameFromFileName(fileName, "java");
 
-                    // Close and reopen menus for players who have it open
-                    if (menuName != null) {
-                        refreshOpenMenus(menuName);
-                    }
-
-                    // Reload menus in memory
-                    plugin.javaMenuManager.loadJavaMenus();
-                    logger.info("Java menu reloaded and refreshed: " + fileName);
-                } else {
-                    // Bedrock menus don't need refresh (can't force close)
-                    plugin.bedrockMenuManager.loadBedrockMenus();
-                    logger.info("Bedrock menus reloaded: " + fileName);
+                // Close and reopen menus for players who have it open
+                if (menuName != null) {
+                    refreshOpenMenus(menuName);
                 }
-            });
+
+                // Reload menus in memory
+                plugin.javaMenuManager.loadJavaMenus();
+                logger.info("Java menu reloaded and refreshed: " + fileName);
+            } else {
+                // Bedrock menus don't need refresh (can't force close)
+                plugin.bedrockMenuManager.loadBedrockMenus();
+                logger.info("Bedrock menus reloaded: " + fileName);
+            }
         } catch (Exception e) {
             logger.severe("Error reloading menus: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Ensure a menu file is registered in java_menus / bedrock_menus inside settings.yml.
+     * Without an entry there the plugin never loads the menu (createNewMenu only writes the file).
+     * MUST be called from the main server thread.
+     */
+    private void registerMenuInSettings(String platform, String fileName) {
+        try {
+            String configKey = platform.equalsIgnoreCase("JAVA") ? "java_menus" : "bedrock_menus";
+            YamlDocument settings = plugin.getConfigManager().getSettings();
+            List<String> entries = new ArrayList<>(settings.getStringList(configKey));
+
+            String baseKey = fileName.toLowerCase().endsWith(".yml")
+                ? fileName.substring(0, fileName.length() - 4)
+                : fileName;
+
+            java.util.Set<String> usedKeys = new java.util.HashSet<>();
+            for (String entry : entries) {
+                String[] parts = entry.split(";");
+                if (parts.length == 2) {
+                    if (parts[1].trim().equalsIgnoreCase(fileName)) {
+                        return; // already registered, nothing to do
+                    }
+                    usedKeys.add(parts[0].trim().toLowerCase());
+                }
+            }
+
+            String menuKey = baseKey;
+            int suffix = 2;
+            while (usedKeys.contains(menuKey.toLowerCase())) {
+                menuKey = baseKey + "_" + suffix++;
+            }
+
+            entries.add(menuKey + ";" + fileName);
+            settings.set(configKey, entries);
+            plugin.getConfigManager().saveSettings();
+            logger.info("Registered new menu in settings.yml: " + menuKey + ";" + fileName);
+        } catch (Exception e) {
+            logger.warning("Failed to register menu in settings.yml: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Remove a menu entry from java_menus / bedrock_menus inside settings.yml.
+     * MUST be called from the main server thread.
+     */
+    private void unregisterMenuFromSettings(String platform, String fileName) {
+        try {
+            String configKey = platform.equalsIgnoreCase("JAVA") ? "java_menus" : "bedrock_menus";
+            YamlDocument settings = plugin.getConfigManager().getSettings();
+            List<String> entries = new ArrayList<>(settings.getStringList(configKey));
+            boolean removed = entries.removeIf(entry -> {
+                String[] parts = entry.split(";");
+                return parts.length == 2 && parts[1].trim().equalsIgnoreCase(fileName);
+            });
+            if (removed) {
+                settings.set(configKey, entries);
+                plugin.getConfigManager().saveSettings();
+                logger.info("Removed menu from settings.yml: " + fileName);
+            }
+        } catch (Exception e) {
+            logger.warning("Failed to remove menu from settings.yml: " + e.getMessage());
         }
     }
 
@@ -580,13 +643,17 @@ public class WebEditorClient extends WebSocketClient {
             // Run on main thread
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 try {
+                    // Mirror what /bm reload does so settings.yml changes actually take effect
                     plugin.getConfigManager().reloadSettings();
+                    plugin.getConfigManager().reloadLang();
+                    plugin.getMenuSyncService().reload();
 
                     // Reload all menus
                     plugin.javaMenuManager.loadJavaMenus();
                     plugin.bedrockMenuManager.loadBedrockMenus();
 
                     logger.info("Plugin configuration and menus reloaded successfully");
+                    logger.info("Note: webeditor.* and metrics changes still require a full server restart");
                 } catch (Exception e) {
                     logger.severe("Error reloading plugin: " + e.getMessage());
                     e.printStackTrace();
