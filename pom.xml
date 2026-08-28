@@ -35,7 +35,7 @@
         <itemsadder-api.version>4.0.10</itemsadder-api.version>
         <oraxen.version>1.173.0</oraxen.version>
         <nexo.version>1.8.0</nexo.version>
-        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
         <maven.jar.plugin.version>3.5.0</maven.jar.plugin.version>
         <maven.shade.plugin.version>3.6.2</maven.shade.plugin.version>
         <maven.antrun.plugin.version>3.2.0</maven.antrun.plugin.version>
