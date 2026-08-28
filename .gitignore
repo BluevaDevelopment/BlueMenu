@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Maven build artifacts ###
+dependency-reduced-pom.xml
+*.backup
