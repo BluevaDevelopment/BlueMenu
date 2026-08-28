@@ -12,7 +12,7 @@
   <img alt="Build" src="https://img.shields.io/badge/build-Maven-C71A36?logo=apachemaven&logoColor=white">
   <img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-1.21+-62B47A">
   <img alt="Bedrock" src="https://img.shields.io/badge/Bedrock-Floodgate%2FGeyser-6EE7B7">
-  <img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0-green">
+  <img alt="License" src="https://img.shields.io/badge/license-GPL--3.0-green">
 </p>
 
 ## Overview
@@ -97,4 +97,4 @@ Website: [blueva.net](https://blueva.net)
 
 ## License
 
-Licensed under the [GNU Affero General Public License v3.0](LICENSE).
+Licensed under the [GNU General Public License v3.0](LICENSE).
