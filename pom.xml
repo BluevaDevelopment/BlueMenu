@@ -38,7 +38,6 @@
         <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
         <maven.shade.plugin.version>3.6.0</maven.shade.plugin.version>
         <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
-        <build.edition>plus</build.edition>
     </properties>
 
     <repositories>
@@ -264,7 +263,7 @@
     </dependencies>
 
     <build>
-        <finalName>BlueMenu-Plus-${project.version}</finalName>
+        <finalName>BlueMenu-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -277,7 +276,6 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>plugin.yml</include>
-                    <include>edition.properties</include>
                 </includes>
                 <filtering>true</filtering>
             </resource>
@@ -358,7 +356,7 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>${maven.antrun.plugin.version}</version>
                 <executions>
-                    <!-- Strip META-INF from the Plus jar -->
+                    <!-- Strip META-INF from the jar -->
                     <execution>
                         <id>strip-meta-inf</id>
                         <phase>package</phase>
@@ -371,25 +369,6 @@
                                 <delete dir="${stripped.dir}/META-INF"/>
                                 <zip destfile="${project.build.directory}/${project.build.finalName}.jar" basedir="${stripped.dir}"/>
                                 <delete dir="${stripped.dir}"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <!-- Derive the Free jar from the Plus jar, replacing edition=plus with edition=free -->
-                    <execution>
-                        <id>build-free-edition</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <property name="free.dir" value="${project.build.directory}/free-edition"/>
-                                <delete dir="${free.dir}"/>
-                                <mkdir dir="${free.dir}"/>
-                                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${free.dir}"/>
-                                <replace file="${free.dir}/edition.properties" token="edition=plus" value="edition=free"/>
-                                <zip destfile="${project.build.directory}/BlueMenu-Free-${project.version}.jar" basedir="${free.dir}"/>
-                                <delete dir="${free.dir}"/>
                             </target>
                         </configuration>
                         <goals>

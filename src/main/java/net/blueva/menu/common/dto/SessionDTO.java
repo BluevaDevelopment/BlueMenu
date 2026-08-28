@@ -19,7 +19,6 @@ public class SessionDTO {
     private boolean requireConfirmation;
     private Set<String> verificationIds;
     private String confirmedVerificationId;
-    private String edition;
     private String serverVersion;
 
     public SessionDTO() {
@@ -46,7 +45,6 @@ public class SessionDTO {
         this.requireConfirmation = true;
         this.verificationIds = ConcurrentHashMap.newKeySet();
         this.confirmedVerificationId = null;
-        this.edition = "plus";
         this.serverVersion = null;
     }
 
@@ -136,14 +134,6 @@ public class SessionDTO {
 
     public void setConfirmedVerificationId(String confirmedVerificationId) {
         this.confirmedVerificationId = confirmedVerificationId;
-    }
-
-    public String getEdition() {
-        return edition != null ? edition : "plus";
-    }
-
-    public void setEdition(String edition) {
-        this.edition = edition;
     }
 
     public String getServerVersion() {
