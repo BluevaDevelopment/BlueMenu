@@ -28,7 +28,7 @@
         <adventure-platform.version>4.4.1</adventure-platform.version>
         <anvilgui.version>1.10.10-SNAPSHOT</anvilgui.version>
         <fastinv.version>3.1.2</fastinv.version>
-        <gson.version>2.10.1</gson.version>
+        <gson.version>2.14.0</gson.version>
         <java-websocket.version>1.5.6</java-websocket.version>
         <hikaricp.version>5.1.0</hikaricp.version>
         <mysql-connector.version>8.3.0</mysql-connector.version>
