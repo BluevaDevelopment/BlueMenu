@@ -31,7 +31,7 @@
         <gson.version>2.10.1</gson.version>
         <java-websocket.version>1.5.6</java-websocket.version>
         <hikaricp.version>5.1.0</hikaricp.version>
-        <mysql-connector.version>8.3.0</mysql-connector.version>
+        <mysql-connector.version>26.7.0</mysql-connector.version>
         <itemsadder-api.version>4.0.10</itemsadder-api.version>
         <oraxen.version>1.167.0</oraxen.version>
         <nexo.version>1.8.0</nexo.version>
