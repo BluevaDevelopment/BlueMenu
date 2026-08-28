@@ -8,7 +8,7 @@
 
 <p align="center">
   <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-blue">
-  <img alt="Java" src="https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white">
+  <img alt="Java" src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white">
   <img alt="Build" src="https://img.shields.io/badge/build-Maven-C71A36?logo=apachemaven&logoColor=white">
   <img alt="Minecraft" src="https://img.shields.io/badge/Minecraft-1.21+-62B47A">
   <img alt="Bedrock" src="https://img.shields.io/badge/Bedrock-Floodgate%2FGeyser-6EE7B7">
@@ -54,7 +54,7 @@ src/main/java/net/blueva/menu/
 
 | Component | Version |
 |---|---|
-| Java | 17+ |
+| Java | 21+ |
 | Server | Spigot/Paper 1.21+ |
 | Optional | [GeyserMC](https://geysermc.org/) with [Floodgate](https://geysermc.org/wiki/floodgate/) for Bedrock menus |
 | Optional | [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) |
