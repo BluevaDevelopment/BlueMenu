@@ -5,18 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.blueva.menu</groupId>
-    <artifactId>BlueMenu-Parent</artifactId>
+    <artifactId>bluemenu</artifactId>
     <version>${revision}</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
-    <name>BlueMenu Parent</name>
-    <description>Parent POM for BlueMenu multi-module project</description>
-
-    <modules>
-        <module>bluemenu-common</module>
-        <module>bluemenu-plugin</module>
-        <module>bluemenu-webserver</module>
-    </modules>
+    <name>BlueMenu</name>
+    <description>GUI menu plugin for Spigot with Java and Bedrock support</description>
 
     <properties>
         <revision>1.5.0</revision>
@@ -34,11 +28,8 @@
         <adventure-platform.version>4.4.1</adventure-platform.version>
         <anvilgui.version>1.10.10-SNAPSHOT</anvilgui.version>
         <fastinv.version>3.1.2</fastinv.version>
-        <javalin.version>6.1.3</javalin.version>
-        <slf4j.version>2.0.9</slf4j.version>
         <gson.version>2.10.1</gson.version>
         <java-websocket.version>1.5.6</java-websocket.version>
-        <jackson.version>2.16.1</jackson.version>
         <hikaricp.version>5.1.0</hikaricp.version>
         <mysql-connector.version>8.3.0</mysql-connector.version>
         <itemsadder-api.version>4.0.10</itemsadder-api.version>
@@ -93,230 +84,321 @@
         </repository>
     </repositories>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- Modules -->
-            <dependency>
-                <groupId>net.blueva.menu</groupId>
-                <artifactId>bluemenu-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+    <dependencies>
+        <!-- Gson must stay first: geyser-common bundles a pre-2.8.6 copy that
+             shadows JsonParser.parseString if it lands on the classpath earlier.
+             Provided by the server at runtime, not shaded. -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
 
-            <!-- Spigot/Bukkit -->
-            <dependency>
-                <groupId>org.spigotmc</groupId>
-                <artifactId>spigot-api</artifactId>
-                <version>${spigot.version}</version>
-                <scope>provided</scope>
-            </dependency>
+        <!-- Spigot API -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${spigot.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- PlaceholderAPI -->
-            <dependency>
-                <groupId>me.clip</groupId>
-                <artifactId>placeholderapi</artifactId>
-                <version>${placeholderapi.version}</version>
-                <scope>provided</scope>
-            </dependency>
+        <!-- PlaceholderAPI -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>${placeholderapi.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- GeyserMC & Floodgate -->
-            <dependency>
-                <groupId>org.geysermc.geyser</groupId>
-                <artifactId>api</artifactId>
-                <version>${geyser.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.geysermc.floodgate</groupId>
-                <artifactId>api</artifactId>
-                <version>${floodgate.version}</version>
-                <scope>provided</scope>
-            </dependency>
+        <!-- GeyserMC & Floodgate -->
+        <dependency>
+            <groupId>org.geysermc.geyser</groupId>
+            <artifactId>api</artifactId>
+            <version>${geyser.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geysermc.floodgate</groupId>
+            <artifactId>api</artifactId>
+            <version>${floodgate.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- Configuration -->
-            <dependency>
-                <groupId>dev.dejvokep</groupId>
-                <artifactId>boosted-yaml</artifactId>
-                <version>${boosted-yaml.version}</version>
-            </dependency>
+        <!-- Boosted YAML -->
+        <dependency>
+            <groupId>dev.dejvokep</groupId>
+            <artifactId>boosted-yaml</artifactId>
+            <version>${boosted-yaml.version}</version>
+        </dependency>
 
-            <!-- Adventure (Chat components) -->
-            <dependency>
-                <groupId>net.kyori</groupId>
-                <artifactId>adventure-api</artifactId>
-                <version>${adventure.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.kyori</groupId>
-                <artifactId>adventure-platform-bukkit</artifactId>
-                <version>${adventure-platform.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.kyori</groupId>
-                <artifactId>adventure-text-minimessage</artifactId>
-                <version>${adventure.version}</version>
-                <scope>provided</scope>
-            </dependency>
+        <!-- Adventure. api/minimessage are shaded: they are not on Maven Central at this version -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>${adventure.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>${adventure.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- provided: Paper already ships this bridge at runtime -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <version>${adventure-platform.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- GUI Libraries -->
-            <dependency>
-                <groupId>net.wesjd</groupId>
-                <artifactId>anvilgui</artifactId>
-                <version>${anvilgui.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>fr.mrmicky</groupId>
-                <artifactId>fastinv</artifactId>
-                <version>${fastinv.version}</version>
-            </dependency>
+        <!-- GUI libraries -->
+        <dependency>
+            <groupId>net.wesjd</groupId>
+            <artifactId>anvilgui</artifactId>
+            <version>${anvilgui.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.mrmicky</groupId>
+            <artifactId>fastinv</artifactId>
+            <version>${fastinv.version}</version>
+        </dependency>
 
-            <!-- Javalin (Web Server) -->
-            <dependency>
-                <groupId>io.javalin</groupId>
-                <artifactId>javalin</artifactId>
-                <version>${javalin.version}</version>
-            </dependency>
+        <!-- Java-WebSocket, client connection to the web editor -->
+        <dependency>
+            <groupId>org.java-websocket</groupId>
+            <artifactId>Java-WebSocket</artifactId>
+            <version>${java-websocket.version}</version>
+        </dependency>
 
-            <!-- SLF4J (Logging) -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
+        <!-- MySQL sync -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikaricp.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql-connector.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- Gson (JSON) -->
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>${gson.version}</version>
-            </dependency>
-
-            <!-- Java-WebSocket -->
-            <dependency>
-                <groupId>org.java-websocket</groupId>
-                <artifactId>Java-WebSocket</artifactId>
-                <version>${java-websocket.version}</version>
-            </dependency>
-
-            <!-- Jackson (for Javalin JSON serialization) -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <!-- MySQL / MariaDB -->
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>${hikaricp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mysql</groupId>
-                <artifactId>mysql-connector-j</artifactId>
-                <version>${mysql-connector.version}</version>
-            </dependency>
-
-            <!-- Custom item plugins -->
-            <dependency>
-                <groupId>dev.lone</groupId>
-                <artifactId>api-itemsadder</artifactId>
-                <version>${itemsadder-api.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.th0rgal</groupId>
-                <artifactId>oraxen</artifactId>
-                <version>${oraxen.version}</version>
-                <classifier>dev</classifier>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>me.gabytm.util</groupId>
-                        <artifactId>actions-spigot</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jetbrains</groupId>
-                        <artifactId>annotations</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.ticxo</groupId>
-                        <artifactId>PlayerAnimator</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.github.stefvanschie.inventoryframework</groupId>
-                        <artifactId>IF</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.th0rgal</groupId>
-                        <artifactId>protectionlib</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>dev.triumphteam</groupId>
-                        <artifactId>triumph-gui</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.bstats</groupId>
-                        <artifactId>bstats-bukkit</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.jeff-media</groupId>
-                        <artifactId>custom-block-data</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.jeff-media</groupId>
-                        <artifactId>persistent-data-serializer</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.jeff_media</groupId>
-                        <artifactId>MorePersistentDataTypes</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>gs.mclo</groupId>
-                        <artifactId>java</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.nexomc</groupId>
-                <artifactId>nexo</artifactId>
-                <version>${nexo.version}</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>net.byteflux</groupId>
-                        <artifactId>libby-bukkit</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>dev.triumphteam</groupId>
-                        <artifactId>triumph-gui</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+        <!-- Custom item plugins, optional integrations -->
+        <dependency>
+            <groupId>dev.lone</groupId>
+            <artifactId>api-itemsadder</artifactId>
+            <version>${itemsadder-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.th0rgal</groupId>
+            <artifactId>oraxen</artifactId>
+            <version>${oraxen.version}</version>
+            <classifier>dev</classifier>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>me.gabytm.util</groupId>
+                    <artifactId>actions-spigot</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jetbrains</groupId>
+                    <artifactId>annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.ticxo</groupId>
+                    <artifactId>PlayerAnimator</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.stefvanschie.inventoryframework</groupId>
+                    <artifactId>IF</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.th0rgal</groupId>
+                    <artifactId>protectionlib</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>dev.triumphteam</groupId>
+                    <artifactId>triumph-gui</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bstats</groupId>
+                    <artifactId>bstats-bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.jeff-media</groupId>
+                    <artifactId>custom-block-data</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.jeff-media</groupId>
+                    <artifactId>persistent-data-serializer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.jeff_media</groupId>
+                    <artifactId>MorePersistentDataTypes</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>gs.mclo</groupId>
+                    <artifactId>java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.nexomc</groupId>
+            <artifactId>nexo</artifactId>
+            <version>${nexo.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.byteflux</groupId>
+                    <artifactId>libby-bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>dev.triumphteam</groupId>
+                    <artifactId>triumph-gui</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven.compiler.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>${maven.shade.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>${maven.antrun.plugin.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <finalName>BlueMenu-Plus-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>plugin.yml</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>plugin.yml</include>
+                    <include>edition.properties</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>net.wesjd:anvilgui</include>
+                                    <include>fr.mrmicky:fastinv</include>
+                                    <include>org.java-websocket:Java-WebSocket</include>
+                                    <include>com.zaxxer:HikariCP</include>
+                                    <include>com.mysql:mysql-connector-j</include>
+                                    <include>net.kyori:adventure-api</include>
+                                    <include>net.kyori:adventure-text-minimessage</include>
+                                    <include>net.kyori:examination-api</include>
+                                    <include>net.kyori:examination-string</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.wesjd.anvilgui</pattern>
+                                    <shadedPattern>net.blueva.menu.libraries.anvilgui</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>fr.mrmicky.fastinv</pattern>
+                                    <shadedPattern>net.blueva.menu.libraries.fastinv</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.java_websocket</pattern>
+                                    <shadedPattern>net.blueva.menu.libraries.websocket</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/maven/**</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven.antrun.plugin.version}</version>
+                <executions>
+                    <!-- Strip META-INF from the Plus jar -->
+                    <execution>
+                        <id>strip-meta-inf</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <property name="stripped.dir" value="${project.build.directory}/stripped-jar"/>
+                                <delete dir="${stripped.dir}"/>
+                                <mkdir dir="${stripped.dir}"/>
+                                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${stripped.dir}"/>
+                                <delete dir="${stripped.dir}/META-INF"/>
+                                <zip destfile="${project.build.directory}/${project.build.finalName}.jar" basedir="${stripped.dir}"/>
+                                <delete dir="${stripped.dir}"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <!-- Derive the Free jar from the Plus jar, replacing edition=plus with edition=free -->
+                    <execution>
+                        <id>build-free-edition</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <property name="free.dir" value="${project.build.directory}/free-edition"/>
+                                <delete dir="${free.dir}"/>
+                                <mkdir dir="${free.dir}"/>
+                                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${free.dir}"/>
+                                <replace file="${free.dir}/edition.properties" token="edition=plus" value="edition=free"/>
+                                <zip destfile="${project.build.directory}/BlueMenu-Free-${project.version}.jar" basedir="${free.dir}"/>
+                                <delete dir="${free.dir}"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
 </project>
