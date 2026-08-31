@@ -1,246 +1,309 @@
 package net.blueva.menu.webeditor;
 
-import org.bukkit.Bukkit;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import net.blueva.menu.Main;
+import net.blueva.menu.common.dto.MenuMetadataDTO;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
-import java.util.UUID;
 
 /**
- * Manages the web editor connection
+ * Owns the plugin's side of the web editor.
+ *
+ * The plugin registers once, keeps itself marked as reachable with a heartbeat,
+ * and answers the operations that arrive on its private Reverb channel.
  */
 public class WebEditorManager {
-    private final Plugin plugin;
+    private static final long HEARTBEAT_TICKS = 20L * 30;
+    private static final long POLL_TICKS = 20L;
+
+    private final Main plugin;
     private final Logger logger;
     private final boolean enabled;
     private final boolean requireSessionConfirmation;
     private final WebEditorEnvironment environment;
-    private WebEditorClient client;
-    private BukkitTask watchdogTask;
+    private final WebEditorCredentials credentials;
+    private final WebEditorApi api;
+    private final WebEditorMenus menus;
+    private final Gson gson = new Gson();
 
-    /** How often the watchdog pings / checks the connection, in ticks (15s). */
-    private static final long WATCHDOG_INTERVAL_TICKS = 20L * 15;
+    private WebEditorRealtime realtime;
+    private BukkitTask heartbeatTask;
+    private BukkitTask pollTask;
+    private volatile boolean polling;
 
-    public WebEditorManager(Plugin plugin, boolean enabled, boolean requireSessionConfirmation,
+    public WebEditorManager(Main plugin, boolean enabled, boolean requireSessionConfirmation,
                             WebEditorEnvironment environment) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.enabled = enabled;
         this.requireSessionConfirmation = requireSessionConfirmation;
         this.environment = environment;
+        this.credentials = new WebEditorCredentials(plugin.getDataFolder(), logger);
+        this.api = new WebEditorApi(environment.baseUrl(), credentials);
+        this.menus = new WebEditorMenus(plugin);
     }
 
-    /**
-     * Connect to the web editor server
-     */
     public void connect() {
         if (!enabled) {
             logger.info("Web editor is disabled in config");
             return;
         }
 
-        try {
-            URI serverUri = new URI(environment.websocketUrl());
-            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin, requireSessionConfirmation);
-            client.connect();
-            logger.info("Connecting to " + environment.displayName() + " BlueMenu web editor at "
-                + environment.websocketUrl());
-            if (environment == WebEditorEnvironment.DEVELOPMENT) {
-                logger.warning("Development environment is intended for plugin contributors only."
-                    + " Do not use on production servers.");
-            }
-            startWatchdog();
-        } catch (Exception e) {
-            logger.severe("Failed to connect to web editor server: " + e.getMessage());
+        if (environment == WebEditorEnvironment.DEVELOPMENT) {
+            logger.warning("Development environment is intended for plugin contributors only."
+                + " Do not use on production servers.");
         }
+
+        ensureRegistered()
+            .thenCompose(ignored -> api.heartbeat(false))
+            .thenAccept(this::startRealtime)
+            .exceptionally(error -> {
+                logger.severe("Could not reach the web editor: " + rootMessage(error));
+                return null;
+            });
     }
 
-    /**
-     * Periodic keepalive + auto-reconnect. Proxies in front of the official server
-     * silently drop idle WebSockets; without this the editor goes dark until a restart.
-     */
-    private void startWatchdog() {
-        stopWatchdog();
-        watchdogTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
-            if (!enabled) {
-                return;
-            }
-            try {
-                if (client == null || client.isClosed()) {
-                    reconnect();
-                } else if (client.isOpen()) {
-                    client.sendPing();
-                }
-            } catch (Exception e) {
-                logger.fine("Web editor watchdog error: " + e.getMessage());
-            }
-        }, WATCHDOG_INTERVAL_TICKS, WATCHDOG_INTERVAL_TICKS);
-    }
-
-    private void stopWatchdog() {
-        if (watchdogTask != null) {
-            watchdogTask.cancel();
-            watchdogTask = null;
-        }
-    }
-
-    private void reconnect() {
-        if (!enabled) {
-            return;
-        }
-        WebEditorClient old = client;
-        if (old != null) {
-            try {
-                old.closeBlocking();
-            } catch (Exception ignored) {
-                // best effort
-            }
-        }
-        try {
-            URI serverUri = new URI(environment.websocketUrl());
-            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin, requireSessionConfirmation);
-            client.connect();
-            logger.info("Reconnecting to BlueMenu web editor at " + environment.websocketUrl());
-        } catch (Exception e) {
-            logger.warning("Web editor reconnect failed: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Disconnect from the web editor server
-     */
     public void disconnect() {
-        stopWatchdog();
-        if (client != null && client.isOpen()) {
-            client.close();
-            logger.info("Disconnected from web editor server");
+        if (heartbeatTask != null) {
+            heartbeatTask.cancel();
+            heartbeatTask = null;
+        }
+
+        if (pollTask != null) {
+            pollTask.cancel();
+            pollTask = null;
+        }
+
+        if (realtime != null) {
+            realtime.disconnect();
+            realtime = null;
+            logger.info("Disconnected from the web editor");
         }
     }
 
-    /**
-     * Create a new editor session
-     * @return CompletableFuture with the session ID
-     */
-    public CompletableFuture<String> createSession() {
-        if (!enabled) {
-            CompletableFuture<String> future = new CompletableFuture<>();
-            future.completeExceptionally(new RuntimeException("Web editor is disabled"));
-            return future;
-        }
-
-        if (client == null || !client.isOpen()) {
-            logger.warning("WebSocket not connected, attempting to reconnect...");
-            connect();
-
-            // Wait a bit for connection
-            CompletableFuture<String> future = new CompletableFuture<>();
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                if (client != null && client.isOpen()) {
-                    client.requestSession(null).thenAccept(future::complete)
-                        .exceptionally(ex -> {
-                            future.completeExceptionally(ex);
-                            return null;
-                        });
-                } else {
-                    future.completeExceptionally(new RuntimeException("Could not connect to web editor server"));
-                }
-            }, 20L); // Wait 1 second
-
-            return future;
-        }
-
-        return client.requestSession(null);
-    }
-
-    /**
-     * Check if the web editor is enabled
-     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    /**
-     * Check if connected to the server
-     */
     public boolean isConnected() {
-        return client != null && client.isOpen();
+        return polling ? heartbeatTask != null : realtime != null && realtime.isConnected();
     }
 
-    /**
-     * Get the editor URL for a session
-     */
     public String getEditorUrl(String sessionId) {
-        return String.format("%s/editor/%s", environment.editorBaseUrl(), sessionId);
+        return environment.editorUrl(sessionId);
     }
 
     /**
-     * Confirm a verification id for a specific player
+     * Opens a session for /bm editor and resolves with its id.
      */
+    public CompletableFuture<String> createSession() {
+        if (!enabled) {
+            return failed("Web editor is disabled");
+        }
+
+        return ensureRegistered()
+            .thenCompose(ignored -> api.createSession(requireSessionConfirmation))
+            .thenApply(response -> response.get("sessionId").getAsString());
+    }
+
     public CompletableFuture<Boolean> confirmSession(String verificationId, UUID confirmedBy) {
         if (!enabled) {
-            CompletableFuture<Boolean> future = new CompletableFuture<>();
-            future.completeExceptionally(new RuntimeException("Web editor is disabled"));
-            return future;
+            return failed("Web editor is disabled");
         }
 
-        if (client == null || !client.isOpen()) {
-            CompletableFuture<Boolean> future = new CompletableFuture<>();
-            future.completeExceptionally(new RuntimeException("Web editor connection is not open"));
-            return future;
-        }
-
-        return client.confirmSession(verificationId, confirmedBy);
+        return ensureRegistered().thenCompose(ignored -> api.confirmSession(verificationId, confirmedBy));
     }
 
     public CompletableFuture<Boolean> confirmSession(String verificationId, Player player) {
         return confirmSession(verificationId, player.getUniqueId());
     }
 
-    public enum WebEditorEnvironment {
-        PRODUCTION("production", "Official", "https://menu.blueva.net", "wss://menu.blueva.net/ws"),
-        DEVELOPMENT("development", "Development", "https://menu.blueva.net/dev", "wss://menu.blueva.net/dev/ws");
-
-        private final String configKey;
-        private final String displayName;
-        private final String editorBaseUrl;
-        private final String websocketUrl;
-
-        WebEditorEnvironment(String configKey, String displayName, String editorBaseUrl, String websocketUrl) {
-            this.configKey = configKey;
-            this.displayName = displayName;
-            this.editorBaseUrl = editorBaseUrl;
-            this.websocketUrl = websocketUrl;
+    private CompletableFuture<Void> ensureRegistered() {
+        if (credentials.exist()) {
+            return CompletableFuture.completedFuture(null);
         }
 
-        public String editorBaseUrl() {
-            return editorBaseUrl;
+        String serverVersion = plugin.getServer().getBukkitVersion().split("-")[0];
+
+        return api.register(plugin.getServer().getName(),
+                plugin.getDescription().getVersion(), serverVersion)
+            .thenAccept(response -> credentials.store(
+                response.get("uuid").getAsString(),
+                response.get("token").getAsString()
+            ));
+    }
+
+    private void startRealtime(JsonObject heartbeat) {
+        RealtimeSettings settings = RealtimeSettings.fromJson(
+            heartbeat.has("realtime") ? heartbeat.getAsJsonObject("realtime") : null);
+
+        if (settings == null || !settings.isUsable()) {
+            // Without a channel the editor would be unusable, so fall back to
+            // collecting requests over plain HTTP instead of giving up.
+            logger.warning("The web editor reported no realtime configuration, falling back to polling");
+            polling = true;
+            startPolling();
+        } else {
+            realtime = new WebEditorRealtime(settings, credentials, logger, this::handleRpc);
+            realtime.connect();
         }
 
-        public String websocketUrl() {
-            return websocketUrl;
+        startHeartbeat();
+    }
+
+    private void startHeartbeat() {
+        heartbeatTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin,
+            () -> api.heartbeat(polling).exceptionally(error -> {
+                logger.fine("Heartbeat failed: " + rootMessage(error));
+                return null;
+            }),
+            0L, HEARTBEAT_TICKS);
+    }
+
+    /**
+     * Asks the editor once a second for anything waiting to be done.
+     */
+    private void startPolling() {
+        pollTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin,
+            () -> api.pollRequests()
+                .thenAccept(this::dispatchPending)
+                .exceptionally(error -> {
+                    logger.fine("Poll failed: " + rootMessage(error));
+                    return null;
+                }),
+            POLL_TICKS, POLL_TICKS);
+    }
+
+    private void dispatchPending(JsonObject response) {
+        if (response == null || !response.has("requests")) {
+            return;
         }
 
-        public String displayName() {
-            return displayName;
+        for (var element : response.getAsJsonArray("requests")) {
+            JsonObject request = element.getAsJsonObject();
+            handleRpc(
+                request.get("id").getAsString(),
+                request.get("action").getAsString(),
+                request.has("payload") && request.get("payload").isJsonObject()
+                    ? request.getAsJsonObject("payload")
+                    : new JsonObject()
+            );
         }
+    }
 
-        public static WebEditorEnvironment fromConfig(String value) {
-            if (value == null) {
-                return PRODUCTION;
+    /**
+     * Runs one browser operation. File access happens off the main thread, and
+     * the pieces that touch the server state reschedule themselves.
+     */
+    private void handleRpc(String requestId, String action, JsonObject payload) {
+        try {
+            switch (action) {
+                case "MENU_LIST_REQUEST" -> respondWithMenuList(requestId);
+                case "MENU_GET" -> respondWithMenu(requestId, payload);
+                case "MENU_SAVE" -> respondToSave(requestId, payload);
+                case "MENU_DELETE" -> respondToDelete(requestId, payload);
+                default -> api.respond(requestId, false, null, "Unknown action " + action);
             }
-
-            String normalized = value.trim().toLowerCase();
-            for (WebEditorEnvironment environment : values()) {
-                if (environment.configKey.equalsIgnoreCase(normalized)) {
-                    return environment;
-                }
-            }
-
-            return PRODUCTION;
+        } catch (Exception e) {
+            logger.severe("Error handling web editor action " + action + ": " + e.getMessage());
+            api.respond(requestId, false, null, e.getMessage());
         }
+    }
+
+    private void respondWithMenuList(String requestId) {
+        List<MenuMetadataDTO> found = menus.list();
+        JsonObject payload = new JsonObject();
+        payload.add("menus", gson.toJsonTree(found));
+
+        api.respond(requestId, true, payload, null);
+    }
+
+    private void respondWithMenu(String requestId, JsonObject request) {
+        String platform = string(request, "platform");
+        String fileName = menus.resolveFileName(string(request, "fileName"), platform);
+        String content = menus.read(fileName, platform);
+
+        if (content == null) {
+            api.respond(requestId, false, null, "Menu file not found");
+            return;
+        }
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("fileName", fileName);
+        payload.addProperty("platform", platform);
+        payload.addProperty("content", content);
+
+        api.respond(requestId, true, payload, null);
+    }
+
+    private void respondToSave(String requestId, JsonObject request) {
+        String platform = string(request, "platform");
+        String fileName = string(request, "fileName");
+        String content = string(request, "content");
+
+        if (platform == null || fileName == null || content == null) {
+            api.respond(requestId, false, null, "Missing required fields");
+            return;
+        }
+
+        WebEditorMenus.SaveOutcome outcome = menus.save(fileName, platform, content);
+
+        if (!outcome.saved()) {
+            api.respond(requestId, false, null, "Failed to save the menu");
+            return;
+        }
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("fileName", menus.resolveFileName(fileName, platform));
+        payload.addProperty("platform", platform);
+        if (outcome.warning() != null) {
+            payload.addProperty("warning", outcome.warning());
+        }
+
+        api.respond(requestId, true, payload, null);
+    }
+
+    private void respondToDelete(String requestId, JsonObject request) {
+        String platform = string(request, "platform");
+        String fileName = string(request, "fileName");
+
+        if (platform == null || fileName == null) {
+            api.respond(requestId, false, null, "Missing required fields");
+            return;
+        }
+
+        if (!menus.delete(fileName, platform)) {
+            api.respond(requestId, false, null, "Failed to delete menu from disk");
+            return;
+        }
+
+        JsonObject payload = new JsonObject();
+        payload.addProperty("fileName", fileName);
+        payload.addProperty("platform", platform);
+
+        api.respond(requestId, true, payload, null);
+    }
+
+    private String string(JsonObject json, String key) {
+        return json.has(key) && !json.get(key).isJsonNull() ? json.get(key).getAsString() : null;
+    }
+
+    private <T> CompletableFuture<T> failed(String message) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        future.completeExceptionally(new WebEditorApi.WebEditorException(message));
+
+        return future;
+    }
+
+    private String rootMessage(Throwable error) {
+        Throwable cause = error.getCause() == null ? error : error.getCause();
+
+        return cause.getMessage() == null ? cause.toString() : cause.getMessage();
     }
 }

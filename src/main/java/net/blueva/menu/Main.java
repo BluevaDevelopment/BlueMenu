@@ -18,7 +18,7 @@ import net.blueva.menu.listeners.*;
 import net.blueva.menu.managers.java.MenuManager;
 import net.blueva.menu.sync.MenuSyncService;
 import net.blueva.menu.webeditor.WebEditorManager;
-import net.blueva.menu.webeditor.WebEditorManager.WebEditorEnvironment;
+import net.blueva.menu.webeditor.WebEditorEnvironment;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

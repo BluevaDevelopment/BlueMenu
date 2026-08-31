@@ -23,6 +23,10 @@ metrics: true
 # Web Editor:
 # Enable the web-based menu editor for real-time menu editing from a browser
 # Connects to the official BlueMenu Web Editor at https://menu.blueva.net
+#
+# The server registers itself the first time it connects and stores its
+# credentials in webeditor-credentials.yml. Keep that file private and out of
+# any config you share: it is what identifies this server to the editor.
 webeditor:
   # Enable/disable web editor functionality
   # When enabled, connects automatically to the official BlueMenu server
@@ -39,8 +43,8 @@ webeditor:
 
   # Environment for the official web editor server.
   # Options:
-  #   PRODUCTION  - Default. Connects to https://menu.blueva.net and wss://menu.blueva.net/ws
-  #   DEVELOPMENT - Only for BlueMenu contributors. Uses https://menu.blueva.net/dev and wss://menu.blueva.net/dev/ws.
+  #   PRODUCTION  - Default. Connects to https://menu.blueva.net
+  #   DEVELOPMENT - Only for BlueMenu contributors. Uses https://menu.blueva.net/dev.
   #                 NOT recommended for public servers; this endpoint may be unstable.
   environment: PRODUCTION
 

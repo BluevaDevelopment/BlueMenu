@@ -30,7 +30,7 @@
         <fastinv.version>3.1.2</fastinv.version>
         <jetbrains-annotations.version>26.1.0</jetbrains-annotations.version>
         <gson.version>2.14.0</gson.version>
-        <java-websocket.version>1.6.0</java-websocket.version>
+        <pusher-client.version>2.4.4</pusher-client.version>
         <hikaricp.version>7.1.0</hikaricp.version>
         <mysql-connector.version>26.7.0</mysql-connector.version>
         <itemsadder-api.version>4.0.10</itemsadder-api.version>
@@ -175,11 +175,12 @@
             <version>${fastinv.version}</version>
         </dependency>
 
-        <!-- Java-WebSocket, client connection to the web editor -->
+        <!-- Pusher protocol client, subscribes to the web editor's Reverb channel.
+             Pulls Java-WebSocket in transitively, which is why that relocation stays. -->
         <dependency>
-            <groupId>org.java-websocket</groupId>
-            <artifactId>Java-WebSocket</artifactId>
-            <version>${java-websocket.version}</version>
+            <groupId>com.pusher</groupId>
+            <artifactId>pusher-java-client</artifactId>
+            <version>${pusher-client.version}</version>
         </dependency>
 
         <!-- MySQL sync -->
@@ -323,6 +324,7 @@
                                 <includes>
                                     <include>net.wesjd:anvilgui</include>
                                     <include>fr.mrmicky:fastinv</include>
+                                    <include>com.pusher:pusher-java-client</include>
                                     <include>org.java-websocket:Java-WebSocket</include>
                                     <include>com.zaxxer:HikariCP</include>
                                     <include>com.mysql:mysql-connector-j</include>
@@ -344,6 +346,10 @@
                                 <relocation>
                                     <pattern>org.java_websocket</pattern>
                                     <shadedPattern>net.blueva.menu.libraries.websocket</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.pusher</pattern>
+                                    <shadedPattern>net.blueva.menu.libraries.pusher</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
