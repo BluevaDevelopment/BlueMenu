@@ -68,13 +68,18 @@ public class ConfigManager {
 
     public void generateFile(String file, String folder) throws IOException {
         File cfgFile = new File(main.getDataFolder() + folder + "/", file + ".yml");
+        // Example menus are meant to be copied and edited freely - never auto-update them
+        // against the bundled resource, or a version bump would reorder/strip the user's keys.
+        if (cfgFile.exists()) {
+            return;
+        }
         YamlDocument.create(
             cfgFile,
             Objects.requireNonNull(main.getResource("net/blueva/menu/configuration/files"+folder+"/" + file + ".yml")),
             GeneralSettings.DEFAULT,
-            LoaderSettings.builder().setAutoUpdate(true).build(),
+            LoaderSettings.DEFAULT,
             DumperSettings.DEFAULT,
-            UpdaterSettings.builder().setVersioning(new BasicVersioning("file_version")).build()
+            UpdaterSettings.DEFAULT
         );
     }
 
