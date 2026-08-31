@@ -8,79 +8,88 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AnimationManager {
+
     static void startAnimation(Main main, Player player, Section animationConfig, int menuSize) {
-        int interval = animationConfig.getInt("interval");
-        List<ItemStack> frames = new ArrayList<>();
+        int interval = Math.max(1, animationConfig.getInt("interval", 20));
 
         Section framesSection = animationConfig.getSection("frames");
-        if (framesSection != null) {
-            for (Object frameObj : framesSection.getKeys()) {
-                String frame = frameObj.toString();
-                Section frameSection = framesSection.getSection(frame);
-                if (frameSection != null) {
-                    ItemStack frameItem = ItemManager.createItemStackFromConfig(frameSection, player);
-                    frames.add(frameItem);
-                }
+        if (framesSection == null) {
+            return;
+        }
+
+        // Build the frame list in declared key order and carry the slot with each frame,
+        // instead of assuming the keys are literally "frame1".."frameN".
+        List<AnimationFrame> frames = new ArrayList<>();
+        for (Object frameKeyObj : framesSection.getKeys()) {
+            Section frameSection = framesSection.getSection(frameKeyObj.toString());
+            if (frameSection == null) {
+                continue;
             }
+
+            int slot = frameSection.getInt("slot", -1);
+            if (slot < 0 || slot >= menuSize) {
+                main.getLogger().warning("Animation frame '" + frameKeyObj + "' has slot " + slot
+                    + " outside the menu (size " + menuSize + ") - skipping.");
+                continue;
+            }
+
+            ItemStack item;
+            try {
+                item = ItemManager.createItemStackFromConfig(frameSection, player);
+                item = ItemManager.applyAttributes(item, frameSection.getStringList("attributes"));
+            } catch (Exception e) {
+                main.getLogger().warning("Skipping animation frame '" + frameKeyObj + "': " + e.getMessage());
+                continue;
+            }
+
+            frames.add(new AnimationFrame(slot, item));
         }
 
-        if (!frames.isEmpty()) {
-            new BukkitRunnable() {
-                int currentFrame = 0;
+        if (frames.isEmpty()) {
+            return;
+        }
 
-                @Override
-                public void run() {
-                    if (!player.isOnline() || !MenuManager.isMenuOpen(player)) {
-                        // Player logged out, cancel the task
-                        cancel();
-                        return;
-                    }
+        BukkitTask task = new BukkitRunnable() {
+            int current = 0;
+            int previousSlot = -1;
 
-                    // Get the active FastInv menu
-                    FastInv menu = main.javaMenuManager.getActiveMenu(player);
-                    if (menu == null) {
-                        cancel();
-                        return;
-                    }
-
-                    Inventory inventory = menu.getInventory();
-
-                    // Clear previous frames
-                    for (int i = 0; i < frames.size(); i++) {
-                        Section frameSection = framesSection.getSection("frame" + (i + 1));
-                        if (frameSection != null) {
-                            int slot = frameSection.getInt("slot");
-                            if (slot >= 0 && slot < menuSize) {
-                                ItemStack air = new ItemStack(Material.AIR);
-                                inventory.setItem(slot, air);
-                            }
-                        }
-                    }
-
-                    // Update inventory with the current frame
-                    if (currentFrame >= frames.size()) {
-                        // Reached the end of frames, start over from the beginning
-                        currentFrame = 0;
-                    }
-
-                    Section currentFrameSection = framesSection.getSection("frame" + (currentFrame + 1));
-                    if (currentFrameSection != null) {
-                        int slot = currentFrameSection.getInt("slot");
-                        if (slot >= 0 && slot < menuSize) {
-                            ItemStack frameItem = frames.get(currentFrame);
-                            ItemStack frameItemWithAttributes = ItemManager.applyAttributes(frameItem, currentFrameSection.getStringList("attributes"));
-                            inventory.setItem(slot, frameItemWithAttributes);
-                        }
-                    }
-
-                    currentFrame++;
+            @Override
+            public void run() {
+                FastInv menu = main.javaMenuManager.getActiveMenu(player);
+                if (!player.isOnline() || !MenuManager.isMenuOpen(player) || menu == null) {
+                    cancel();
+                    return;
                 }
-            }.runTaskTimer(main, 0, interval).getTaskId();
-        }
+
+                Inventory inventory = menu.getInventory();
+
+                if (previousSlot >= 0 && previousSlot < inventory.getSize()) {
+                    inventory.setItem(previousSlot, new ItemStack(Material.AIR));
+                }
+
+                if (current >= frames.size()) {
+                    current = 0;
+                }
+
+                AnimationFrame frame = frames.get(current);
+                if (frame.slot() < inventory.getSize()) {
+                    inventory.setItem(frame.slot(), frame.item());
+                    previousSlot = frame.slot();
+                }
+
+                current++;
+            }
+        }.runTaskTimer(main, 0L, interval);
+
+        main.javaMenuManager.registerAnimationTask(player, task);
+    }
+
+    private record AnimationFrame(int slot, ItemStack item) {
     }
 }

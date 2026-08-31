@@ -10,6 +10,8 @@ public class MenuMetadataDTO {
     private String type;           // "CHEST", "SIMPLE", "MODAL", "CUSTOM"
     private String openCommand;    // Command to open the menu
     private int itemCount;         // Number of items/buttons (optional)
+    private boolean registered = true; // Whether the menu is registered in java_menus/bedrock_menus and actually loaded
+    private String source = "disk";    // Where the menu content lives: "disk" or "mysql"
 
     // Default constructor for JSON serialization
     public MenuMetadataDTO() {
@@ -22,6 +24,13 @@ public class MenuMetadataDTO {
         this.type = type;
         this.openCommand = openCommand;
         this.itemCount = itemCount;
+    }
+
+    public MenuMetadataDTO(String fileName, String menuName, String platform, String type, String openCommand,
+                           int itemCount, boolean registered, String source) {
+        this(fileName, menuName, platform, type, openCommand, itemCount);
+        this.registered = registered;
+        this.source = source;
     }
 
     // Getters and setters
@@ -71,5 +80,21 @@ public class MenuMetadataDTO {
 
     public void setItemCount(int itemCount) {
         this.itemCount = itemCount;
+    }
+
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }

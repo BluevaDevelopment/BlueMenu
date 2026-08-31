@@ -49,7 +49,13 @@ public class MessagesUtil {
         processed = replacePrefixPlaceholder(processed);
         processed = convertLegacyToMiniMessage(processed);
 
-        return miniMessage.deserialize(processed);
+        try {
+            return miniMessage.deserialize(processed);
+        } catch (Exception e) {
+            // Malformed MiniMessage (typically a stray '<' in user text or a placeholder value).
+            // Render it literally instead of blowing up the menu / message.
+            return Component.text(processed);
+        }
     }
 
     // Send message to player using Adventure

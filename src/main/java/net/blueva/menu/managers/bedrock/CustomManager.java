@@ -15,9 +15,12 @@ import java.util.*;
 public class CustomManager {
     public static void openMenu(Player player, YamlDocument menuConfig) {
         FloodgatePlayer playerB = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
+        if (playerB == null) {
+            return;
+        }
 
         CustomForm.Builder formBuilder = CustomForm.builder()
-                .title(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("menuName"))));
+                .title(MessagesUtil.format(player, menuConfig.getString("menuName", "")));
 
         // Storage to preserve component order and their actions
         List<ComponentData> componentsOrder = new ArrayList<>();
@@ -36,6 +39,9 @@ public class CustomManager {
                 }
             }
         }
+
+        formBuilder.closedOrInvalidResultHandler(() ->
+            ActionManager.executeActions(player, menuConfig.getStringList("close_actions")));
 
         CustomForm form = formBuilder.validResultHandler(response -> {
             handleResponse(player, response, componentsOrder);
@@ -70,7 +76,7 @@ public class CustomManager {
             return;
         }
 
-        String text = MessagesUtil.format(player, Objects.requireNonNull(component.getString("text", "")));
+        String text = MessagesUtil.format(player, component.getString("text", ""));
 
         switch (type.toUpperCase()) {
             case "DROPDOWN":

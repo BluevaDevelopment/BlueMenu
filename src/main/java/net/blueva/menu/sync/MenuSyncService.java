@@ -54,6 +54,52 @@ public class MenuSyncService {
         return syncConfig != null && syncConfig.enabled();
     }
 
+    /**
+     * Whether the given menu is consumed from MySQL on this server (receiver mode).
+     * Web editor edits for such menus must go to the database, not the local file.
+     */
+    public boolean isReceiverMenu(MenuType type, String menuKey) {
+        Map<String, ReceiverState> states = receiverStates.get(type);
+        return states != null && states.containsKey(menuKey);
+    }
+
+    /**
+     * Read the current YAML of a receiver menu straight from MySQL.
+     */
+    public Optional<String> fetchMenuYaml(MenuType type, String menuKey) {
+        if (!isRepositoryAvailable()) {
+            return Optional.empty();
+        }
+        try {
+            return repository.fetchMenu(type, menuKey).map(MenuRecord::yaml);
+        } catch (SQLException e) {
+            main.getLogger().warning("Failed to fetch menu YAML from MySQL for " + menuKey + ": " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Persist a web-editor edit of a receiver menu into MySQL. The poll task then
+     * propagates it back into the live menu managers on this and every other server.
+     */
+    public boolean saveReceiverMenuYaml(MenuType type, String menuKey, String fileName, String yaml) {
+        if (!isRepositoryAvailable()) {
+            main.getLogger().warning("Cannot save receiver menu " + menuKey + ": MySQL repository unavailable.");
+            return false;
+        }
+        try {
+            if (repository.fetchMetadata(type, menuKey).isPresent()) {
+                repository.updateMenu(type, menuKey, fileName, yaml);
+            } else {
+                repository.insertMenu(type, menuKey, fileName, yaml);
+            }
+            return true;
+        } catch (SQLException e) {
+            main.getLogger().warning("Failed to save receiver menu " + menuKey + " to MySQL: " + e.getMessage());
+            return false;
+        }
+    }
+
     private boolean isRepositoryAvailable() {
         return syncConfig != null && syncConfig.enabled() && repository != null;
     }

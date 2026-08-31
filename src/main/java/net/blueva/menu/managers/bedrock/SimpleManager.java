@@ -13,11 +13,13 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class SimpleManager {
     public static void openMenu(Player player, YamlDocument menuConfig) {
         FloodgatePlayer playerB = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
+        if (playerB == null) {
+            return;
+        }
 
         List<String> content = MessagesUtil.format(player, menuConfig.getStringList("content"));
         StringBuilder keyResult = new StringBuilder();
@@ -26,10 +28,10 @@ public class SimpleManager {
         }
 
         SimpleForm.Builder formBuilder = SimpleForm.builder()
-                .title(MessagesUtil.format(player, Objects.requireNonNull(menuConfig.getString("menuName"))))
+                .title(MessagesUtil.format(player, menuConfig.getString("menuName", "")))
                 .content(keyResult.toString());
 
-        // Store visible buttons for action handling
+        // Buttons that actually got added, in order - so the clicked index maps back to a key.
         List<String> visibleButtons = new ArrayList<>();
 
         Section buttonsConfig = menuConfig.getSection("buttons");
@@ -37,55 +39,57 @@ public class SimpleManager {
             for (Object buttonKeyObj : buttonsConfig.getKeys()) {
                 String buttonKey = buttonKeyObj.toString();
                 Section buttonSection = buttonsConfig.getSection(buttonKey);
-                if (buttonSection != null) {
-                    // Check display conditions before adding the button
-                    boolean shouldDisplay = true;
-
-                    if (buttonSection.contains("display_conditions")) {
-                        Object conditionsObj = buttonSection.get("display_conditions");
-                        if (conditionsObj instanceof Map) {
-                            // Map format with all/any/none
-                            @SuppressWarnings("unchecked")
-                            Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
-                            shouldDisplay = ConditionManager.evaluateConditionsMap(player, conditionsMap);
-                        } else if (conditionsObj instanceof List) {
-                            // Simple list format
-                            @SuppressWarnings("unchecked")
-                            List<String> conditionsList = (List<String>) conditionsObj;
-                            shouldDisplay = ConditionManager.evaluateConditions(player, conditionsList);
-                        }
-                    }
-
-                    // Only add the button if conditions pass
-                    if (shouldDisplay) {
-                        String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonSection.getString("text")));
-                        if (buttonSection.contains("image")) {
-                            formBuilder.button(buttonText, FormImage.Type.URL, Objects.requireNonNull(buttonSection.getString("image")));
-                        } else {
-                            formBuilder.button(buttonText);
-                        }
-                        visibleButtons.add(buttonKey);
-                    }
+                if (buttonSection == null || !shouldDisplay(player, buttonSection)) {
+                    continue;
                 }
+
+                String buttonText = MessagesUtil.format(player, buttonSection.getString("text", ""));
+                String image = buttonSection.getString("image", "");
+                if (!image.isBlank()) {
+                    formBuilder.button(buttonText, FormImage.Type.URL, image);
+                } else {
+                    formBuilder.button(buttonText);
+                }
+                visibleButtons.add(buttonKey);
             }
         }
 
+        formBuilder.closedOrInvalidResultHandler(() ->
+            ActionManager.executeActions(player, menuConfig.getStringList("close_actions")));
+
         SimpleForm form = formBuilder.validResultHandler(result -> {
-            Section buttonsConfigSection = menuConfig.getSection("buttons");
-            if (buttonsConfigSection != null) {
-                // Only check visible buttons for action execution
-                for (String buttonKey : visibleButtons) {
-                    Section buttonSection = buttonsConfigSection.getSection(buttonKey);
-                    if (buttonSection != null) {
-                        String buttonText = MessagesUtil.format(player, Objects.requireNonNull(buttonSection.getString("text")));
-                        if (result.clickedButton().text().equals(buttonText)) {
-                            ActionManager.executeActions(player, buttonSection.getStringList("actions"));
-                        }
-                    }
-                }
+            int id = result.clickedButtonId();
+            if (id < 0 || id >= visibleButtons.size()) {
+                return;
+            }
+            Section buttonsSection = menuConfig.getSection("buttons");
+            if (buttonsSection == null) {
+                return;
+            }
+            Section buttonSection = buttonsSection.getSection(visibleButtons.get(id));
+            if (buttonSection != null) {
+                ActionManager.executeActions(player, buttonSection.getStringList("actions"));
             }
         }).build();
 
         playerB.sendForm(form);
+    }
+
+    private static boolean shouldDisplay(Player player, Section buttonSection) {
+        if (!buttonSection.contains("display_conditions")) {
+            return true;
+        }
+        Object conditionsObj = buttonSection.get("display_conditions");
+        if (conditionsObj instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> conditionsMap = (Map<String, Object>) conditionsObj;
+            return ConditionManager.evaluateConditionsMap(player, conditionsMap);
+        }
+        if (conditionsObj instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> conditionsList = (List<String>) conditionsObj;
+            return ConditionManager.evaluateConditions(player, conditionsList);
+        }
+        return true;
     }
 }
