@@ -2,13 +2,9 @@ package net.blueva.menu.commands.main.subcommands;
 
 import net.blueva.menu.Main;
 import net.blueva.menu.commands.CommandInterface;
-import net.blueva.menu.managers.java.AnimationManager;
 import net.blueva.menu.utils.MessagesUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class ReloadSubCommand implements CommandInterface
@@ -24,13 +20,7 @@ public class ReloadSubCommand implements CommandInterface
     public boolean onCommand(@NotNull CommandSender sender, Command cmd,
                              String commandLabel, String @NotNull [] args) {
         if(sender.hasPermission("bluemenu.reload")) {
-            main.getConfigManager().reloadSettings();
-            main.configManager.reloadLang();
-            main.getMenuSyncService().reload();
-            main.javaMenuManager.loadJavaMenus();
-            if(Main.isUsingFloodgate) {
-                main.bedrockMenuManager.loadBedrockMenus();
-            }
+            main.reloadAll();
             MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.reload.success"));
         } else {
             MessagesUtil.sendMessage(sender, main.configManager.getLang().getString("commands.bluemenu.reload.insufficient_permissions"));

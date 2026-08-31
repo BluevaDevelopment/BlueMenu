@@ -147,6 +147,11 @@ public class Main extends JavaPlugin implements Listener {
         if (menuSyncService != null) {
             menuSyncService.shutdown();
         }
+        // Cancel running animations and drop per-player menu state
+        if (javaMenuManager != null) {
+            javaMenuManager.shutdown();
+        }
+        net.blueva.menu.managers.java.PlayerManager.clearAll();
         // Disconnect web editor
         if (webEditorManager != null) {
             webEditorManager.disconnect();
@@ -165,6 +170,19 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + " |____/|_|\\__,_|\\___|_|  |_|\\___|_| |_|\\__,_|");
         Bukkit.getConsoleSender().sendMessage("");
         Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "V. " + pluginversion + " | Plugin disabled successfully | blueva.net");
+    }
+
+    /**
+     * Full config + menu reload, shared by {@code /bm reload} and the web editor so the two
+     * can never drift apart. Must run on the main server thread.
+     * <p>Note: {@code webeditor.*} and {@code metrics} still need a full restart.
+     */
+    public void reloadAll() {
+        configManager.reloadSettings();
+        configManager.reloadLang();
+        menuSyncService.reload();
+        javaMenuManager.loadJavaMenus();
+        bedrockMenuManager.loadBedrockMenus();
     }
 
     public void registerCommands() {
