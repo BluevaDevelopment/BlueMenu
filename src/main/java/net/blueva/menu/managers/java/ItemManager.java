@@ -38,7 +38,11 @@ public class ItemManager {
         if (itemStack != null) {
             material = itemStack.getType();
         } else {
-            material = Material.valueOf(materialName);
+            material = parseMaterial(materialName);
+            if (material == null) {
+                throw new IllegalArgumentException("unknown or missing 'itemStack.material'"
+                    + (materialName == null ? "" : ": '" + materialName + "'"));
+            }
             itemStack = new ItemStack(material);
         }
 
@@ -69,6 +73,18 @@ public class ItemManager {
         }
 
         return itemStack;
+    }
+
+    private static Material parseMaterial(String name) {
+        if (name == null || name.isBlank()) {
+            return null;
+        }
+        String cleaned = name.trim();
+        try {
+            return Material.valueOf(cleaned.toUpperCase(java.util.Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return Material.matchMaterial(cleaned);
+        }
     }
 
     private static ItemStack createCustomPluginItem(Section itemSection, Player player, String materialName) {

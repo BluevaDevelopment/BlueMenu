@@ -8,22 +8,60 @@ import net.blueva.menu.managers.ConditionManager;
 import net.blueva.menu.utils.MessagesUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MenuManager {
     public final Map<String, YamlDocument> menuConfigs = new HashMap<>();
     public final List<String> menuNames = new ArrayList<>();
     public final Map<Player, FastInv> activeMenus = new HashMap<>();
+    private final Map<UUID, List<BukkitTask>> activeAnimations = new ConcurrentHashMap<>();
 
     private final Main main;
 
     public MenuManager(Main main) {
         this.main = main;
+    }
+
+    /** Track an animation task so it can be cancelled when the menu closes or the plugin disables. */
+    public void registerAnimationTask(Player player, BukkitTask task) {
+        activeAnimations.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(task);
+    }
+
+    /** Cancel and forget every animation task running for a player. */
+    public void cancelAnimations(Player player) {
+        List<BukkitTask> tasks = activeAnimations.remove(player.getUniqueId());
+        if (tasks != null) {
+            for (BukkitTask task : tasks) {
+                try {
+                    task.cancel();
+                } catch (Exception ignored) {
+                    // task already dead
+                }
+            }
+        }
+    }
+
+    /** Cancel every animation and drop all live menu references. Call on plugin disable. */
+    public void shutdown() {
+        for (List<BukkitTask> tasks : activeAnimations.values()) {
+            for (BukkitTask task : tasks) {
+                try {
+                    task.cancel();
+                } catch (Exception ignored) {
+                    // task already dead
+                }
+            }
+        }
+        activeAnimations.clear();
+        activeMenus.clear();
     }
 
     public void loadJavaMenus() {
@@ -51,12 +89,15 @@ public class MenuManager {
                 return;
             }
 
+            // Kill any animation left over from a previously open menu before we build the new one.
+            cancelAnimations(player);
+
             List<String> openActions = menuConfig.getStringList("open_actions");
             if (!openActions.isEmpty()) {
                 ActionManager.executeActions(player, openActions);
             }
 
-            int menuSize = menuConfig.getInt("menuSize");
+            int menuSize = normalizeMenuSize(menuConfig.getInt("menuSize", 27));
             String menuTitle = MessagesUtil.format(player, menuConfig.getString("menuName"));
 
             // Create FastInv menu
@@ -90,8 +131,21 @@ public class MenuManager {
 
                         // Only add the item if conditions pass
                         if (shouldDisplay) {
-                            ItemStack itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
+                            ItemStack itemStack;
+                            try {
+                                itemStack = ItemManager.createItemStackFromConfig(itemSection, player);
+                            } catch (Exception ex) {
+                                main.getLogger().warning("Skipping menu item '" + itemName + "' in menu '"
+                                    + menuName + "': " + ex.getMessage());
+                                continue;
+                            }
+
                             int slot = itemSection.getInt("slot");
+                            if (slot < 0 || slot >= menuSize) {
+                                main.getLogger().warning("Menu item '" + itemName + "' in menu '" + menuName
+                                    + "' has slot " + slot + " outside the menu (size " + menuSize + ") - skipping.");
+                                continue;
+                            }
                             List<String> actions = itemSection.getStringList("actions");
                             int priority = itemSection.getInt("priority", 0);
 
@@ -116,6 +170,7 @@ public class MenuManager {
             // Add close handler
             menu.addCloseHandler(e -> {
                 activeMenus.remove(player);
+                cancelAnimations(player);
                 PlayerManager.closeMenu(player);
             });
 
@@ -180,6 +235,19 @@ public class MenuManager {
 
     static boolean isMenuOpen(Player player) {
         return PlayerManager.isPlayerInMenu(player);
+    }
+
+    /** Clamp a configured chest size to a Bukkit-legal value (9..54, multiple of 9). */
+    private int normalizeMenuSize(int configured) {
+        int size = configured;
+        if (size < 9) {
+            size = 9;
+        } else if (size > 54) {
+            size = 54;
+        } else if (size % 9 != 0) {
+            size = Math.min(54, ((size / 9) + 1) * 9);
+        }
+        return size;
     }
 
     private record PrioritizedMenuItem(ItemStack itemStack, List<String> actions, int priority) {
