@@ -159,8 +159,12 @@ public class WebEditorManager {
     }
 
     /**
-     * Switches between the channel and polling, and tells the editor at once so
-     * it stops publishing requests nobody is listening for.
+     * Records whether the channel is delivering and tells the editor at once.
+     *
+     * The HTTP poll keeps running either way. A request is published to the
+     * channel or left in the queue, never both, so collecting the queue costs
+     * one small request a second and catches anything the channel could not
+     * carry, such as a publish endpoint that is not routed.
      */
     private synchronized void onRealtimeState(boolean carryingTraffic) {
         if (carryingTraffic == !polling) {
@@ -168,26 +172,14 @@ public class WebEditorManager {
         }
 
         polling = !carryingTraffic;
-
-        if (polling) {
-            logger.warning("The web editor channel is not delivering, falling back to polling");
-            startPolling();
-        } else {
-            logger.info("The web editor channel is live, stopping the HTTP poll");
-            stopPolling();
-        }
+        logger.info(polling
+            ? "The web editor channel is not delivering, requests will come over HTTP"
+            : "The web editor channel is live");
 
         api.heartbeat(polling).exceptionally(error -> {
             logger.fine("Heartbeat failed: " + rootMessage(error));
             return null;
         });
-    }
-
-    private synchronized void stopPolling() {
-        if (pollTask != null) {
-            pollTask.cancel();
-            pollTask = null;
-        }
     }
 
     private void startHeartbeat() {
