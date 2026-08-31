@@ -1,18 +1,20 @@
 package net.blueva.menu.listeners;
 
 import net.blueva.menu.managers.java.PlayerManager;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
+/**
+ * Cleans up per-player menu state when a player leaves so nothing is kept in memory.
+ * <p>
+ * No join handler is needed any more: {@link PlayerManager} creates entries lazily and
+ * unconditionally the first time a menu is opened, which also fixes players that were
+ * already online when the plugin (re)loaded.
+ */
 public class PlayerJoinListener implements Listener {
     @EventHandler
-    public void PJL(PlayerJoinEvent e) {
-        if(!PlayerManager.playerInMenu.containsKey(e.getPlayer())) {
-            PlayerManager.playerInMenu.put(e.getPlayer(), false);
-            PlayerManager.playerMenuTitle.put(e.getPlayer(), "None");
-            PlayerManager.playerMenuName.put(e.getPlayer(), null);
-        }
+    public void onQuit(PlayerQuitEvent e) {
+        PlayerManager.forget(e.getPlayer());
     }
 }
