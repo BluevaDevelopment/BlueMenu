@@ -35,7 +35,7 @@ public class WebEditorManager {
     private WebEditorRealtime realtime;
     private BukkitTask heartbeatTask;
     private BukkitTask pollTask;
-    private volatile boolean polling;
+    private volatile boolean polling = true;
 
     public WebEditorManager(Main plugin, boolean enabled, boolean requireSessionConfirmation,
                             WebEditorEnvironment environment) {
@@ -143,18 +143,51 @@ public class WebEditorManager {
         RealtimeSettings settings = RealtimeSettings.fromJson(
             heartbeat.has("realtime") ? heartbeat.getAsJsonObject("realtime") : null);
 
+        // Start out collecting requests over HTTP. The channel takes over only
+        // once it confirms it is subscribed, so a rejected or dropped
+        // subscription can never leave the editor waiting on nothing.
+        startPolling();
+        startHeartbeat();
+
         if (settings == null || !settings.isUsable()) {
-            // Without a channel the editor would be unusable, so fall back to
-            // collecting requests over plain HTTP instead of giving up.
-            logger.warning("The web editor reported no realtime configuration, falling back to polling");
-            polling = true;
-            startPolling();
-        } else {
-            realtime = new WebEditorRealtime(settings, credentials, logger, this::handleRpc);
-            realtime.connect();
+            logger.warning("The web editor reported no realtime configuration, staying on polling");
+            return;
         }
 
-        startHeartbeat();
+        realtime = new WebEditorRealtime(settings, credentials, logger, this::handleRpc, this::onRealtimeState);
+        realtime.connect();
+    }
+
+    /**
+     * Switches between the channel and polling, and tells the editor at once so
+     * it stops publishing requests nobody is listening for.
+     */
+    private synchronized void onRealtimeState(boolean carryingTraffic) {
+        if (carryingTraffic == !polling) {
+            return;
+        }
+
+        polling = !carryingTraffic;
+
+        if (polling) {
+            logger.warning("The web editor channel is not delivering, falling back to polling");
+            startPolling();
+        } else {
+            logger.info("The web editor channel is live, stopping the HTTP poll");
+            stopPolling();
+        }
+
+        api.heartbeat(polling).exceptionally(error -> {
+            logger.fine("Heartbeat failed: " + rootMessage(error));
+            return null;
+        });
+    }
+
+    private synchronized void stopPolling() {
+        if (pollTask != null) {
+            pollTask.cancel();
+            pollTask = null;
+        }
     }
 
     private void startHeartbeat() {
@@ -169,7 +202,11 @@ public class WebEditorManager {
     /**
      * Asks the editor once a second for anything waiting to be done.
      */
-    private void startPolling() {
+    private synchronized void startPolling() {
+        if (pollTask != null) {
+            return;
+        }
+
         pollTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin,
             () -> api.pollRequests()
                 .thenAccept(this::dispatchPending)
@@ -177,7 +214,7 @@ public class WebEditorManager {
                     logger.fine("Poll failed: " + rootMessage(error));
                     return null;
                 }),
-            POLL_TICKS, POLL_TICKS);
+            0L, POLL_TICKS);
     }
 
     private void dispatchPending(JsonObject response) {

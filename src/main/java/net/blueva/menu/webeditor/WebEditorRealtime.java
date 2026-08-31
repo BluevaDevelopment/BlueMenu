@@ -30,12 +30,15 @@ public class WebEditorRealtime {
     private final RpcHandler handler;
     private Pusher pusher;
 
+    private final SubscriptionListener subscription;
+
     public WebEditorRealtime(RealtimeSettings settings, WebEditorCredentials credentials, Logger logger,
-                             RpcHandler handler) {
+                             RpcHandler handler, SubscriptionListener subscription) {
         this.settings = settings;
         this.credentials = credentials;
         this.logger = logger;
         this.handler = handler;
+        this.subscription = subscription;
     }
 
     public void connect() {
@@ -63,11 +66,16 @@ public class WebEditorRealtime {
             @Override
             public void onConnectionStateChange(ConnectionStateChange change) {
                 logger.info("Web editor realtime connection is " + change.getCurrentState());
+
+                if (change.getCurrentState() != ConnectionState.CONNECTED) {
+                    subscription.onCarryingTraffic(false);
+                }
             }
 
             @Override
             public void onError(String message, String code, Exception e) {
                 logger.warning("Web editor realtime error: " + message);
+                subscription.onCarryingTraffic(false);
             }
         }, ConnectionState.ALL);
 
@@ -80,11 +88,13 @@ public class WebEditorRealtime {
             @Override
             public void onSubscriptionSucceeded(String channelName) {
                 logger.info("Listening for web editor requests on " + channelName);
+                subscription.onCarryingTraffic(true);
             }
 
             @Override
             public void onAuthenticationFailure(String message, Exception e) {
                 logger.severe("Web editor rejected this server's credentials: " + message);
+                subscription.onCarryingTraffic(false);
             }
         }, RPC_EVENT);
     }
@@ -123,5 +133,14 @@ public class WebEditorRealtime {
     @FunctionalInterface
     public interface RpcHandler {
         void handle(String requestId, String action, JsonObject payload);
+    }
+
+    /**
+     * Tells the manager whether the channel is actually delivering requests, so
+     * it can fall back to collecting them over HTTP when it is not.
+     */
+    @FunctionalInterface
+    public interface SubscriptionListener {
+        void onCarryingTraffic(boolean carrying);
     }
 }
