@@ -6,6 +6,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
 import net.blueva.menu.Main;
 import net.blueva.menu.common.dto.MenuMetadataDTO;
+import net.blueva.menu.sync.MenuType;
 import org.bukkit.Bukkit;
 import net.blueva.menu.common.protocol.MessageType;
 import net.blueva.menu.common.protocol.WebSocketMessage;
@@ -18,7 +19,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
@@ -39,11 +43,26 @@ public class WebEditorClient extends WebSocketClient {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.requireSessionConfirmation = requireSessionConfirmation;
+        // Detect a silently dropped socket faster than the 60s default (proxies love to
+        // kill idle WebSockets). Combined with the app-level PING watchdog in WebEditorManager.
+        this.setConnectionLostTimeout(30);
     }
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         logger.info("Connected to web editor server");
+        // Re-announce ourselves so the server (re)binds this socket as THE plugin connection,
+        // even after an automatic reconnect where no new editor session is created.
+        try {
+            WebSocketMessage register = new WebSocketMessage(MessageType.PLUGIN_STATUS);
+            JsonObject data = new JsonObject();
+            data.addProperty("connected", true);
+            data.addProperty("role", "plugin");
+            register.setData(data);
+            send(gson.toJson(register));
+        } catch (Exception e) {
+            logger.fine("Could not send plugin register message: " + e.getMessage());
+        }
     }
 
     @Override
@@ -64,8 +83,9 @@ public class WebEditorClient extends WebSocketClient {
                 case MENU_DELETE -> handleMenuDelete(msg);
                 case PONG -> {} // Silent
                 case ERROR -> handleError(msg);
-                // Messages we send (ignore when broadcast back to us)
-                case MENU_LIST, MENU_DATA, MENU_SAVED, MENU_DELETED -> {} // Silent (we sent these)
+                case MENU_UPDATE -> {} // Live-edit channel not implemented plugin-side yet
+                // Messages we send (ignore when echoed back to us)
+                case MENU_LIST, MENU_DATA, MENU_SAVED, MENU_DELETED, PLUGIN_STATUS -> {} // Silent (we sent these)
                 default -> logger.warning("Unhandled message type: " + msg.getType());
             }
         } catch (Exception e) {
@@ -125,11 +145,18 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Send a ping to the server
+     * Send an application-level ping to the server. Called periodically by the
+     * WebEditorManager watchdog to keep proxies from idling the connection out.
      */
     public void sendPing() {
-        WebSocketMessage ping = new WebSocketMessage(MessageType.PING);
-        send(gson.toJson(ping));
+        try {
+            if (isOpen()) {
+                WebSocketMessage ping = new WebSocketMessage(MessageType.PING);
+                send(gson.toJson(ping));
+            }
+        } catch (Exception e) {
+            logger.fine("Failed to send ping: " + e.getMessage());
+        }
     }
 
     private void handleSessionValid(WebSocketMessage msg) {
@@ -235,6 +262,27 @@ public class WebEditorClient extends WebSocketClient {
             return;
         }
 
+        // Receiver menus are owned by MySQL - the edit must go to the database, not a local
+        // file the plugin never reads. The sync poll task then propagates it everywhere.
+        if (!platform.equalsIgnoreCase("CONFIG")) {
+            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+            MenuType type = platform.equalsIgnoreCase("JAVA") ? MenuType.JAVA : MenuType.BEDROCK;
+            String menuKey = resolveMenuKey(fileName, folderName);
+            if (menuKey != null && plugin.getMenuSyncService() != null
+                    && plugin.getMenuSyncService().isReceiverMenu(type, menuKey)) {
+                boolean ok = plugin.getMenuSyncService().saveReceiverMenuYaml(type, menuKey, fileName, content);
+                if (ok) {
+                    sendMenuSaved(fileName, platform, sessionId,
+                        "This menu is synced from MySQL. The change was written to the database "
+                            + "and will propagate to every server on the next sync poll.");
+                    logger.info("Receiver menu saved to MySQL: " + fileName + " (" + menuKey + ")");
+                } else {
+                    sendError("Failed to save menu to MySQL", sessionId);
+                }
+                return;
+            }
+        }
+
         // Save menu to disk
         String targetFileName = platform.equalsIgnoreCase("CONFIG") ? SETTINGS_FILE_NAME : fileName;
 
@@ -263,7 +311,13 @@ public class WebEditorClient extends WebSocketClient {
             }
 
             // Send success confirmation
-            sendMenuSaved(targetFileName, platform, sessionId);
+            if (platform.equalsIgnoreCase("CONFIG")) {
+                sendMenuSaved(targetFileName, platform, sessionId,
+                    "Settings reloaded. Note: changes to webeditor.* and metrics only take effect "
+                        + "after a full server restart.");
+            } else {
+                sendMenuSaved(targetFileName, platform, sessionId, null);
+            }
             logger.info("Menu saved: " + targetFileName);
         } else {
             sendError("Failed to save menu to disk", sessionId);
@@ -308,72 +362,96 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
-     * Get list of all menus (Java + Bedrock) by scanning filesystem
+     * Build the menu list the web editor sees.
+     * <p>
+     * Source of truth is what the plugin actually has loaded ({@code menuNames}/{@code menuConfigs}):
+     * that covers registered files AND MySQL receiver menus. Any extra {@code .yml} sitting in the
+     * folder but not registered is still listed, flagged {@code registered=false} so the editor can
+     * warn the user instead of silently pretending it is a live menu.
      */
     private List<MenuMetadataDTO> getMenuList() {
         List<MenuMetadataDTO> menus = new ArrayList<>();
 
-        // Scan Java menus from filesystem
-        File javaMenusDir = new File(plugin.getDataFolder(), "menus/java");
-        if (javaMenusDir.exists() && javaMenusDir.isDirectory()) {
-            File[] javaFiles = javaMenusDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
-            if (javaFiles != null) {
-                for (File file : javaFiles) {
-                    try {
-                        YamlDocument config = YamlDocument.create(file);
-                        String fileName = file.getName();
-                        String displayName = config.getString("menuName", fileName.replace(".yml", ""));
-                        String type = config.getString("type", "CHEST");
-                        String openCommand = config.getString("openCommand", "");
+        List<String> javaKeys = plugin.javaMenuManager != null
+            ? plugin.javaMenuManager.menuNames : new ArrayList<String>();
+        Map<String, YamlDocument> javaConfigs = plugin.javaMenuManager != null
+            ? plugin.javaMenuManager.menuConfigs : new LinkedHashMap<String, YamlDocument>();
+        collectMenusForPlatform(menus, "JAVA", "java", MenuType.JAVA, "CHEST", javaKeys, javaConfigs, "menus/java");
 
-                        // Count items
-                        int itemCount = 0;
-                        Section itemsSection = config.getSection("items");
-                        if (itemsSection != null) {
-                            itemCount = itemsSection.getKeys().size();
-                        }
+        List<String> bedrockKeys = plugin.bedrockMenuManager != null
+            ? plugin.bedrockMenuManager.menuNames : new ArrayList<String>();
+        Map<String, YamlDocument> bedrockConfigs = plugin.bedrockMenuManager != null
+            ? plugin.bedrockMenuManager.menuConfigs : new LinkedHashMap<String, YamlDocument>();
+        collectMenusForPlatform(menus, "BEDROCK", "bedrock", MenuType.BEDROCK, "FORM", bedrockKeys, bedrockConfigs,
+            "menus/bedrock");
 
-                        menus.add(new MenuMetadataDTO(fileName, displayName, "JAVA", type, openCommand, itemCount));
-                    } catch (Exception e) {
-                        logger.warning("Error reading Java menu file: " + file.getName() + " - " + e.getMessage());
-                    }
-                }
-            }
-        }
-
-        // Scan Bedrock menus from filesystem
-        File bedrockMenusDir = new File(plugin.getDataFolder(), "menus/bedrock");
-        if (bedrockMenusDir.exists() && bedrockMenusDir.isDirectory()) {
-            File[] bedrockFiles = bedrockMenusDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
-            if (bedrockFiles != null) {
-                for (File file : bedrockFiles) {
-                    try {
-                        YamlDocument config = YamlDocument.create(file);
-                        String fileName = file.getName();
-                        String displayName = config.getString("menuName", fileName.replace(".yml", ""));
-                        String type = config.getString("type", "FORM");
-                        String openCommand = config.getString("openCommand", "");
-
-                        // Count buttons/components
-                        int itemCount = 0;
-                        Section buttonsSection = config.getSection("buttons");
-                        Section componentsSection = config.getSection("components");
-                        if (buttonsSection != null) {
-                            itemCount = buttonsSection.getKeys().size();
-                        } else if (componentsSection != null) {
-                            itemCount = componentsSection.getKeys().size();
-                        }
-
-                        menus.add(new MenuMetadataDTO(fileName, displayName, "BEDROCK", type, openCommand, itemCount));
-                    } catch (Exception e) {
-                        logger.warning("Error reading Bedrock menu file: " + file.getName() + " - " + e.getMessage());
-                    }
-                }
-            }
-        }
-
-        logger.fine("Found " + menus.size() + " menus from filesystem");
+        logger.fine("Reporting " + menus.size() + " menus to the web editor");
         return menus;
+    }
+
+    private void collectMenusForPlatform(List<MenuMetadataDTO> out, String platformLabel, String platformKey,
+                                         MenuType type, String defaultType, List<String> loadedKeys,
+                                         Map<String, YamlDocument> loadedConfigs, String folder) {
+        java.util.Set<String> seenFiles = new java.util.HashSet<>();
+
+        // 1) Menus the plugin actually has loaded
+        for (String menuKey : new ArrayList<>(loadedKeys)) {
+            YamlDocument config = loadedConfigs.get(menuKey);
+            if (config == null) {
+                continue;
+            }
+            String fileName = getFileNameForMenu(menuKey, platformKey);
+            seenFiles.add(fileName.toLowerCase());
+            boolean receiver = plugin.getMenuSyncService() != null
+                && plugin.getMenuSyncService().isReceiverMenu(type, menuKey);
+            out.add(buildMenuDto(config, fileName, platformLabel, defaultType, true, receiver ? "mysql" : "disk"));
+        }
+
+        // 2) Orphan .yml files on disk that are not registered / not loaded
+        File dir = new File(plugin.getDataFolder(), folder);
+        File[] files = dir.listFiles((d, name) -> name.toLowerCase().endsWith(".yml"));
+        if (files != null) {
+            for (File file : files) {
+                if (seenFiles.contains(file.getName().toLowerCase())) {
+                    continue;
+                }
+                try {
+                    YamlDocument config = YamlDocument.create(file);
+                    out.add(buildMenuDto(config, file.getName(), platformLabel, defaultType, false, "disk"));
+                } catch (Exception e) {
+                    logger.warning("Error reading menu file: " + file.getName() + " - " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private MenuMetadataDTO buildMenuDto(YamlDocument config, String fileName, String platformLabel,
+                                         String defaultType, boolean registered, String source) {
+        String displayName = config.getString("menuName", fileName.replace(".yml", ""));
+        String menuType = config.getString("type", defaultType);
+        String openCommand = config.getString("openCommand", "");
+
+        int itemCount = 0;
+        Section items = config.getSection("items");
+        Section buttons = config.getSection("buttons");
+        Section components = config.getSection("components");
+        if (items != null) {
+            itemCount = items.getKeys().size();
+        } else if (buttons != null) {
+            itemCount = buttons.getKeys().size();
+        } else if (components != null) {
+            itemCount = components.getKeys().size();
+        }
+
+        return new MenuMetadataDTO(fileName, displayName, platformLabel, menuType, openCommand, itemCount,
+            registered, source);
+    }
+
+    private YamlDocument loadedConfigFor(MenuType type, String menuKey) {
+        if (type == MenuType.JAVA) {
+            return plugin.javaMenuManager != null ? plugin.javaMenuManager.menuConfigs.get(menuKey) : null;
+        }
+        return plugin.bedrockMenuManager != null ? plugin.bedrockMenuManager.menuConfigs.get(menuKey) : null;
     }
 
     /**
@@ -416,16 +494,34 @@ public class WebEditorClient extends WebSocketClient {
      */
     private String getMenuContent(String fileName, String platform) {
         try {
-            File menuFile;
-
             // Special handling for settings.yml
             if (platform.equalsIgnoreCase("CONFIG")) {
-                menuFile = new File(plugin.getDataFolder(), SETTINGS_FILE_NAME);
-            } else {
-                String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
-                menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
+                File settings = new File(plugin.getDataFolder(), SETTINGS_FILE_NAME);
+                if (!settings.exists()) {
+                    logger.warning("Settings file not found: " + settings.getPath());
+                    return null;
+                }
+                return Files.readString(settings.toPath());
             }
 
+            String folderName = platform.equalsIgnoreCase("JAVA") ? "java" : "bedrock";
+            MenuType type = platform.equalsIgnoreCase("JAVA") ? MenuType.JAVA : MenuType.BEDROCK;
+            String menuKey = resolveMenuKey(fileName, folderName);
+
+            // Receiver menus live in MySQL, not on disk - serve the database copy
+            if (menuKey != null && plugin.getMenuSyncService() != null
+                    && plugin.getMenuSyncService().isReceiverMenu(type, menuKey)) {
+                Optional<String> dbYaml = plugin.getMenuSyncService().fetchMenuYaml(type, menuKey);
+                if (dbYaml.isPresent()) {
+                    return dbYaml.get();
+                }
+                YamlDocument loaded = loadedConfigFor(type, menuKey);
+                if (loaded != null) {
+                    return loaded.dump();
+                }
+            }
+
+            File menuFile = new File(plugin.getDataFolder() + "/menus/" + folderName, fileName);
             if (!menuFile.exists()) {
                 logger.warning("Menu file not found: " + menuFile.getPath());
                 return null;
@@ -641,14 +737,8 @@ public class WebEditorClient extends WebSocketClient {
             // Run on main thread
             plugin.getServer().getScheduler().runTask(plugin, () -> {
                 try {
-                    // Mirror what /bm reload does so settings.yml changes actually take effect
-                    plugin.getConfigManager().reloadSettings();
-                    plugin.getConfigManager().reloadLang();
-                    plugin.getMenuSyncService().reload();
-
-                    // Reload all menus
-                    plugin.javaMenuManager.loadJavaMenus();
-                    plugin.bedrockMenuManager.loadBedrockMenus();
+                    // Exact same path as /bm reload so the two can never diverge
+                    plugin.reloadAll();
 
                     logger.info("Plugin configuration and menus reloaded successfully");
                     logger.info("Note: webeditor.* and metrics changes still require a full server restart");
@@ -681,48 +771,80 @@ public class WebEditorClient extends WebSocketClient {
     }
 
     /**
+     * Resolve the menuKey the plugin uses for a given file name.
+     * Checks settings.yml first, then the live managers so MySQL receive-wildcard
+     * menus (which are never listed in settings.yml) still resolve.
+     */
+    private String resolveMenuKey(String fileName, String folderName) {
+        String fromSettings = getMenuNameFromFileName(fileName, folderName);
+        if (fromSettings != null) {
+            return fromSettings;
+        }
+
+        Map<String, YamlDocument> configs = folderName.equals("java")
+            ? (plugin.javaMenuManager != null ? plugin.javaMenuManager.menuConfigs : null)
+            : (plugin.bedrockMenuManager != null ? plugin.bedrockMenuManager.menuConfigs : null);
+        if (configs == null) {
+            return null;
+        }
+
+        String base = fileName.toLowerCase().endsWith(".yml")
+            ? fileName.substring(0, fileName.length() - 4) : fileName;
+        for (String key : configs.keySet()) {
+            if (key.equalsIgnoreCase(base) || getFileNameForMenu(key, folderName).equalsIgnoreCase(fileName)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Refresh (close and reopen) menus for players who have them open
      * Only works for Java menus
      */
     private void refreshOpenMenus(String menuName) {
-        // Get all players who have this menu open
+        // Only players who actually have THIS menu open - not everyone with any menu open.
         List<org.bukkit.entity.Player> playersToRefresh = new ArrayList<>();
 
         for (var entry : plugin.javaMenuManager.activeMenus.entrySet()) {
             org.bukkit.entity.Player player = entry.getKey();
-            fr.mrmicky.fastinv.FastInv menu = entry.getValue();
-
-            // Check if this player has the specific menu open
-            if (menu != null) {
+            if (entry.getValue() == null) {
+                continue;
+            }
+            if (menuName.equals(net.blueva.menu.managers.java.PlayerManager.getMenuName(player))) {
                 playersToRefresh.add(player);
             }
         }
 
-        // Close and reopen menus after a short delay
-        if (!playersToRefresh.isEmpty()) {
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                for (org.bukkit.entity.Player player : playersToRefresh) {
-                    if (player.isOnline() && plugin.javaMenuManager.activeMenus.containsKey(player)) {
-                        // Close current menu
-                        player.closeInventory();
-
-                        // Reopen menu after a tick
-                        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                            if (player.isOnline()) {
-                                plugin.javaMenuManager.openMenu(player, menuName);
-                                logger.fine("Refreshed menu for player: " + player.getName());
-                            }
-                        }, 2L);
-                    }
-                }
-            }, 5L);
+        if (playersToRefresh.isEmpty()) {
+            return;
         }
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            for (org.bukkit.entity.Player player : playersToRefresh) {
+                if (!player.isOnline()
+                    || !menuName.equals(net.blueva.menu.managers.java.PlayerManager.getMenuName(player))) {
+                    continue;
+                }
+                player.closeInventory();
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline()) {
+                        plugin.javaMenuManager.openMenu(player, menuName);
+                        logger.fine("Refreshed menu for player: " + player.getName());
+                    }
+                }, 2L);
+            }
+        }, 5L);
     }
 
     /**
      * Send menu saved confirmation to the server
      */
     private void sendMenuSaved(String fileName, String platform, String sessionId) {
+        sendMenuSaved(fileName, platform, sessionId, null);
+    }
+
+    private void sendMenuSaved(String fileName, String platform, String sessionId, String warning) {
         WebSocketMessage msg = new WebSocketMessage(MessageType.MENU_SAVED);
         JsonObject data = new JsonObject();
 
@@ -730,6 +852,9 @@ public class WebEditorClient extends WebSocketClient {
         data.addProperty("platform", platform);
         data.addProperty("success", true);
         data.addProperty("message", "Menu saved successfully");
+        if (warning != null && !warning.isEmpty()) {
+            data.addProperty("warning", warning);
+        }
         if (sessionId != null) {
             data.addProperty("sessionId", sessionId);
         }

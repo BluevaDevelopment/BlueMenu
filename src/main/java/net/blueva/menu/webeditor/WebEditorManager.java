@@ -1,7 +1,9 @@
 package net.blueva.menu.webeditor;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +20,10 @@ public class WebEditorManager {
     private final boolean requireSessionConfirmation;
     private final WebEditorEnvironment environment;
     private WebEditorClient client;
+    private BukkitTask watchdogTask;
+
+    /** How often the watchdog pings / checks the connection, in ticks (15s). */
+    private static final long WATCHDOG_INTERVAL_TICKS = 20L * 15;
 
     public WebEditorManager(Plugin plugin, boolean enabled, boolean requireSessionConfirmation,
                             WebEditorEnvironment environment) {
@@ -47,8 +53,60 @@ public class WebEditorManager {
                 logger.warning("Development environment is intended for plugin contributors only."
                     + " Do not use on production servers.");
             }
+            startWatchdog();
         } catch (Exception e) {
             logger.severe("Failed to connect to web editor server: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Periodic keepalive + auto-reconnect. Proxies in front of the official server
+     * silently drop idle WebSockets; without this the editor goes dark until a restart.
+     */
+    private void startWatchdog() {
+        stopWatchdog();
+        watchdogTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            if (!enabled) {
+                return;
+            }
+            try {
+                if (client == null || client.isClosed()) {
+                    reconnect();
+                } else if (client.isOpen()) {
+                    client.sendPing();
+                }
+            } catch (Exception e) {
+                logger.fine("Web editor watchdog error: " + e.getMessage());
+            }
+        }, WATCHDOG_INTERVAL_TICKS, WATCHDOG_INTERVAL_TICKS);
+    }
+
+    private void stopWatchdog() {
+        if (watchdogTask != null) {
+            watchdogTask.cancel();
+            watchdogTask = null;
+        }
+    }
+
+    private void reconnect() {
+        if (!enabled) {
+            return;
+        }
+        WebEditorClient old = client;
+        if (old != null) {
+            try {
+                old.closeBlocking();
+            } catch (Exception ignored) {
+                // best effort
+            }
+        }
+        try {
+            URI serverUri = new URI(environment.websocketUrl());
+            client = new WebEditorClient(serverUri, (net.blueva.menu.Main) plugin, requireSessionConfirmation);
+            client.connect();
+            logger.info("Reconnecting to BlueMenu web editor at " + environment.websocketUrl());
+        } catch (Exception e) {
+            logger.warning("Web editor reconnect failed: " + e.getMessage());
         }
     }
 
@@ -56,6 +114,7 @@ public class WebEditorManager {
      * Disconnect from the web editor server
      */
     public void disconnect() {
+        stopWatchdog();
         if (client != null && client.isOpen()) {
             client.close();
             logger.info("Disconnected from web editor server");
